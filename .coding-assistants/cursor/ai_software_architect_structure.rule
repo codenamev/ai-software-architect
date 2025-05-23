@@ -1,0 +1,57 @@
+name: AI Software Architect Structure
+description: Directory structure and organization of the AI Software Architect framework
+include: ["**/*"]
+exclude: ["node_modules/**/*", ".git/**/*"]
+weight: 1.0
+---
+
+# AI Software Architect Framework Structure
+
+This rule explains the directory structure and organization of the AI Software Architect framework.
+
+## Main Directories
+
+```
+.architecture/
+├── decisions/
+│   ├── adrs/                # Architectural Decision Records
+│   └── principles.md        # Architectural principles document
+├── reviews/                 # Architecture review documents
+├── recalibration/           # Recalibration plans and tracking
+├── comparisons/             # Version-to-version comparisons
+├── docs/                    # General architecture documentation
+├── templates/               # Templates for various documents
+└── members.yml              # Architecture review team members
+```
+
+## .coding-assistants/
+
+```
+.coding-assistants/
+├── claude/                  # Claude Code configuration
+├── cursor/                  # Cursor configuration
+└── codex/                   # GitHub Copilot/Codex configuration
+```
+
+## Document Types
+
+1. **ADRs** (.architecture/decisions/adrs/):
+   - Lightweight documents that capture architectural decisions
+   - Include context, decision, status, consequences, and alternatives
+
+2. **Reviews** (.architecture/reviews/):
+   - Version-based reviews (e.g., `1-0-0.md`) 
+   - Feature-based reviews (e.g., `feature-name.md`)
+   - Include multi-perspective analysis from different architecture roles
+
+3. **Recalibration Plans** (.architecture/recalibration/):
+   - Action plans for implementing review recommendations
+   - Track progress on architectural improvements
+
+4. **Principles** (.architecture/decisions/principles.md):
+   - Core architectural principles guiding the project
+   - High-level design philosophy and constraints
+
+5. **Members** (.architecture/members.yml):
+   - Defines architecture review team members
+   - Each member has specialties, disciplines, and domains

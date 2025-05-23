@@ -1,0 +1,41 @@
+name: AI Software Architect Usage
+description: How to use the AI Software Architect framework for architecture documentation and reviews
+include: ["**/*"]
+exclude: ["node_modules/**/*", ".git/**/*"]
+weight: 1.0
+---
+
+# AI Software Architect Framework
+
+This rule provides guidance on using the AI Software Architect framework - a markdown-based system for implementing rigorous software architecture practices with AI assistant integration.
+
+## Directory Structure
+
+The AI Software Architect framework uses these key directories:
+
+- `.architecture/` - The main container for all architectural documentation
+  - `decisions/adrs/` - Contains Architectural Decision Records (ADRs)
+  - `decisions/principles.md` - Architectural principles document
+  - `reviews/` - Holds architecture review documents
+  - `recalibration/` - Contains plans for implementing architectural changes
+  - `comparisons/` - Version-to-version comparisons
+  - `templates/` - Templates for various document types
+  - `members.yml` - Defines architecture review team members
+
+- `.coding-assistants/` - Configuration for AI assistants to understand your architecture
+  - Each assistant has its own subdirectory (claude, cursor, codex)
+
+## Key Workflows
+
+1. **Creating ADRs**: Document architectural decisions in `.architecture/decisions/adrs/`
+2. **Architecture Reviews**: Conduct and document reviews in `.architecture/reviews/` using:
+   - Version-based format (e.g., `1-0-0.md`) for version reviews
+   - Feature-based format (e.g., `feature-name.md`) for feature reviews
+3. **Recalibration**: Plan implementation in `.architecture/recalibration/`
+4. **Specialized Reviews**: Get focused feedback from specific architectural perspectives
+
+## Commands for Cursor Users
+
+- "Review this architecture using AI Software Architect framework"
+- "Create an ADR for [topic] following the AI Software Architect format"
+- "Provide a security review for this code using the AI Software Architect framework"

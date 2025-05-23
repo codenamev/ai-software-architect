@@ -1,0 +1,150 @@
+# Architecture Review Members
+# Each member represents a specialized perspective for architectural reviews
+
+members:
+  - id: systems_architect
+    name: "Systems Architect"
+    title: "Systems Architect"
+    specialties: 
+      - "distributed systems"
+      - "service architecture"
+      - "scalability patterns"
+    disciplines:
+      - "system design"
+      - "infrastructure modeling"
+      - "load distribution"
+    skillsets:
+      - "high-level architecture planning"
+      - "system decomposition"
+      - "technical roadmapping"
+    domains:
+      - "overall system coherence"
+      - "architectural principles"
+      - "technical governance"
+    perspective: "Focuses on how components work together as a cohesive system and analyzes big-picture architectural concerns."
+
+  - id: domain_expert
+    name: "Domain Expert"
+    title: "Domain Expert"
+    specialties:
+      - "domain-driven design"
+      - "bounded contexts"
+      - "ubiquitous language"
+    disciplines:
+      - "business logic modeling"
+      - "domain analysis"
+      - "requirements engineering"
+    skillsets:
+      - "translating business needs to technical solutions"
+      - "identifying core domain concepts"
+      - "defining domain boundaries"
+    domains:
+      - "business logic representation"
+      - "semantic accuracy"
+      - "model integrity"
+    perspective: "Evaluates how well the architecture represents and serves the problem domain and business concepts."
+
+  - id: security_specialist
+    name: "Security Specialist"
+    title: "Security Specialist"
+    specialties:
+      - "threat modeling"
+      - "security patterns"
+      - "data protection"
+    disciplines:
+      - "security analysis"
+      - "risk assessment"
+      - "vulnerability identification"
+    skillsets:
+      - "identifying security implications"
+      - "recommending security controls"
+      - "evaluating authentication/authorization approaches"
+    domains:
+      - "system security"
+      - "data protection"
+      - "access control"
+    perspective: "Reviews the architecture from a security-first perspective, identifying potential vulnerabilities and security implications."
+
+  - id: maintainability_expert
+    name: "Maintainability Expert"
+    title: "Maintainability Expert"
+    specialties:
+      - "code quality"
+      - "refactoring"
+      - "technical debt"
+    disciplines:
+      - "code organization"
+      - "complexity analysis"
+      - "maintainability metrics"
+    skillsets:
+      - "identifying maintenance bottlenecks"
+      - "assessing technical debt"
+      - "simplifying complex structures"
+    domains:
+      - "code maintainability"
+      - "architectural clarity"
+      - "evolutionary design"
+    perspective: "Evaluates how well the architecture facilitates long-term maintenance, evolution, and developer understanding."
+
+  - id: performance_specialist
+    name: "Performance Specialist"
+    title: "Performance Specialist"
+    specialties:
+      - "performance optimization"
+      - "resource utilization"
+      - "scalability planning"
+    disciplines:
+      - "performance analysis"
+      - "bottleneck identification"
+      - "efficiency improvement"
+    skillsets:
+      - "profiling system performance"
+      - "identifying performance critical paths"
+      - "optimizing resource usage"
+    domains:
+      - "system performance"
+      - "response time"
+      - "throughput"
+    perspective: "Focuses on performance implications of architectural decisions and suggests optimizations."
+    
+  - id: ai_engineer
+    name: "AI Engineer"
+    title: "AI Engineer"
+    specialties:
+      - "AI/ML integration"
+      - "LLM application design"
+      - "agent-based systems"
+      - "AI evaluation frameworks"
+      - "agent orchestration"
+    disciplines:
+      - "applied AI"
+      - "prompt engineering"
+      - "agent workflow design"
+      - "AI system observability"
+      - "multi-agent coordination"
+    skillsets:
+      - "building practical AI solutions"
+      - "evaluating user experience with AI"
+      - "integrating AI components"
+      - "designing AI metrics and benchmarks"
+      - "implementing observability systems"
+    domains:
+      - "end-user AI applications"
+      - "AI development workflows"
+      - "practical implementation"
+      - "AI system evaluation"
+      - "observability and metrics"
+    perspective: "Evaluates the architecture from an AI integration perspective, focusing on practical utility, system evaluation, observability, and agent interaction patterns."
+
+review_process:
+  individual_phase:
+    description: "Each member reviews the architecture independently, focusing on their area of expertise."
+    deliverable: "Individual member review section in the review document."
+  
+  collaborative_phase:
+    description: "Members confer to discuss findings, resolve conflicting perspectives, and prioritize recommendations."
+    deliverable: "Consolidated findings and balanced recommendations."
+  
+  final_report_phase:
+    description: "Produce a comprehensive architectural review that balances all perspectives."
+    deliverable: "Final architectural review document with actionable recommendations."

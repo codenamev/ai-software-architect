@@ -1,0 +1,29 @@
+name: AI Software Architect Overview
+description: High-level overview of the AI Software Architect framework
+include: ["**/*"]
+exclude: ["node_modules/**/*", ".git/**/*"]
+weight: 1.0
+---
+
+# AI Software Architect Overview
+
+AI Software Architect is a framework for organizing and structuring software architecture design with support for multiple AI coding assistants. It provides a structured approach to architecture documentation and decision-making.
+
+## Key Principles
+
+The framework follows these key principles:
+
+1. **Architecture Documentation**: Central repository of architecture decisions and reviews in `.architecture/`
+2. **Coding Assistant Integration**: Support for multiple AI coding assistants in `.coding-assistants/`
+3. **Structured Review Process**: Formalized approach to architecture reviews and recalibration
+4. **Multi-Perspective Analysis**: Reviews from specialized architectural roles
+5. **Implementation Planning**: Concrete plans for architectural improvements
+
+## Core Components
+
+- **ADRs**: Lightweight, structured documentation of architectural decisions
+- **Architecture Reviews**: Multi-perspective analysis of architecture
+- **Recalibration Plans**: Action items for implementing changes
+- **Specialized Roles**: Different architectural perspectives (security, performance, etc.)
+
+Refer to the central architecture documentation in the `.architecture/` directory for definitive information on the system design.

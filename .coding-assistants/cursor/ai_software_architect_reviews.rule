@@ -1,0 +1,65 @@
+name: AI Software Architect Reviews
+description: How to conduct architecture reviews using the AI Software Architect framework
+include: ["**/*"]
+exclude: ["node_modules/**/*", ".git/**/*"]
+weight: 1.0
+---
+
+# AI Software Architect Reviews
+
+This rule explains how to conduct architecture reviews using the AI Software Architect framework.
+
+## Review Types
+
+The framework supports several types of architecture reviews:
+
+1. **Version Reviews**: Comprehensive reviews tied to version releases
+   - Format: `.architecture/reviews/1-0-0.md` (using version number)
+   - Used for major releases, significant updates, or milestone versions
+
+2. **Feature Reviews**: Focused reviews of specific features or components
+   - Format: `.architecture/reviews/feature-name.md`
+   - Used for evaluating individual features or components
+
+3. **Specialized Reviews**: Reviews from specific architectural perspectives
+   - Security, Performance, Maintainability, Domain, etc.
+   - Conducted by specialized architecture roles
+
+## Review Process
+
+The review process follows these steps:
+
+1. **Individual Member Review Phase**:
+   - Each architecture member (from members.yml) reviews independently
+   - Members focus on their specific areas of expertise
+   - Document findings, recommendations, and concerns
+
+2. **Collaborative Discussion Phase**:
+   - Members confer on findings and discuss trade-offs
+   - Prioritize recommendations and align on key issues
+   - Identify cross-cutting concerns
+
+3. **Final Consolidated Report**:
+   - Create balanced perspective across all domains
+   - Document findings, recommendations, trade-offs analysis
+   - Suggest improvements with clear priorities
+
+## Specialized Architecture Members
+
+Reviews incorporate perspectives from specialized members defined in `.architecture/members.yml`:
+
+- Systems Architects (overall system design)
+- Domain Experts (business logic and domain modeling)
+- Security Specialists (security concerns and vulnerabilities)
+- Performance Experts (system performance and scalability)
+- Maintainability Architects (code quality and long-term maintenance)
+- AI Engineering Specialists (AI integration and optimization)
+- Language/Framework Experts (language or framework-specific expertise)
+
+## Using Reviews with Cursor
+
+You can request specialized architecture reviews by using prompts like:
+
+- "Review this architecture from a security perspective using AI Software Architect"
+- "Conduct a performance review of this component using AI Software Architect"
+- "Analyze this feature's architecture using the AI Software Architect framework"

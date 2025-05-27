@@ -4,14 +4,14 @@ This directory contains rule files for the Cursor AI coding assistant to underst
 
 ## Rules Structure
 
-Cursor uses individual "rule" files for providing context about different aspects of your codebase. Each rule file follows this format:
+Cursor uses `.mdc` files in the `.cursor/rules` directory (or in project subdirectories like this one) for providing context. Each rule file follows this format:
 
 ```
-name: Rule Name
+---
 description: Rule Description
-include: ["file/path/pattern/**/*.js"]
-exclude: ["file/path/to/exclude/**/*.js"]
-weight: 1.0
+globs:
+  - "file/path/pattern/**/*.js"
+alwaysApply: false
 ---
 
 The actual rule content that guides Cursor...
@@ -19,10 +19,11 @@ The actual rule content that guides Cursor...
 
 ## Available Rules
 
-- `ai_software_architect_overview.rule` - High-level overview of the framework
-- `ai_software_architect_structure.rule` - Directory structure and organization
-- `ai_software_architect_usage.rule` - How to use the framework
-- `ai_software_architect_reviews.rule` - How to conduct architecture reviews
+- `ai_software_architect_overview.mdc` - High-level overview of the framework
+- `ai_software_architect_structure.mdc` - Directory structure and organization  
+- `ai_software_architect_usage.mdc` - How to use the framework
+- `ai_software_architect_reviews.mdc` - How to conduct architecture reviews
+- `ai_software_architect_setup.mdc` - Setup and configuration instructions
 
 ## Usage with Cursor
 

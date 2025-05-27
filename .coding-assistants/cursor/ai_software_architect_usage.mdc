@@ -1,8 +1,9 @@
-name: AI Software Architect Usage
+---
 description: How to use the AI Software Architect framework for architecture documentation and reviews
-include: ["**/*"]
-exclude: ["node_modules/**/*", ".git/**/*"]
-weight: 1.0
+globs:
+  - ".architecture/**/*"
+  - "**/*.md"
+alwaysApply: false
 ---
 
 # AI Software Architect Framework

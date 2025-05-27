@@ -8,7 +8,7 @@ For general usage instructions, see [USAGE.md](USAGE.md). For installation optio
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/ai-software-architect.git .architecture
+   git clone https://github.com/codenamev/ai-software-architect.git .architecture
    rm -rf .architecture/.git  # Remove Git history if desired
    ```
 

@@ -1,8 +1,8 @@
-name: AI Software Architect Structure
+---
 description: Directory structure and organization of the AI Software Architect framework
-include: ["**/*"]
-exclude: ["node_modules/**/*", ".git/**/*"]
-weight: 1.0
+globs:
+  - ".architecture/**/*"
+alwaysApply: false
 ---
 
 # AI Software Architect Framework Structure

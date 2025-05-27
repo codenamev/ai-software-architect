@@ -4,22 +4,57 @@ This guide explains how to effectively use the AI Software Architect framework w
 
 For general usage instructions, see [USAGE.md](USAGE.md). For installation options, see [INSTALL.md](INSTALL.md).
 
-## Getting Started
+## Quick Setup for Cursor Users
+
+### Option 1: In-Project Setup (Recommended)
+
+1. **Clone into your project**:
+   ```bash
+   # From your project root directory
+   git clone https://github.com/codenamev/ai-software-architect.git .architecture
+   ```
+
+2. **Add to your project's .cursorrules file** (create if it doesn't exist):
+   ```
+   # Include AI Software Architect framework
+   @.architecture/.coding-assistants/cursor/ai_software_architect_overview.mdc
+   @.architecture/.coding-assistants/cursor/ai_software_architect_setup.mdc
+   ```
+
+3. **Setup the framework**:
+   Open Cursor in your project and ask:
+   ```
+   Setup ai-software-architect
+   ```
+   
+   Cursor will analyze your project and customize the framework templates for your specific codebase.
+
+### Option 2: Manual Setup
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/ai-software-architect.git .architecture
+   git clone https://github.com/codenamev/ai-software-architect.git .architecture
    rm -rf .architecture/.git  # Remove Git history if desired
    ```
 
 2. **Configure Cursor**:
    - Make sure the `.coding-assistants/cursor` directory is present in your project
-   - Cursor will automatically use the rule files in this directory
+   - Cursor will automatically use the `.mdc` rule files in this directory
 
 3. **Use Cursor with AI Software Architect Commands**:
    - Open Cursor
    - Start prompts with AI Software Architect-specific language
    - Cursor will reference the rule files to understand the framework
+
+## Setup Commands
+
+After installation, Cursor recognizes these setup commands:
+
+| Command | Description |
+|---------|-------------|
+| `Setup ai-software-architect` | Full framework setup and customization |
+| `Setup architecture` | Alias for framework setup |
+| `Customize architecture` | Customize existing framework for project changes |
 
 ## Key Commands for Cursor
 

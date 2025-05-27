@@ -18,7 +18,7 @@ For detailed usage instructions, see [USAGE.md](USAGE.md) and [INSTALL.md](INSTA
 
 1. Copy this repository into your project:
    ```bash
-   git clone https://github.com/yourusername/ai-software-architect.git .architecture
+   git clone https://github.com/codenamev/ai-software-architect.git .architecture
    rm -rf .architecture/.git  # Remove Git history if desired
    ```
    See [INSTALL.md](INSTALL.md) for additional installation options.
@@ -72,11 +72,12 @@ Claude can dynamically create new specialist roles if they don't exist in your `
 
 For Cursor users, see [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md) for detailed instructions. Key capabilities include:
 
+- **Setup & Customization**: "Setup ai-software-architect", "Setup architecture"
 - **Architecture Reviews**: "Review this architecture using the AI Software Architect framework"
 - **Specialized Reviews**: "Analyze this from a security perspective using AI Software Architect"
 - **Documentation Creation**: "Create an ADR for this decision using the AI Software Architect format"
 
-Cursor uses rule files in the `.coding-assistants/cursor` directory to understand the framework.
+Cursor uses .mdc rule files in the `.coding-assistants/cursor` directory to understand the framework.
 
 ### Other AI Assistants
 

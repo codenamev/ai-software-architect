@@ -1,8 +1,9 @@
-name: AI Software Architect Overview
+---
 description: High-level overview of the AI Software Architect framework
-include: ["**/*"]
-exclude: ["node_modules/**/*", ".git/**/*"]
-weight: 1.0
+globs:
+  - "**/*.md"
+  - ".architecture/**/*"
+alwaysApply: true
 ---
 
 # AI Software Architect Overview

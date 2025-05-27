@@ -13,30 +13,40 @@ This framework supports several types of requests from users. Recognize and resp
 ### Setup Requests
 When a user makes requests like "Setup .architecture", "Setup ai-software-architect", "Setup software architect", "Setup architect", "Setup architecture", "Customize architecture", or similar phrases, follow these steps:
 
-1. **Understand the User's Workflow**
-   - The user has already cloned this repository into `.architecture/` in their project
-   - They have removed `.architecture/.git/` to avoid submodule issues
-   - They now need your help customizing the framework for their project
+1. **Detect Setup Context**
+   - Check if `.architecture/` directory exists with the cloned framework files
+   - Verify you're running from the user's project root (not from within .architecture)
+   - Confirm the user has added the framework reference to their CLAUDE.md
 
-2. **Repository Analysis**
-   - Analyze the user's repository to understand their codebase
+2. **Analyze Target Project**
+   - Examine the current directory (user's project) to understand their codebase
    - Identify primary programming languages, frameworks, and architectural patterns
-   - Study the project structure and existing documentation style
+   - Check for existing documentation patterns, package files, and project structure
+   - Look for technology-specific files (package.json, requirements.txt, etc.)
 
-3. **Template Customization**
-   - The template files already exist in `.architecture/templates/`
-   - Review and customize these templates based on the project's specific needs
-   - Use the existing files in this repository as reference for customization
+3. **Framework Installation**
+   - Move the actual framework from `.architecture/.architecture/` to `.architecture/`
+   - Create `.coding-assistants/` directory structure in project root
+   - **IMPORTANT**: Only append framework usage instructions to CLAUDE.md, NOT the setup instructions
+   - Set up initial directory structure for decisions, reviews, and recalibration
 
-4. **Configuration Files**
-   - Customize `.architecture/members.yml` with roles appropriate for the project
-   - Modify `.architecture/principles.md` to align with the project's architecture
-   - Create initial ADR templates in `.architecture/decisions/adrs/`
+4. **Customize for Project**
+   - Update `.architecture/members.yml` with roles relevant to their technology stack
+   - Modify `.architecture/principles.md` to align with their project's architectural needs
+   - Customize templates in `.architecture/templates/` based on their project patterns
+   - Create initial ADR structure in `.architecture/decisions/adrs/`
 
-5. **Document Customizations**
-   - Explain to the user what customizations you've made and why
-   - Provide guidance on how to use the framework with their specific project
-   - Suggest next steps for architectural documentation
+5. **Cleanup & Finalize**
+   - Remove template repository files (README.md, USAGE*.md, INSTALL.md, etc.)
+   - **CRITICAL**: Remove `.architecture/.git/` directory specifically (never touch project root .git)
+   - Remove the now-empty cloned repository structure
+   - Verify all framework files are properly located
+
+6. **Guide Next Steps**
+   - Explain what customizations you've made and why
+   - Show them how to use the framework with their specific project
+   - Suggest immediate next steps for architectural documentation
+   - Provide examples relevant to their tech stack
 
 ### Specific Architect Reviews
 When a user requests a review from a specific architect role, such as "Ask Security Architect to review these code changes", "Have Performance Specialist review this database schema", "Get Domain Expert's opinion on this API design", or "Ask Ruby Expert if my use of modules follows industry standards", follow these steps:

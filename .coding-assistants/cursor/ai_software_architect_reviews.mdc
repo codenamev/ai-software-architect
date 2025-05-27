@@ -1,8 +1,9 @@
-name: AI Software Architect Reviews
+---
 description: How to conduct architecture reviews using the AI Software Architect framework
-include: ["**/*"]
-exclude: ["node_modules/**/*", ".git/**/*"]
-weight: 1.0
+globs:
+  - ".architecture/reviews/**/*"
+  - ".architecture/members.yml"
+alwaysApply: false
 ---
 
 # AI Software Architect Reviews

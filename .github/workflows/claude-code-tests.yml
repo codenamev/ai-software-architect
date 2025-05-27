@@ -123,20 +123,18 @@ jobs:
         
         # Step 4: Create initial CLAUDE.md content (simulate)
         echo "=== Testing CLAUDE.md Integration ==="
-        cat > CLAUDE.md << 'EOF'
-# CLAUDE.md
-
-# AI Software Architect Framework Usage
-Follow these instructions when working with architecture in this project:
-
-## Architecture Documentation
-- Store architectural decisions in `.architecture/decisions/`
-- Store architectural reviews in `.architecture/reviews/`
-- Reference architecture members from `.architecture/members.yml`
-
-## Request Recognition
-When users request architecture setup, reviews, or recalibration, follow the framework processes.
-EOF
+        echo "# CLAUDE.md" > CLAUDE.md
+        echo "" >> CLAUDE.md
+        echo "# AI Software Architect Framework Usage" >> CLAUDE.md
+        echo "Follow these instructions when working with architecture in this project:" >> CLAUDE.md
+        echo "" >> CLAUDE.md
+        echo "## Architecture Documentation" >> CLAUDE.md
+        echo "- Store architectural decisions in \`.architecture/decisions/\`" >> CLAUDE.md
+        echo "- Store architectural reviews in \`.architecture/reviews/\`" >> CLAUDE.md
+        echo "- Reference architecture members from \`.architecture/members.yml\`" >> CLAUDE.md
+        echo "" >> CLAUDE.md
+        echo "## Request Recognition" >> CLAUDE.md
+        echo "When users request architecture setup, reviews, or recalibration, follow the framework processes." >> CLAUDE.md
         
         if [ -f "CLAUDE.md" ]; then
           echo "✓ CLAUDE.md created"
@@ -155,85 +153,79 @@ EOF
         case "${{ matrix.project-type }}" in
           nodejs)
             # Add Node.js specific members
-            cat >> .architecture/members.yml << 'EOF'
-
-- id: frontend_architect
-  name: "Alex Chen"
-  title: "Frontend Architect"
-  specialties: 
-    - "React/Next.js Architecture"
-    - "State Management"
-    - "Performance Optimization"
-  disciplines:
-    - "Frontend Development"
-    - "User Experience"
-    - "Web Performance"
-  skillsets:
-    - "JavaScript/TypeScript"
-    - "Modern Build Tools"
-    - "Component Architecture"
-  domains:
-    - "Web Applications"
-    - "Single Page Applications"
-    - "Progressive Web Apps"
-  perspective: "Focuses on scalable frontend architecture and optimal user experience"
-EOF
+            echo "" >> .architecture/members.yml
+            echo "- id: frontend_architect" >> .architecture/members.yml
+            echo "  name: \"Alex Chen\"" >> .architecture/members.yml
+            echo "  title: \"Frontend Architect\"" >> .architecture/members.yml
+            echo "  specialties:" >> .architecture/members.yml
+            echo "    - \"React/Next.js Architecture\"" >> .architecture/members.yml
+            echo "    - \"State Management\"" >> .architecture/members.yml
+            echo "    - \"Performance Optimization\"" >> .architecture/members.yml
+            echo "  disciplines:" >> .architecture/members.yml
+            echo "    - \"Frontend Development\"" >> .architecture/members.yml
+            echo "    - \"User Experience\"" >> .architecture/members.yml
+            echo "    - \"Web Performance\"" >> .architecture/members.yml
+            echo "  skillsets:" >> .architecture/members.yml
+            echo "    - \"JavaScript/TypeScript\"" >> .architecture/members.yml
+            echo "    - \"Modern Build Tools\"" >> .architecture/members.yml
+            echo "    - \"Component Architecture\"" >> .architecture/members.yml
+            echo "  domains:" >> .architecture/members.yml
+            echo "    - \"Web Applications\"" >> .architecture/members.yml
+            echo "    - \"Single Page Applications\"" >> .architecture/members.yml
+            echo "    - \"Progressive Web Apps\"" >> .architecture/members.yml
+            echo "  perspective: \"Focuses on scalable frontend architecture and optimal user experience\"" >> .architecture/members.yml
             echo "✓ Node.js specific members added"
             ;;
             
           rails)
             # Add Rails specific members
-            cat >> .architecture/members.yml << 'EOF'
-
-- id: rails_architect
-  name: "Morgan Ruby"
-  title: "Rails Architect"
-  specialties: 
-    - "Rails Architecture Patterns"
-    - "ActiveRecord Design"
-    - "Ruby Performance"
-  disciplines:
-    - "Backend Development"
-    - "Database Design"
-    - "API Architecture"
-  skillsets:
-    - "Ruby/Rails Framework"
-    - "PostgreSQL/MySQL"
-    - "RESTful API Design"
-  domains:
-    - "Web Applications"
-    - "API Development"
-    - "Database Architecture"
-  perspective: "Champions Rails conventions and Ruby ecosystem best practices"
-EOF
+            echo "" >> .architecture/members.yml
+            echo "- id: rails_architect" >> .architecture/members.yml
+            echo "  name: \"Morgan Ruby\"" >> .architecture/members.yml
+            echo "  title: \"Rails Architect\"" >> .architecture/members.yml
+            echo "  specialties:" >> .architecture/members.yml
+            echo "    - \"Rails Architecture Patterns\"" >> .architecture/members.yml
+            echo "    - \"ActiveRecord Design\"" >> .architecture/members.yml
+            echo "    - \"Ruby Performance\"" >> .architecture/members.yml
+            echo "  disciplines:" >> .architecture/members.yml
+            echo "    - \"Backend Development\"" >> .architecture/members.yml
+            echo "    - \"Database Design\"" >> .architecture/members.yml
+            echo "    - \"API Architecture\"" >> .architecture/members.yml
+            echo "  skillsets:" >> .architecture/members.yml
+            echo "    - \"Ruby/Rails Framework\"" >> .architecture/members.yml
+            echo "    - \"PostgreSQL/MySQL\"" >> .architecture/members.yml
+            echo "    - \"RESTful API Design\"" >> .architecture/members.yml
+            echo "  domains:" >> .architecture/members.yml
+            echo "    - \"Web Applications\"" >> .architecture/members.yml
+            echo "    - \"API Development\"" >> .architecture/members.yml
+            echo "    - \"Database Architecture\"" >> .architecture/members.yml
+            echo "  perspective: \"Champions Rails conventions and Ruby ecosystem best practices\"" >> .architecture/members.yml
             echo "✓ Rails specific members added"
             ;;
             
           python)
             # Add Python specific members
-            cat >> .architecture/members.yml << 'EOF'
-
-- id: python_architect
-  name: "Dr. Patricia Python"
-  title: "Python Systems Architect"
-  specialties: 
-    - "Python Architecture"
-    - "Django/Flask Design"
-    - "Data Pipeline Architecture"
-  disciplines:
-    - "Backend Development"
-    - "Data Engineering"
-    - "System Integration"
-  skillsets:
-    - "Python Ecosystem"
-    - "Microservices"
-    - "Data Processing"
-  domains:
-    - "Web Applications"
-    - "Data Systems"
-    - "API Services"
-  perspective: "Emphasizes Pythonic design principles and scalable data architectures"
-EOF
+            echo "" >> .architecture/members.yml
+            echo "- id: python_architect" >> .architecture/members.yml
+            echo "  name: \"Dr. Patricia Python\"" >> .architecture/members.yml
+            echo "  title: \"Python Systems Architect\"" >> .architecture/members.yml
+            echo "  specialties:" >> .architecture/members.yml
+            echo "    - \"Python Architecture\"" >> .architecture/members.yml
+            echo "    - \"Django/Flask Design\"" >> .architecture/members.yml
+            echo "    - \"Data Pipeline Architecture\"" >> .architecture/members.yml
+            echo "  disciplines:" >> .architecture/members.yml
+            echo "    - \"Backend Development\"" >> .architecture/members.yml
+            echo "    - \"Data Engineering\"" >> .architecture/members.yml
+            echo "    - \"System Integration\"" >> .architecture/members.yml
+            echo "  skillsets:" >> .architecture/members.yml
+            echo "    - \"Python Ecosystem\"" >> .architecture/members.yml
+            echo "    - \"Microservices\"" >> .architecture/members.yml
+            echo "    - \"Data Processing\"" >> .architecture/members.yml
+            echo "  domains:" >> .architecture/members.yml
+            echo "    - \"Web Applications\"" >> .architecture/members.yml
+            echo "    - \"Data Systems\"" >> .architecture/members.yml
+            echo "    - \"API Services\"" >> .architecture/members.yml
+            echo "  perspective: \"Emphasizes Pythonic design principles and scalable data architectures\"" >> .architecture/members.yml
             echo "✓ Python specific members added"
             ;;
         esac

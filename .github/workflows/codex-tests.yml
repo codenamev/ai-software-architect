@@ -242,27 +242,27 @@ jobs:
           # Create a sample ADR to test the process
           mkdir -p .architecture/decisions/adrs
           cat > .architecture/decisions/adrs/001-database-choice.md << 'EOF'
-# ADR-001: Database Technology Choice
-
-## Status
-Proposed
-
-## Context
-We need to choose a database technology for our application that supports both relational and document storage patterns.
-
-## Decision
-We will use PostgreSQL with JSONB columns for hybrid relational/document storage.
-
-## Consequences
-### Positive
-- Single database technology to maintain
-- Strong ACID guarantees
-- Rich JSON querying capabilities
-
-### Negative  
-- Requires PostgreSQL-specific knowledge
-- May have performance implications for large JSON documents
-EOF
+        # ADR-001: Database Technology Choice
+        
+        ## Status
+        Proposed
+        
+        ## Context
+        We need to choose a database technology for our application that supports both relational and document storage patterns.
+        
+        ## Decision
+        We will use PostgreSQL with JSONB columns for hybrid relational/document storage.
+        
+        ## Consequences
+        ### Positive
+        - Single database technology to maintain
+        - Strong ACID guarantees
+        - Rich JSON querying capabilities
+        
+        ### Negative  
+        - Requires PostgreSQL-specific knowledge
+        - May have performance implications for large JSON documents
+        EOF
           
           if [ -f ".architecture/decisions/adrs/001-database-choice.md" ]; then
             echo "✓ ADR creation simulation successful"

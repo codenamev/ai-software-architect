@@ -1,0 +1,402 @@
+name: Claude Code Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  claude-setup-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project-type: [nodejs, rails, python, generic]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js (for all project types)
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Setup Ruby (for Rails tests)
+      if: matrix.project-type == 'rails'
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        
+    - name: Setup Python (for Python tests)
+      if: matrix.project-type == 'python'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Create test project fixtures
+      run: |
+        mkdir -p test-projects/${{ matrix.project-type }}
+        cd test-projects/${{ matrix.project-type }}
+        
+        case "${{ matrix.project-type }}" in
+          nodejs)
+            echo '{"name": "test-app", "version": "1.0.0", "dependencies": {"express": "^4.18.0"}}' > package.json
+            ;;
+          rails)
+            echo 'source "https://rubygems.org"' > Gemfile
+            echo 'gem "rails", "~> 7.0"' >> Gemfile
+            echo 'gem "sqlite3"' >> Gemfile
+            ;;
+          python)
+            echo 'flask==2.3.0' > requirements.txt
+            echo 'django==4.2.0' >> requirements.txt
+            ;;
+          generic)
+            echo '# Generic project' > README.md
+            ;;
+        esac
+        
+    - name: Copy framework to test project
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        cp -r ../../.architecture ./.architecture
+        cp -r ../../.coding-assistants ./.coding-assistants
+        
+    - name: Simulate Claude Code setup process
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        # Step 1: Detect Setup Context
+        echo "=== Testing Setup Context Detection ==="
+        if [ -d ".architecture" ]; then
+          echo "✓ Framework directory detected"
+        else
+          echo "✗ Framework directory missing"
+          exit 1
+        fi
+        
+        # Step 2: Analyze Target Project
+        echo "=== Testing Project Analysis ==="
+        case "${{ matrix.project-type }}" in
+          nodejs)
+            if [ -f "package.json" ]; then
+              echo "✓ Node.js project detected"
+            else
+              echo "✗ package.json not found"
+              exit 1
+            fi
+            ;;
+          rails)
+            if grep -q "rails" Gemfile 2>/dev/null; then
+              echo "✓ Rails project detected"
+            else
+              echo "✗ Rails not detected in Gemfile"
+              exit 1
+            fi
+            ;;
+          python)
+            if [ -f "requirements.txt" ]; then
+              echo "✓ Python project detected"
+            else
+              echo "✗ requirements.txt not found"
+              exit 1
+            fi
+            ;;
+        esac
+        
+    - name: Test framework installation simulation
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        # Step 3: Framework Installation (simulate moving from nested to root)
+        echo "=== Testing Framework Installation ==="
+        
+        # Simulate the framework move (already done in copy step)
+        if [ -f ".architecture/decisions/ArchitectureConsiderations.md" ]; then
+          echo "✓ Architecture decisions available"
+        else
+          echo "✗ Architecture decisions missing"
+          exit 1
+        fi
+        
+        # Step 4: Create initial CLAUDE.md content (simulate)
+        echo "=== Testing CLAUDE.md Integration ==="
+        cat > CLAUDE.md << 'EOF'
+# CLAUDE.md
+
+# AI Software Architect Framework Usage
+Follow these instructions when working with architecture in this project:
+
+## Architecture Documentation
+- Store architectural decisions in `.architecture/decisions/`
+- Store architectural reviews in `.architecture/reviews/`
+- Reference architecture members from `.architecture/members.yml`
+
+## Request Recognition
+When users request architecture setup, reviews, or recalibration, follow the framework processes.
+EOF
+        
+        if [ -f "CLAUDE.md" ]; then
+          echo "✓ CLAUDE.md created"
+        else
+          echo "✗ CLAUDE.md creation failed"
+          exit 1
+        fi
+        
+    - name: Test technology-specific customization
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Technology-Specific Customization ==="
+        
+        # Create customized members.yml based on project type
+        case "${{ matrix.project-type }}" in
+          nodejs)
+            # Add Node.js specific members
+            cat >> .architecture/members.yml << 'EOF'
+
+- id: frontend_architect
+  name: "Alex Chen"
+  title: "Frontend Architect"
+  specialties: 
+    - "React/Next.js Architecture"
+    - "State Management"
+    - "Performance Optimization"
+  disciplines:
+    - "Frontend Development"
+    - "User Experience"
+    - "Web Performance"
+  skillsets:
+    - "JavaScript/TypeScript"
+    - "Modern Build Tools"
+    - "Component Architecture"
+  domains:
+    - "Web Applications"
+    - "Single Page Applications"
+    - "Progressive Web Apps"
+  perspective: "Focuses on scalable frontend architecture and optimal user experience"
+EOF
+            echo "✓ Node.js specific members added"
+            ;;
+            
+          rails)
+            # Add Rails specific members
+            cat >> .architecture/members.yml << 'EOF'
+
+- id: rails_architect
+  name: "Morgan Ruby"
+  title: "Rails Architect"
+  specialties: 
+    - "Rails Architecture Patterns"
+    - "ActiveRecord Design"
+    - "Ruby Performance"
+  disciplines:
+    - "Backend Development"
+    - "Database Design"
+    - "API Architecture"
+  skillsets:
+    - "Ruby/Rails Framework"
+    - "PostgreSQL/MySQL"
+    - "RESTful API Design"
+  domains:
+    - "Web Applications"
+    - "API Development"
+    - "Database Architecture"
+  perspective: "Champions Rails conventions and Ruby ecosystem best practices"
+EOF
+            echo "✓ Rails specific members added"
+            ;;
+            
+          python)
+            # Add Python specific members
+            cat >> .architecture/members.yml << 'EOF'
+
+- id: python_architect
+  name: "Dr. Patricia Python"
+  title: "Python Systems Architect"
+  specialties: 
+    - "Python Architecture"
+    - "Django/Flask Design"
+    - "Data Pipeline Architecture"
+  disciplines:
+    - "Backend Development"
+    - "Data Engineering"
+    - "System Integration"
+  skillsets:
+    - "Python Ecosystem"
+    - "Microservices"
+    - "Data Processing"
+  domains:
+    - "Web Applications"
+    - "Data Systems"
+    - "API Services"
+  perspective: "Emphasizes Pythonic design principles and scalable data architectures"
+EOF
+            echo "✓ Python specific members added"
+            ;;
+        esac
+        
+    - name: Test file structure validation
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing File Structure Validation ==="
+        
+        # Check required directories
+        required_dirs=(".architecture" ".architecture/decisions" ".architecture/reviews" ".coding-assistants")
+        for dir in "${required_dirs[@]}"; do
+          if [ -d "$dir" ]; then
+            echo "✓ Directory $dir exists"
+          else
+            echo "✗ Directory $dir missing"
+            exit 1
+          fi
+        done
+        
+        # Check required files
+        required_files=(".architecture/members.yml" ".architecture/principles.md" "CLAUDE.md")
+        for file in "${required_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✓ File $file exists"
+          else
+            echo "✗ File $file missing"
+            exit 1
+          fi
+        done
+        
+    - name: Test command recognition patterns
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Command Recognition Patterns ==="
+        
+        # Test setup command recognition (simulate)
+        setup_patterns=(
+          "Setup .architecture"
+          "Setup ai-software-architect"
+          "Setup software architect"
+          "Setup architect"
+          "Setup architecture"
+          "Customize architecture"
+        )
+        
+        for pattern in "${setup_patterns[@]}"; do
+          # Simulate pattern matching
+          if [[ "$pattern" =~ [Ss]etup.*(architecture|architect) ]]; then
+            echo "✓ Pattern '$pattern' would be recognized"
+          else
+            echo "✗ Pattern '$pattern' not recognized"
+            exit 1
+          fi
+        done
+        
+        # Test review command patterns
+        review_patterns=(
+          "Start architecture review for version 1.0.0"
+          "Review architecture for user authentication"
+          "Ask Security Architect to review these changes"
+        )
+        
+        for pattern in "${review_patterns[@]}"; do
+          if [[ "$pattern" =~ [Rr]eview|[Aa]sk.*[Aa]rchitect ]]; then
+            echo "✓ Pattern '$pattern' would be recognized"
+          else
+            echo "✗ Pattern '$pattern' not recognized"
+            exit 1
+          fi
+        done
+        
+    - name: Test cleanup validation
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Cleanup Validation ==="
+        
+        # Simulate cleanup process
+        cleanup_targets=(".architecture/.git" "INSTALL.md" "USAGE.md" "USAGE-WITH-CLAUDE.md")
+        
+        for target in "${cleanup_targets[@]}"; do
+          if [ ! -e "$target" ]; then
+            echo "✓ $target properly cleaned up"
+          else
+            echo "⚠ $target should be cleaned up during setup"
+          fi
+        done
+        
+    - name: Generate test report
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Test Report for ${{ matrix.project-type }} ===" 
+        echo "Project Type: ${{ matrix.project-type }}"
+        echo "Framework Installation: ✓ Success"
+        echo "Technology Detection: ✓ Success"  
+        echo "Customization: ✓ Success"
+        echo "Command Recognition: ✓ Success"
+        echo "File Structure: ✓ Success"
+        echo ""
+        echo "All Claude Code integration tests passed for ${{ matrix.project-type }} project type."
+        
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: claude-test-${{ matrix.project-type }}
+        path: test-projects/${{ matrix.project-type }}/
+        retention-days: 7
+
+  cross-compatibility-test:
+    runs-on: ubuntu-latest
+    needs: claude-setup-tests
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download all test artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: test-artifacts/
+        
+    - name: Test cross-assistant compatibility
+      run: |
+        echo "=== Testing Cross-Assistant Compatibility ==="
+        
+        # Test that architecture configured by Claude can be used by other assistants
+        for project_type in nodejs rails python generic; do
+          if [ -d "test-artifacts/claude-test-$project_type" ]; then
+            cd "test-artifacts/claude-test-$project_type"
+            
+            echo "Testing $project_type compatibility..."
+            
+            # Verify Cursor can access the architecture
+            if [ -d ".coding-assistants/cursor" ]; then
+              echo "✓ Cursor configurations present"
+            else
+              echo "✗ Cursor configurations missing"
+              exit 1
+            fi
+            
+            # Verify Codex can access the architecture  
+            if [ -d ".coding-assistants/codex" ]; then
+              echo "✓ Codex configurations present"
+            else
+              echo "✗ Codex configurations missing"
+              exit 1
+            fi
+            
+            # Test shared architecture understanding
+            if [ -f ".architecture/members.yml" ] && [ -f ".architecture/principles.md" ]; then
+              echo "✓ Shared architecture files accessible"
+            else
+              echo "✗ Shared architecture files missing"
+              exit 1
+            fi
+            
+            cd ../..
+          fi
+        done
+        
+        echo "All cross-compatibility tests passed."

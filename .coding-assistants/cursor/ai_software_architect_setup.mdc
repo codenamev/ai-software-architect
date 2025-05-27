@@ -2,7 +2,7 @@
 description: Setup and configuration instructions for AI Software Architect framework
 globs:
   - "CLAUDE.md"
-  - ".cursorrules"
+  - ".coding-assistants/**/*"
 alwaysApply: false
 ---
 
@@ -37,7 +37,7 @@ When a user requests setup:
 
 3. **Framework Installation**
    - Move framework from `.architecture/.architecture/` to `.architecture/`
-   - Create `.coding-assistants/` directory structure
+   - Create `.coding-assistants/` directory structure with Cursor Rule files
    - Set up initial directory structure for decisions, reviews, recalibration
 
 4. **Customize for Project**
@@ -62,7 +62,7 @@ When a user requests setup:
 
 When setting up, ensure these files are properly configured:
 
-- `.cursorrules` - Include reference to framework rules
+- `.coding-assistants/cursor/` - Cursor Rule files for framework integration
 - `CLAUDE.md` - Add framework usage instructions (if present)
 - `.architecture/members.yml` - Customize for project's needs
 - `.architecture/principles.md` - Align with project architecture

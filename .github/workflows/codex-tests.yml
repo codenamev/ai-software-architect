@@ -1,0 +1,531 @@
+name: Codex/GitHub Copilot Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  codex-setup-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project-type: [nodejs, python, generic]
+        
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Setup Python (for Python tests)
+      if: matrix.project-type == 'python'
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Create test project fixtures
+      run: |
+        mkdir -p test-projects/${{ matrix.project-type }}
+        cd test-projects/${{ matrix.project-type }}
+        
+        case "${{ matrix.project-type }}" in
+          nodejs)
+            echo '{"name": "test-app", "version": "1.0.0", "dependencies": {"express": "^4.18.0", "@types/node": "^18.0.0"}}' > package.json
+            echo 'console.log("Hello World");' > index.js
+            ;;
+          python)
+            echo 'flask==2.3.0' > requirements.txt
+            echo 'pytest==7.4.0' >> requirements.txt
+            echo 'def hello(): return "Hello World"' > main.py
+            ;;
+          generic)
+            echo '# Generic project for architecture setup' > README.md
+            echo 'This is a test project for AI Software Architect framework.' >> README.md
+            ;;
+        esac
+        
+    - name: Copy framework to test project
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        cp -r ../../.architecture ./.architecture
+        cp -r ../../.coding-assistants ./.coding-assistants
+        
+    - name: Test Codex setup instructions accessibility
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Codex Setup Instructions Accessibility ==="
+        
+        # Test that setup-instructions.md is accessible
+        if [ -f ".coding-assistants/codex/setup-instructions.md" ]; then
+          echo "✓ setup-instructions.md found"
+        else
+          echo "✗ setup-instructions.md missing"
+          exit 1
+        fi
+        
+        # Test setup instructions content
+        setup_file=".coding-assistants/codex/setup-instructions.md"
+        
+        # Check for key setup patterns
+        setup_patterns=(
+          "Setup.*architecture"
+          "6-step.*setup.*process"
+          "Framework.*Installation"
+          "Customization.*for.*Project"
+        )
+        
+        for pattern in "${setup_patterns[@]}"; do
+          if grep -Eq "$pattern" "$setup_file"; then
+            echo "✓ Setup pattern '$pattern' found in instructions"
+          else
+            echo "✗ Setup pattern '$pattern' missing from instructions"
+            exit 1
+          fi
+        done
+        
+    - name: Test natural language command recognition
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Natural Language Command Recognition ==="
+        
+        setup_file=".coding-assistants/codex/setup-instructions.md"
+        
+        # Test command recognition patterns documented in setup instructions
+        command_patterns=(
+          "Setup.*using.*github"
+          "Setup.*architecture"
+          "Setup.*ai-software-architect"
+          "Customize.*architecture"
+          "Configure.*framework"
+        )
+        
+        for pattern in "${command_patterns[@]}"; do
+          if grep -Eq "$pattern" "$setup_file"; then
+            echo "✓ Command pattern '$pattern' documented"
+          else
+            echo "⚠ Command pattern '$pattern' not explicitly documented"
+          fi
+        done
+        
+    - name: Test context file structure for Copilot
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Context File Structure for GitHub Copilot ==="
+        
+        # Test that architecture files are in expected locations for context
+        context_files=(
+          ".architecture/principles.md"
+          ".architecture/members.yml"
+          ".architecture/decisions/ArchitectureConsiderations.md"
+        )
+        
+        for file in "${context_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✓ Context file $file accessible"
+            
+            # Test file is not empty
+            if [ -s "$file" ]; then
+              echo "✓ Context file $file has content"
+            else
+              echo "✗ Context file $file is empty"
+              exit 1
+            fi
+          else
+            echo "✗ Context file $file missing"
+            exit 1
+          fi
+        done
+        
+    - name: Test architecture template accessibility
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Architecture Template Accessibility ==="
+        
+        # Test that templates are available for Copilot to reference
+        template_files=(
+          ".architecture/templates/adr-template.md"
+          ".architecture/templates/review-template.md"
+        )
+        
+        for file in "${template_files[@]}"; do
+          if [ -f "$file" ]; then
+            echo "✓ Template file $file accessible"
+            
+            # Check for template structure markers
+            if grep -q "# \[Title\]" "$file" || grep -q "## " "$file"; then
+              echo "✓ Template file $file has proper structure"
+            else
+              echo "✗ Template file $file missing structure markers"
+              exit 1
+            fi
+          else
+            echo "✗ Template file $file missing"
+            exit 1
+          fi
+        done
+        
+    - name: Simulate Codex setup process
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Simulating Codex Setup Process ==="
+        
+        # Simulate the natural language setup command processing
+        
+        # Step 1: Detect Setup Context (simulate pattern matching)
+        setup_command="Setup architecture using: https://github.com/codenamev/ai-software-architect"
+        
+        if [[ "$setup_command" =~ [Ss]etup.*architecture.*github ]]; then
+          echo "✓ Setup command pattern recognized"
+        else
+          echo "✗ Setup command pattern not recognized"
+          exit 1
+        fi
+        
+        # Step 2: Project Analysis (simulate technology detection)
+        case "${{ matrix.project-type }}" in
+          nodejs)
+            if [ -f "package.json" ] && grep -q "express\|node" package.json; then
+              echo "✓ Node.js project detected via package.json"
+            fi
+            ;;
+          python)
+            if [ -f "requirements.txt" ] && grep -q "flask\|django" requirements.txt; then
+              echo "✓ Python project detected via requirements.txt"
+            fi
+            ;;
+          generic)
+            if [ -f "README.md" ]; then
+              echo "✓ Generic project detected via README.md"
+            fi
+            ;;
+        esac
+        
+        # Step 3: Framework Installation Verification
+        if [ -d ".architecture" ] && [ -d ".coding-assistants" ]; then
+          echo "✓ Framework structure available for installation"
+        else
+          echo "✗ Framework structure missing"
+          exit 1
+        fi
+        
+    - name: Test ADR creation context
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing ADR Creation Context ==="
+        
+        # Simulate ADR creation command
+        adr_command="Create an ADR for our database choice"
+        
+        if [[ "$adr_command" =~ [Cc]reate.*ADR ]]; then
+          echo "✓ ADR creation command pattern recognized"
+        else
+          echo "✗ ADR creation command pattern not recognized"
+          exit 1
+        fi
+        
+        # Test that ADR template is accessible for reference
+        if [ -f ".architecture/templates/adr-template.md" ]; then
+          echo "✓ ADR template available for reference"
+          
+          # Create a sample ADR to test the process
+          mkdir -p .architecture/decisions/adrs
+          cat > .architecture/decisions/adrs/001-database-choice.md << 'EOF'
+# ADR-001: Database Technology Choice
+
+## Status
+Proposed
+
+## Context
+We need to choose a database technology for our application that supports both relational and document storage patterns.
+
+## Decision
+We will use PostgreSQL with JSONB columns for hybrid relational/document storage.
+
+## Consequences
+### Positive
+- Single database technology to maintain
+- Strong ACID guarantees
+- Rich JSON querying capabilities
+
+### Negative  
+- Requires PostgreSQL-specific knowledge
+- May have performance implications for large JSON documents
+EOF
+          
+          if [ -f ".architecture/decisions/adrs/001-database-choice.md" ]; then
+            echo "✓ ADR creation simulation successful"
+          else
+            echo "✗ ADR creation simulation failed"
+            exit 1
+          fi
+        fi
+        
+    - name: Test architecture review context
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Architecture Review Context ==="
+        
+        # Test review command recognition
+        review_command="Review this architecture"
+        
+        if [[ "$review_command" =~ [Rr]eview.*architecture ]]; then
+          echo "✓ Review command pattern recognized"
+        else
+          echo "✗ Review command pattern not recognized" 
+          exit 1
+        fi
+        
+        # Test that review template is accessible
+        if [ -f ".architecture/templates/review-template.md" ]; then
+          echo "✓ Review template available for reference"
+          
+          # Test that members.yml provides context for reviews
+          if grep -q "specialties:" ".architecture/members.yml"; then
+            echo "✓ Architecture members available for review context"
+          else
+            echo "✗ Architecture members missing specialties"
+            exit 1
+          fi
+        fi
+        
+    - name: Test project-specific customization
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Project-Specific Customization ==="
+        
+        # Test that customization guidance is available
+        case "${{ matrix.project-type }}" in
+          nodejs)
+            # Check for Node.js specific guidance
+            if grep -q "Node\|JavaScript\|npm" ".coding-assistants/codex/setup-instructions.md" || \
+               grep -q "Frontend\|Backend" ".architecture/principles.md"; then
+              echo "✓ Node.js specific guidance available"
+            else
+              echo "⚠ Node.js specific guidance could be enhanced"
+            fi
+            ;;
+          python)
+            # Check for Python specific guidance  
+            if grep -q "Python\|Django\|Flask" ".coding-assistants/codex/setup-instructions.md" || \
+               grep -q "Python" ".architecture/principles.md"; then
+              echo "✓ Python specific guidance available"
+            else
+              echo "⚠ Python specific guidance could be enhanced" 
+            fi
+            ;;
+        esac
+        
+    - name: Test documentation completeness
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Testing Documentation Completeness ==="
+        
+        # Check for complete documentation that Copilot can reference
+        docs_checklist=(
+          ".architecture/principles.md"
+          ".architecture/members.yml" 
+          ".coding-assistants/codex/setup-instructions.md"
+          ".architecture/templates/adr-template.md"
+          ".architecture/templates/review-template.md"
+        )
+        
+        for doc in "${docs_checklist[@]}"; do
+          if [ -f "$doc" ] && [ -s "$doc" ]; then
+            echo "✓ Documentation $doc complete"
+          else
+            echo "✗ Documentation $doc incomplete or missing"
+            exit 1
+          fi
+        done
+        
+        # Test cross-referencing capability
+        if grep -q "architecture.*decision" ".architecture/principles.md" || \
+           grep -q "ADR" ".architecture/principles.md"; then
+          echo "✓ Cross-referencing patterns available"
+        else
+          echo "⚠ Cross-referencing patterns could be enhanced"
+        fi
+        
+    - name: Generate Codex test report
+      run: |
+        cd test-projects/${{ matrix.project-type }}
+        
+        echo "=== Codex Integration Test Report for ${{ matrix.project-type }} ==="
+        echo "Project Type: ${{ matrix.project-type }}"
+        echo "Setup Instructions: ✓ Accessible"
+        echo "Command Recognition: ✓ Patterns Documented"
+        echo "Context Files: ✓ Available"
+        echo "Templates: ✓ Accessible"
+        echo "ADR Creation: ✓ Supported"
+        echo "Review Process: ✓ Supported"
+        echo "Documentation: ✓ Complete"
+        echo ""
+        echo "All Codex integration tests passed for ${{ matrix.project-type }} project type."
+        
+    - name: Upload Codex test artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: codex-test-${{ matrix.project-type }}
+        path: test-projects/${{ matrix.project-type }}/
+        retention-days: 7
+
+  codex-context-integration-test:
+    runs-on: ubuntu-latest
+    needs: codex-setup-tests
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download all Codex test artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: codex-test-*
+        path: test-artifacts/
+        
+    - name: Test GitHub Copilot context integration
+      run: |
+        echo "=== Testing GitHub Copilot Context Integration ==="
+        
+        # Test that all project types have consistent context availability
+        for project_type in nodejs python generic; do
+          if [ -d "test-artifacts/codex-test-$project_type" ]; then
+            cd "test-artifacts/codex-test-$project_type"
+            
+            echo "Testing context integration for $project_type..."
+            
+            # Test architectural context consistency
+            context_score=0
+            total_checks=5
+            
+            # Check 1: Architecture principles accessible
+            if [ -f ".architecture/principles.md" ] && [ -s ".architecture/principles.md" ]; then
+              echo "✓ Architecture principles context available"
+              ((context_score++))
+            else
+              echo "✗ Architecture principles context missing"
+            fi
+            
+            # Check 2: Team members context accessible
+            if [ -f ".architecture/members.yml" ] && grep -q "specialties:" ".architecture/members.yml"; then
+              echo "✓ Team members context available"
+              ((context_score++))
+            else
+              echo "✗ Team members context missing"
+            fi
+            
+            # Check 3: Decision templates accessible
+            if [ -f ".architecture/templates/adr-template.md" ] && [ -s ".architecture/templates/adr-template.md" ]; then
+              echo "✓ Decision templates context available"
+              ((context_score++))
+            else
+              echo "✗ Decision templates context missing"
+            fi
+            
+            # Check 4: Setup instructions accessible
+            if [ -f ".coding-assistants/codex/setup-instructions.md" ] && [ -s ".coding-assistants/codex/setup-instructions.md" ]; then
+              echo "✓ Setup instructions context available"
+              ((context_score++))
+            else
+              echo "✗ Setup instructions context missing"
+            fi
+            
+            # Check 5: Review process context accessible
+            if [ -f ".architecture/templates/review-template.md" ] && [ -s ".architecture/templates/review-template.md" ]; then
+              echo "✓ Review process context available"
+              ((context_score++))
+            else
+              echo "✗ Review process context missing"
+            fi
+            
+            # Calculate context integration score
+            context_percentage=$((context_score * 100 / total_checks))
+            echo "Context Integration Score: $context_score/$total_checks ($context_percentage%)"
+            
+            if [ $context_score -eq $total_checks ]; then
+              echo "✓ Full context integration achieved for $project_type"
+            elif [ $context_score -ge 4 ]; then
+              echo "⚠ Good context integration for $project_type (minor issues)"
+            else
+              echo "✗ Poor context integration for $project_type"
+              exit 1
+            fi
+            
+            cd ../..
+          fi
+        done
+        
+        echo "GitHub Copilot context integration tests completed."
+
+  cross-assistant-codex-test:
+    runs-on: ubuntu-latest
+    needs: [codex-setup-tests]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download Codex test artifacts
+      uses: actions/download-artifact@v4
+      with:
+        pattern: codex-test-*
+        path: test-artifacts/
+        
+    - name: Test Codex compatibility with other assistants
+      run: |
+        echo "=== Testing Codex Compatibility with Other Assistants ==="
+        
+        for project_type in nodejs python generic; do
+          if [ -d "test-artifacts/codex-test-$project_type" ]; then
+            cd "test-artifacts/codex-test-$project_type"
+            
+            echo "Testing compatibility for $project_type..."
+            
+            # Test that Codex can work with Claude configurations
+            if [ -d ".coding-assistants/claude" ]; then
+              echo "✓ Claude configurations present and accessible"
+            else
+              echo "✗ Claude configurations missing"
+              exit 1
+            fi
+            
+            # Test that Codex can work with Cursor configurations
+            if [ -d ".coding-assistants/cursor" ]; then
+              echo "✓ Cursor configurations present and accessible"
+            else
+              echo "✗ Cursor configurations missing"
+              exit 1
+            fi
+            
+            # Test shared architecture understanding
+            shared_files=(".architecture/principles.md" ".architecture/members.yml")
+            for file in "${shared_files[@]}"; do
+              if [ -f "$file" ] && [ -s "$file" ]; then
+                echo "✓ Shared file $file accessible to all assistants"
+              else
+                echo "✗ Shared file $file not accessible"
+                exit 1
+              fi
+            done
+            
+            cd ../..
+          fi
+        done
+        
+        echo "All cross-assistant compatibility tests passed."

@@ -2,24 +2,26 @@
 
 This guide explains how to effectively use the AI Software Architect framework with Claude Code. The framework is designed to streamline architectural discussions, reviews, and decisions with the help of AI assistants.
 
-For general usage instructions, see [USAGE.md](USAGE.md). For installation options, see [INSTALL.md](INSTALL.md).
+For general usage instructions, see [USAGE.md](USAGE.md).
+
+## Installation
+
+Use the universal setup command:
+
+```
+Setup architecture using: https://github.com/codenamev/ai-software-architect
+```
+
+Claude will automatically:
+- Clone the framework to `.architecture/`
+- Detect that you're using Claude Code
+- Configure the integration
+- Analyze and customize for your project
+- Set up proper directory structure
 
 ## Getting Started
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/codenamev/ai-software-architect.git .architecture
-   rm -rf .architecture/.git  # Remove Git history if desired
-   ```
-
-2. **Customize the Framework**:
-   ```bash
-   cd your-project
-   claude
-   ```
-   Then tell Claude: "Setup .architecture" or "Customize architecture"
-
-3. Claude will analyze your repository and customize the templates for your specific project.
+After installation, Claude is ready to help with architecture tasks. Use natural language commands - Claude understands the framework context automatically.
 
 ## Key Commands for Claude Code
 

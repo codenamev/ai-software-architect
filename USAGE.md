@@ -39,34 +39,18 @@ nano .architecture/decisions/adrs/ADR-001-your-decision-name.md
 
 Schedule regular architecture reviews before major versions:
 
-```bash
-# Copy the review template
-cp .architecture/reviews/template.md .architecture/reviews/1-0-0.md
+### 4. Plan Recalibration
 
-# Customize for your version
-nano .architecture/reviews/1-0-0.md
 ```
-
-### 4. Implement Recalibration Process
-
-After each review, initiate the recalibration process:
-
-```bash
-# Create a recalibration plan
-cp .architecture/templates/recalibration_plan.md .architecture/recalibration/1-0-0.md
-
-# Create an implementation roadmap
-cp .architecture/templates/implementation_roadmap.md .architecture/recalibration/implementation_roadmap_1-0-0.md
-
-# Set up progress tracking
-cp .architecture/templates/progress_tracking.md .architecture/recalibration/progress_tracking_1-0-0.md
+Start architecture recalibration for version X.Y.Z
 ```
 
 ## Working with AI Assistants
 
 This framework is optimized for AI assistant collaboration. For detailed assistant-specific instructions, see:
 - [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md) - For Claude Code users
-- [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md) - For Cursor users
+- [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md) - For Cursor users  
+- [USAGE-WITH-CODEX.md](USAGE-WITH-CODEX.md) - For GitHub Copilot/Codex users
 
 ### Starting an Architecture Review
 

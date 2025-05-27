@@ -2,49 +2,37 @@
 
 This guide explains how to effectively use the AI Software Architect framework with Cursor. The framework is designed to streamline architectural discussions, reviews, and decisions with the help of AI assistants.
 
-For general usage instructions, see [USAGE.md](USAGE.md). For installation options, see [INSTALL.md](INSTALL.md).
+For general usage instructions, see [USAGE.md](USAGE.md).
 
-## Quick Setup for Cursor Users
+## Installation
 
-### Option 1: In-Project Setup (Recommended)
+Use the universal setup command:
 
-1. **Clone into your project**:
-   ```bash
-   # From your project root directory
-   git clone https://github.com/codenamev/ai-software-architect.git .architecture
-   ```
+```
+Setup architecture using: https://github.com/codenamev/ai-software-architect
+```
 
-2. **Add to your project's .cursorrules file** (create if it doesn't exist):
-   ```
-   # Include AI Software Architect framework
-   @.architecture/.coding-assistants/cursor/ai_software_architect_overview.mdc
-   @.architecture/.coding-assistants/cursor/ai_software_architect_setup.mdc
-   ```
+Cursor will automatically:
+- Clone the framework to `.architecture/`
+- Detect that you're using Cursor
+- Configure Rule files in `.coding-assistants/cursor/` directory
+- Set up integration following Cursor's Rules documentation
+- Analyze and customize for your project
 
-3. **Setup the framework**:
-   Open Cursor in your project and ask:
-   ```
-   Setup ai-software-architect
-   ```
-   
-   Cursor will analyze your project and customize the framework templates for your specific codebase.
+## Cursor Rules Integration
 
-### Option 2: Manual Setup
+The framework provides pre-configured Rule files for Cursor:
 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/codenamev/ai-software-architect.git .architecture
-   rm -rf .architecture/.git  # Remove Git history if desired
-   ```
+```
+.coding-assistants/cursor/
+├── ai_software_architect_overview.mdc
+├── ai_software_architect_setup.mdc
+├── ai_software_architect_usage.mdc
+├── ai_software_architect_structure.mdc
+└── ai_software_architect_reviews.mdc
+```
 
-2. **Configure Cursor**:
-   - Make sure the `.coding-assistants/cursor` directory is present in your project
-   - Cursor will automatically use the `.mdc` rule files in this directory
-
-3. **Use Cursor with AI Software Architect Commands**:
-   - Open Cursor
-   - Start prompts with AI Software Architect-specific language
-   - Cursor will reference the rule files to understand the framework
+This follows Cursor's updated [Rules documentation](https://docs.cursor.com/context/rules).
 
 ## Setup Commands
 
@@ -62,25 +50,25 @@ After installation, Cursor recognizes these setup commands:
 
 | Command | Description |
 |---------|-------------|
-| `Review this architecture using the AI Software Architect framework` | Begin a comprehensive review |
-| `Analyze this feature using the AI Software Architect framework` | Review a specific feature or component |
-| `Evaluate this code's architecture using AI Software Architect` | Analyze existing code architecture |
+| `Review this architecture` | Begin a comprehensive review |
+| `Analyze this feature` | Review a specific feature or component |
+| `Evaluate this code's architecture` | Analyze existing code architecture |
 
 ### Specialized Reviews
 
 | Command | Description |
 |---------|-------------|
-| `Analyze this from a security perspective using AI Software Architect` | Get security-focused review |
-| `Review this for performance using the AI Software Architect framework` | Get performance-focused review |
-| `Evaluate maintainability using AI Software Architect principles` | Get maintainability assessment |
+| `Analyze this from a security perspective` | Get security-focused review |
+| `Review this for performance` | Get performance-focused review |
+| `Evaluate maintainability` | Get maintainability assessment |
 
 ### Documentation Creation
 
 | Command | Description |
 |---------|-------------|
-| `Create an ADR for this decision using the AI Software Architect format` | Draft an Architectural Decision Record |
-| `Document this architectural approach using AI Software Architect` | Create documentation in the framework style |
-| `Help me write an architecture review following AI Software Architect` | Create a review document |
+| `Create an ADR for this decision` | Draft an Architectural Decision Record |
+| `Document this architectural approach` | Create documentation in the framework style |
+| `Help me write an architecture review` | Create a review document |
 
 ## Advanced Usage
 

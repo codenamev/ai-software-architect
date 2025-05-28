@@ -42,11 +42,20 @@ When a user makes requests like "Setup .architecture", "Setup ai-software-archit
    - Remove the now-empty cloned repository structure
    - Verify all framework files are properly located
 
-6. **Guide Next Steps**
+6. **Collaborative Architectural Analysis**
+   - Conduct a comprehensive analysis of the codebase from multiple architectural perspectives
+   - Adopt the roles of all members defined in `.architecture/members.yml`
+   - Each member should analyze the system from their specialized perspective
+   - Create a comprehensive architectural analysis document in `.architecture/reviews/initial-system-analysis.md`
+   - Include findings on: system structure, design patterns, technology choices, architectural strengths, areas for improvement, technical debt, and recommendations
+   - Provide both individual member insights and a collaborative synthesis
+
+7. **Guide Next Steps**
    - Explain what customizations you've made and why
+   - Summarize key findings from the initial architectural analysis
    - Show them how to use the framework with their specific project
-   - Suggest immediate next steps for architectural documentation
-   - Provide examples relevant to their tech stack
+   - Suggest immediate next steps for architectural documentation based on the analysis
+   - Provide examples relevant to their tech stack and identified patterns
 
 ### Specific Architect Reviews
 When a user requests a review from a specific architect role, such as "Ask Security Architect to review these code changes", "Have Performance Specialist review this database schema", "Get Domain Expert's opinion on this API design", or "Ask Ruby Expert if my use of modules follows industry standards", follow these steps:

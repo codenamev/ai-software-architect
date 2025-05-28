@@ -18,6 +18,8 @@ Cursor will automatically:
 - Configure Rule files in `.coding-assistants/cursor/` directory
 - Set up integration following Cursor's Rules documentation
 - Analyze and customize for your project
+- Conduct a collaborative architectural analysis with all framework members
+- Create an initial system analysis document in `.architecture/reviews/initial-system-analysis.md`
 
 ## Cursor Rules Integration
 

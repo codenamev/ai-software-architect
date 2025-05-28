@@ -17,6 +17,8 @@ GitHub Copilot/Codex will automatically:
 - Detect that you're using GitHub Copilot/Codex
 - Configure context-based recognition
 - Analyze and customize for your project
+- Conduct a collaborative architectural analysis with all framework members
+- Create an initial system analysis document in `.architecture/reviews/initial-system-analysis.md`
 
 ## Natural Language Commands
 

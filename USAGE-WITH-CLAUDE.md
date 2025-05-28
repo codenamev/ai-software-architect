@@ -18,6 +18,8 @@ Claude will automatically:
 - Configure the integration
 - Analyze and customize for your project
 - Set up proper directory structure
+- Conduct a collaborative architectural analysis with all framework members
+- Create an initial system analysis document in `.architecture/reviews/initial-system-analysis.md`
 
 ## Getting Started
 

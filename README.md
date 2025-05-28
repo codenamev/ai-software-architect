@@ -16,20 +16,40 @@ For detailed usage instructions, see [USAGE.md](USAGE.md).
 
 ## Installation
 
-**Universal Setup (All AI Assistants)**
+Choose the installation method for your AI assistant:
 
-Use this single command with any AI assistant:
+### Claude Code Installation
 
+If you're using Claude Code, follow the detailed setup instructions in [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md).
+
+**Quick Setup:**
 ```
 Setup architecture using: https://github.com/codenamev/ai-software-architect
 ```
 
-The AI will automatically:
-- Clone the framework to `.architecture/`
-- Detect your AI assistant type (Claude Code, Cursor, GitHub Copilot/Codex)
-- Configure the appropriate integration
-- Analyze and customize for your project
-- Set up proper directory structure
+Claude Code will automatically detect the framework, customize it for your project, and set up the proper CLAUDE.md integration.
+
+### Cursor Installation  
+
+If you're using Cursor, follow the detailed setup instructions in [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md).
+
+**Quick Setup:**
+```
+Setup architecture using @https://github.com/codenamev/ai-software-architect
+```
+
+Cursor will clone the framework and configure the Rule files in `.cursor/rules/` for seamless integration.
+
+### GitHub Copilot / Codex Installation
+
+If you're using GitHub Copilot or OpenAI Codex, follow the detailed setup instructions in [USAGE-WITH-CODEX.md](USAGE-WITH-CODEX.md).
+
+**Quick Setup:**
+```
+Setup architecture using: https://github.com/codenamev/ai-software-architect
+```
+
+The framework will be configured with context files that GitHub Copilot and Codex can automatically understand.
 
 ## Getting Started
 

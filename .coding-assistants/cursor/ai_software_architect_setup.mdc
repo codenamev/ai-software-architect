@@ -52,11 +52,20 @@ When a user requests setup:
    - Remove empty cloned repository structure
    - Verify framework files are properly located
 
-6. **Guide Next Steps**
+6. **Collaborative Architectural Analysis**
+   - Conduct comprehensive analysis of the codebase from multiple architectural perspectives
+   - Adopt roles of all members defined in `.architecture/members.yml`
+   - Each member analyzes system from their specialized perspective
+   - Create comprehensive analysis document in `.architecture/reviews/initial-system-analysis.md`
+   - Include findings on: system structure, design patterns, technology choices, strengths, improvements, technical debt, recommendations
+   - Provide both individual member insights and collaborative synthesis
+
+7. **Guide Next Steps**
    - Explain customizations made and reasoning
+   - Summarize key findings from initial architectural analysis
    - Show how to use framework with their specific project
-   - Suggest immediate steps for architectural documentation
-   - Provide examples relevant to their tech stack
+   - Suggest immediate steps for architectural documentation based on analysis
+   - Provide examples relevant to their tech stack and identified patterns
 
 ## Configuration Files
 

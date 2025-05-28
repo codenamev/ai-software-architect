@@ -2,6 +2,15 @@
 
 A markdown-based framework for implementing rigorous software architecture practices in any project, with specialized AI assistant integration.
 
+<div>
+  <a href="https://www.loom.com/share/b83f478045e04bb9ba7e70f5fe057d14">
+    <p>Introducing AI Software Architect 🚀 - Watch Video</p>
+  </a>
+  <a href="https://www.loom.com/share/b83f478045e04bb9ba7e70f5fe057d14">
+    <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/b83f478045e04bb9ba7e70f5fe057d14-901889c69de34909-full-play.gif">
+  </a>
+</div>
+
 ## Overview
 
 This framework provides a structured approach to:

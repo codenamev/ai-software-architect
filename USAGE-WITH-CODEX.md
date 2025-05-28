@@ -29,7 +29,7 @@ The framework uses context-based recognition - no need to mention "AI Software A
 | Command | Description |
 |---------|-------------|
 | `Setup architecture` | Initial setup and customization |
-| `Customize architecture` | Refine or update framework configuration |
+| `Customize software architect` | Refine or update framework configuration |
 
 ### Architecture Reviews
 

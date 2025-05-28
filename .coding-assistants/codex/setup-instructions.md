@@ -11,11 +11,11 @@ GitHub Copilot/Codex should recognize these setup requests and follow the setup 
 - "Setup architecture" 
 - "Setup software architect"
 - "Setup architect"
-- "Customize architecture"
+- "Customize software architect"
 
-## Setup Process
+## 6-Step Setup Process
 
-When a user requests setup using any of the recognized phrases:
+When a user requests setup using any of the recognized phrases, follow this 6-step setup process:
 
 ### 1. Detect Setup Context
 - Check if `.architecture/` directory exists with framework files
@@ -33,7 +33,7 @@ When a user requests setup using any of the recognized phrases:
 - Create `.coding-assistants/` directory structure in project root
 - Set up initial directory structure for decisions, reviews, recalibration
 
-### 4. Customize for Project
+### 4. Customization for Project
 - Update `.architecture/members.yml` with roles relevant to their technology stack
 - Modify `.architecture/principles.md` to align with project's architectural needs
 - Customize templates in `.architecture/templates/` based on project patterns

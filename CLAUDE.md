@@ -11,7 +11,7 @@ AI Software Architect is a framework for organizing and structuring software arc
 This framework supports several types of requests from users. Recognize and respond to these patterns:
 
 ### Setup Requests
-When a user makes requests like "Setup .architecture", "Setup ai-software-architect", "Setup software architect", "Setup architect", "Setup architecture", "Customize architecture", or similar phrases, follow these steps:
+When a user makes requests like "Setup .architecture", "Setup ai-software-architect", "Setup software architect", "Setup architect", "Setup architecture", "Customize software architect", or similar phrases, follow these steps:
 
 1. **Detect Setup Context**
    - Check if `.architecture/` directory exists with the cloned framework files

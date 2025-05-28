@@ -271,12 +271,12 @@ jobs:
           "Setup software architect"
           "Setup architect"
           "Setup architecture"
-          "Customize architecture"
+          "Customize software architect"
         )
         
         for pattern in "${setup_patterns[@]}"; do
           # Simulate pattern matching
-          if [[ "$pattern" =~ [Ss]etup.*(architecture|architect) ]]; then
+          if [[ "$pattern" =~ ([Ss]etup|[Cc]ustomize).*(architecture|architect) ]]; then
             echo "✓ Pattern '$pattern' would be recognized"
           else
             echo "✗ Pattern '$pattern' not recognized"

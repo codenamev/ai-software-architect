@@ -44,7 +44,7 @@ After installation, Cursor recognizes these setup commands:
 |---------|-------------|
 | `Setup ai-software-architect` | Full framework setup and customization |
 | `Setup architecture` | Alias for framework setup |
-| `Customize architecture` | Customize existing framework for project changes |
+| `Customize software architect` | Customize existing framework for project changes |
 
 ## Key Commands for Cursor
 

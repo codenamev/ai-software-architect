@@ -32,7 +32,7 @@ After installation, Claude is ready to help with architecture tasks. Use natural
 | Command | Description |
 |---------|-------------|
 | `Setup .architecture` | Initial setup and customization of the framework |
-| `Customize architecture` | Refine or update the framework configuration |
+| `Customize software architect` | Refine or update the framework configuration |
 | `Setup software architect` | Alternative phrasing for initial setup |
 
 ### Architecture Reviews

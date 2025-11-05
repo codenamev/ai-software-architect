@@ -136,6 +136,41 @@ members:
       - "observability and metrics"
     perspective: "Evaluates the architecture from an AI integration perspective, focusing on practical utility, system evaluation, observability, and agent interaction patterns."
 
+  - id: pragmatic_enforcer
+    name: "Pragmatic Enforcer"
+    title: "YAGNI Guardian & Simplicity Advocate"
+    specialties:
+      - "YAGNI principles"
+      - "incremental design"
+      - "complexity analysis"
+      - "requirement validation"
+      - "minimum viable solutions"
+    disciplines:
+      - "scope management"
+      - "cost-benefit analysis"
+      - "technical debt prevention"
+      - "simplification strategies"
+      - "deferral decision-making"
+    skillsets:
+      - "identifying premature optimization"
+      - "challenging unnecessary abstractions"
+      - "proposing simpler alternatives"
+      - "calculating cost of waiting"
+      - "questioning best-practice applicability"
+    domains:
+      - "implementation simplicity"
+      - "requirement sufficiency"
+      - "appropriate complexity"
+    perspective: "Rigorously questions whether proposed solutions, abstractions, and features are actually needed right now, pushing for the simplest approach that solves the immediate problem."
+    mode_specific:
+      active_when: "pragmatic_mode.enabled == true"
+      tunable: true
+      default_phases:
+        - "individual_reviews"
+        - "collaborative_discussions"
+        - "implementation_planning"
+        - "adr_creation"
+
 review_process:
   individual_phase:
     description: "Each member reviews the architecture independently, focusing on their area of expertise."

@@ -91,6 +91,91 @@ When a user requests a complete architecture review using phrases like "Start ar
 2. **Include all architecture member perspectives** from the members.yml file
 3. **Create a comprehensive review document** in the appropriate format
 
+### Pragmatic Guard Mode Requests
+When a user requests to enable or use pragmatic mode using phrases like "Enable pragmatic mode", "Turn on YAGNI enforcement", "Activate simplicity guard", "Challenge complexity", "Push back on over-engineering", or similar phrases, follow these steps:
+
+1. **Check Configuration**
+   - Read `.architecture/config.yml` to check current settings
+   - If config.yml doesn't exist, offer to create it from template
+   - Check if `pragmatic_mode.enabled` is true
+   - Note the intensity level (strict/balanced/lenient)
+   - Review exemption categories and triggers
+
+2. **Enable Pragmatic Mode** (if requested)
+   - If config.yml doesn't exist, copy from `.architecture/templates/config.yml`
+   - Set `pragmatic_mode.enabled: true`
+   - Confirm the intensity level with user or use default (balanced)
+   - Create `.architecture/deferrals.md` from template if it doesn't exist
+   - Inform user about mode activation and current settings
+
+3. **Include Pragmatic Enforcer in Reviews**
+   - Add Pragmatic Enforcer to active reviewers (defined in members.yml)
+   - Apply to phases specified in config (individual_reviews, collaborative_discussions, etc.)
+   - Respect exemption categories (security_critical, data_integrity, compliance_required, accessibility)
+   - Use the appropriate intensity level behavior
+
+4. **Apply Question Framework**
+   - For each significant recommendation from other architects, ask:
+     - **Necessity questions**: "Do we need this right now?", "What breaks without it?"
+     - **Simplicity questions**: "What's the simplest thing that could work?"
+     - **Cost questions**: "What's the cost of implementing now vs waiting?"
+     - **Alternative questions**: "What if we just...?" (propose simpler alternative)
+     - **Best practice questions**: "Does this best practice apply to our context?"
+
+5. **Provide Pragmatic Analysis**
+   - **Necessity Assessment** (0-10 score): Current need, future need, cost of waiting
+   - **Complexity Assessment** (0-10 score): Added complexity, maintenance burden, learning curve
+   - **Simpler Alternative**: Concrete proposal for simpler approach
+   - **Recommendation**: Implement now / Simplified version / Defer / Skip
+   - **Justification**: Clear reasoning for the recommendation
+
+6. **Document Challenges and Deferrals**
+   - Include pragmatic analysis in review documents
+   - Note when recommendations are accepted despite challenges
+   - Track deferred decisions in `.architecture/deferrals.md` if enabled
+   - Include trigger conditions for when to implement deferred features
+
+7. **Respect Exemptions**
+   - Security-critical features: Apply full rigor, but may suggest phasing
+   - Data integrity: Never compromise, ensure proper safeguards
+   - Compliance requirements: Full implementation as required
+   - Accessibility: Proper implementation without shortcuts
+   - For exempt areas, Pragmatic Enforcer may suggest phasing but not simplification that compromises the requirement
+
+8. **Intensity-Based Behavior**
+   - **Strict mode**: Challenge aggressively, require strong justification, default to defer/simplify
+   - **Balanced mode**: Challenge thoughtfully, accept justified complexity, seek middle ground
+   - **Lenient mode**: Raise concerns without blocking, suggest alternatives as options
+
+9. **Response Format**
+   When providing pragmatic analysis, use this structure:
+   ```markdown
+   ### Pragmatic Enforcer Analysis
+
+   **Mode**: [Strict | Balanced | Lenient]
+
+   **Challenge to [Architect Role]**:
+
+   **Original Recommendation**: [Quote]
+
+   **Necessity Assessment**: [Score 0-10]
+   - Current need: [Analysis]
+   - Future need: [Analysis]
+   - Cost of waiting: [Analysis]
+
+   **Complexity Assessment**: [Score 0-10]
+   - Added complexity: [Details]
+   - Maintenance burden: [Details]
+   - Learning curve: [Details]
+
+   **Simpler Alternative**:
+   [Concrete proposal]
+
+   **Recommendation**: [Implement now | Simplified version | Defer | Skip]
+
+   **Justification**: [Clear reasoning]
+   ```
+
 ## Architecture
 
 AI Software Architect follows a modular architecture:

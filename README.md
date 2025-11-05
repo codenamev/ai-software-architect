@@ -29,14 +29,57 @@ Choose the installation method for your AI assistant:
 
 ### Claude Code Installation
 
-If you're using Claude Code, follow the detailed setup instructions in [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md).
+Claude Code supports three installation methods:
 
-**Quick Setup:**
+**Option 1: Claude Skills (Recommended for Claude Code)**
+
+Install as reusable skills that work across all your projects:
+
+```bash
+# Clone and install skills
+git clone https://github.com/codenamev/ai-software-architect
+cp -r ai-software-architect/.claude/skills ~/.claude/
+rm -rf ai-software-architect
+```
+
+Then in any project:
+```
+Setup ai-software-architect
+```
+
+See [USAGE-WITH-CLAUDE-SKILLS.md](USAGE-WITH-CLAUDE-SKILLS.md) for detailed instructions.
+
+**Benefits**: Simpler setup, no dependencies, automatic skill invocation, portable
+
+**Option 2: MCP Server**
+
+```bash
+npm install -g ai-software-architect
+```
+
+Then configure in `~/.claude/config.json`:
+```json
+{
+  "mcpServers": {
+    "ai-software-architect": {
+      "command": "mcp",
+      "args": []
+    }
+  }
+}
+```
+
+**Benefits**: Programmatic automation, external tool integration
+
+**Option 3: Traditional Setup**
+
 ```
 Setup architecture using: https://github.com/codenamev/ai-software-architect
 ```
 
-Claude Code will automatically detect the framework, customize it for your project, and set up the proper CLAUDE.md integration.
+See [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md) for detailed instructions.
+
+**Benefits**: No installation required, works immediately
 
 ### Cursor Installation  
 
@@ -117,13 +160,24 @@ For general usage instructions, see [USAGE.md](USAGE.md).
 
 ### Claude Code
 
-For Claude Code users, see [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md) for detailed instructions. Key capabilities include:
+For Claude Code users, see [USAGE-WITH-CLAUDE-SKILLS.md](USAGE-WITH-CLAUDE-SKILLS.md) (Skills method) or [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md) (Traditional method) for detailed instructions.
 
-- **Setup & Customization**: "Setup .architecture", "Customize architecture"
+**Available Skills** (when using Claude Skills installation):
+- **setup-architect**: Automatically sets up and customizes the framework
+- **create-adr**: Creates Architectural Decision Records
+- **architecture-review**: Conducts comprehensive multi-perspective reviews
+- **specialist-review**: Gets focused reviews from specific experts
+- **list-members**: Shows your architecture team
+- **architecture-status**: Displays current documentation state
+
+**Key Commands**:
+- **Setup & Customization**: "Setup ai-software-architect", "Setup .architecture"
 - **Reviews**: "Start architecture review for version X.Y.Z" or "Review architecture for 'component'"
-- **Specialized Reviews**: "Ask Security Architect to review these code changes"
+- **Specialized Reviews**: "Ask Security Specialist to review these code changes"
 - **Recalibration**: "Start architecture recalibration for 'feature name'"
-- **ADR Creation**: "Create an ADR for 'topic'"
+- **ADR Creation**: "Create ADR for 'topic'"
+- **Status Check**: "What's our architecture status?"
+- **Team Info**: "List architecture members"
 
 Claude can dynamically create new specialist roles if they don't exist in your `members.yml` file.
 

@@ -1,0 +1,225 @@
+# AI Software Architect Configuration
+# This file controls operational modes and behavior of the architectural review framework
+
+# ==============================================================================
+# PRAGMATIC GUARD MODE
+# ==============================================================================
+# The Pragmatic Guard Mode adds a specialized "Pragmatic Enforcer" architect
+# who actively challenges complexity, questions abstractions, and pushes for
+# the simplest solutions that meet current requirements.
+#
+# Enable this mode to guard against over-engineering and ensure YAGNI
+# (You Aren't Gonna Need It) principles are applied rigorously.
+
+pragmatic_mode:
+  # Enable or disable Pragmatic Guard Mode
+  # Default: false (opt-in feature)
+  enabled: false
+
+  # Intensity level controls how aggressively the Pragmatic Enforcer challenges
+  # complexity and pushes for simplicity
+  #
+  # - strict: Challenges aggressively, requires strong justification for any complexity
+  #           Questions every "should" and "could", pushes for absolute minimal implementation
+  #
+  # - balanced: Challenges thoughtfully, accepts justified complexity (RECOMMENDED)
+  #             Seeks middle ground between simplicity and best practices
+  #             Questions "should" but accepts reasonable "must"
+  #
+  # - lenient: Raises concerns without blocking, suggests simpler alternatives as options
+  #            Focuses on major complexity additions only
+  #            Questions significant departures from simplicity
+  #
+  # Default: balanced
+  intensity: balanced
+
+  # Control which review phases include the Pragmatic Enforcer
+  apply_to:
+    # Include in individual architect reviews
+    individual_reviews: true
+
+    # Include in collaborative discussion phase
+    collaborative_discussions: true
+
+    # Include when planning implementation steps
+    implementation_planning: true
+
+    # Include during ADR (Architecture Decision Record) creation
+    adr_creation: true
+
+    # Include in specific architect reviews (when user asks single architect)
+    specific_reviews: true
+
+  # Exemptions: Areas where strict best practices should be maintained
+  # regardless of pragmatic mode intensity. The Pragmatic Enforcer will
+  # still participate but will not challenge security/compliance requirements.
+  exemptions:
+    # Never compromise on security-critical features
+    # Examples: authentication, authorization, encryption, input validation
+    security_critical: true
+
+    # Never compromise on data integrity
+    # Examples: database transactions, data validation, backup strategies
+    data_integrity: true
+
+    # Never compromise on compliance requirements
+    # Examples: GDPR, HIPAA, PCI-DSS, audit logging
+    compliance_required: true
+
+    # Never compromise on accessibility requirements
+    # Examples: WCAG compliance, screen reader support
+    accessibility: true
+
+  # Triggers: Situations that activate pragmatic analysis and challenges
+  # Disable specific triggers if you want to skip analysis for those cases
+  triggers:
+    # Challenge when adding new abstraction layers
+    # Examples: new interfaces, abstract base classes, dependency injection containers
+    new_abstraction_layer: true
+
+    # Challenge when adding new external dependencies
+    # Examples: new libraries, frameworks, services
+    new_dependency: true
+
+    # Challenge when introducing new architectural patterns
+    # Examples: repository pattern, strategy pattern, observer pattern
+    new_pattern_introduction: true
+
+    # Challenge when expanding scope beyond initial requirements
+    # Examples: adding "nice to have" features, building for imagined future needs
+    scope_expansion: true
+
+    # Challenge performance optimizations without evidence of problems
+    # Examples: caching layers, database indexes, query optimization
+    performance_optimization: true
+
+    # Challenge comprehensive test infrastructure upfront
+    # Examples: full integration tests, E2E tests, property tests before code exists
+    test_infrastructure: true
+
+    # Challenge adding flexibility or configurability
+    # Examples: feature flags, plugin systems, configuration frameworks
+    flexibility_addition: true
+
+  # Thresholds: Numerical values that help determine when to challenge
+  thresholds:
+    # Minimum complexity score to trigger a challenge (0-10)
+    # Complexity is assessed by: abstraction layers, file count, dependencies, LOC
+    # Default: 5 (challenge moderate to high complexity)
+    min_complexity_score: 5
+
+    # Minimum necessity score to accept without challenge (0-10)
+    # Necessity is assessed by: current requirements, immediate value, cost of deferral
+    # Default: 7 (must be clearly necessary to skip challenge)
+    min_necessity_score: 7
+
+    # Maximum acceptable complexity-to-necessity ratio
+    # If complexity score / necessity score > threshold, challenge strongly
+    # Default: 1.5 (complexity should not exceed necessity by more than 50%)
+    max_complexity_ratio: 1.5
+
+  # Behavioral configuration
+  behavior:
+    # Require explicit justification for complexity
+    # When true, architects must proactively justify complex solutions
+    require_justification: true
+
+    # Always propose simpler alternative
+    # When true, Pragmatic Enforcer always suggests a simpler approach
+    always_propose_alternative: true
+
+    # Calculate and show cost of waiting
+    # When true, includes analysis of what happens if implementation is deferred
+    show_cost_of_waiting: true
+
+    # Track deferred decisions
+    # When true, maintains a log of decisions deferred for future implementation
+    track_deferrals: true
+
+    # Deferral log location
+    deferral_log: .architecture/deferrals.md
+
+  # Question templates: Customize the questions the Pragmatic Enforcer asks
+  # Leave empty to use defaults
+  custom_questions:
+    necessity: []
+      # - "Do we need this right now?"
+      # - "What breaks if we don't implement this?"
+
+    simplicity: []
+      # - "What's the simplest thing that could work?"
+      # - "Can we do this with less code?"
+
+    cost: []
+      # - "What's the cost of implementing this now?"
+      # - "What's the cost of waiting?"
+
+    alternatives: []
+      # - "What if we just...?"
+      # - "Could we use an existing tool?"
+
+    best_practices: []
+      # - "Does this best practice apply to our context?"
+      # - "Is this over-engineering for our scale?"
+
+# ==============================================================================
+# GENERAL CONFIGURATION
+# ==============================================================================
+
+# Review process configuration
+review_process:
+  # Require all members to review before collaborative phase
+  require_all_members: true
+
+  # Maximum time for individual review phase (for planning purposes)
+  max_individual_phase_days: 3
+
+  # Maximum time for collaborative discussion (for planning purposes)
+  max_collaborative_phase_days: 2
+
+# Architecture Decision Record (ADR) configuration
+adr:
+  # Numbering format: sequential | date-based
+  numbering_format: sequential
+
+  # Require alternatives section
+  require_alternatives: true
+
+  # Require validation criteria
+  require_validation: true
+
+# Member configuration
+members:
+  # Path to members.yml file (relative to .architecture)
+  definition_file: members.yml
+
+  # Allow dynamic member creation
+  # When true, new members can be added during reviews if expertise is needed
+  allow_dynamic_creation: true
+
+# Templates configuration
+templates:
+  # Directory containing templates (relative to .architecture)
+  directory: templates
+
+  # Auto-populate template metadata
+  auto_populate_metadata: true
+
+# Output configuration
+output:
+  # Verbosity level: minimal | normal | detailed
+  verbosity: normal
+
+  # Include reasoning in outputs
+  include_reasoning: true
+
+  # Format: markdown | json | yaml
+  format: markdown
+
+# Version tracking
+version:
+  # Current framework version
+  framework_version: "0.1.0"
+
+  # Project architecture version (update with each major architecture change)
+  architecture_version: "1.0.0"

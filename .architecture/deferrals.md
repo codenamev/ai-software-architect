@@ -394,6 +394,309 @@ When implementing:
 
 ---
 
+### Comprehensive Usage Guide (Phase 4B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Documentation
+**Priority**: Low
+
+**What Was Deferred**:
+Creating a comprehensive usage guide for pragmatic mode beyond existing CLAUDE.md instructions
+
+**Original Proposal**:
+Phase 4 roadmap included creating detailed usage guide covering:
+- When to enable pragmatic mode
+- How to configure intensity levels
+- Handling exemptions
+- Best practices for usage
+- Integration workflows
+- Troubleshooting guide
+
+**Rationale for Deferring**:
+- Current need score: 3/10 (helpful but not essential)
+- Complexity score: 6/10 (significant documentation effort)
+- Cost of waiting: Very low
+- CLAUDE.md already has comprehensive 9-step activation guide
+- config.yml has extensive inline documentation
+- Examples demonstrate usage patterns
+- Don't know yet what users will struggle with
+- Cannot create effective guide without seeing real usage questions
+
+**Simpler Current Approach**:
+Rely on existing documentation:
+- CLAUDE.md: Complete "Pragmatic Guard Mode Requests" section with 9-step process
+- config.yml: Extensive inline documentation for all settings
+- Review template: Self-documenting with clear structure
+- ADR template: Self-documenting with clear structure
+- Examples: 1 review + 1 ADR demonstrate all patterns
+
+**Trigger Conditions** (Implement when):
+- [ ] 5+ support questions about how to use pragmatic mode
+- [ ] Users report confusion despite existing documentation
+- [ ] Common usage patterns emerge that aren't documented
+- [ ] Specific workflows prove difficult to understand
+- [ ] Feedback indicates current docs insufficient
+
+**Implementation Notes**:
+When creating usage guide:
+- Base on actual user questions and confusion points
+- Focus on scenarios that proved unclear in practice
+- Include real-world usage examples from actual projects
+- Address specific pain points identified through support
+- Avoid documenting what users already understand
+
+**Related Documents**:
+- `CLAUDE.md` (current usage instructions)
+- `.architecture/config.yml` (configuration documentation)
+- `.architecture/reviews/example-pragmatic-api-feature.md`
+- `.architecture/decisions/adrs/example-pragmatic-caching-layer.md`
+- `.architecture/decisions/phase-4-pragmatic-analysis.md` (deferral decision)
+
+**Last Reviewed**: 2025-11-05
+
+---
+
+### YAGNI Principles Reference Document (Phase 4B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Documentation
+**Priority**: Low
+
+**What Was Deferred**:
+Creating a comprehensive reference document on YAGNI principles, resources, and best practices
+
+**Original Proposal**:
+Phase 4 roadmap included creating reference documentation covering:
+- Link to YAGNI resources (Martin Fowler, Kent Beck, XP principles)
+- Common pitfalls in architectural decision-making
+- Decision frameworks for complexity vs simplicity
+- When YAGNI applies and when it doesn't
+- Examples of appropriate vs premature optimization
+- Cost-benefit frameworks for architectural decisions
+
+**Rationale for Deferring**:
+- Current need score: 2/10 (nice to have, not required)
+- Complexity score: 5/10 (research and compilation effort)
+- Cost of waiting: Zero
+- Can link to external resources (Martin Fowler, Kent Beck) as needed
+- Don't know yet what principles users need reinforcement on
+- Cannot document "common pitfalls" that haven't been encountered
+- Better to create based on actual user needs vs speculation
+
+**Simpler Current Approach**:
+Link to external resources when needed:
+- Martin Fowler's YAGNI article: https://martinfowler.com/bliki/Yagni.html
+- Kent Beck's XP principles (reference in principles.md)
+- Pragmatic mode config and examples demonstrate principles in action
+- Users can request specific references if needed
+
+**Trigger Conditions** (Implement when):
+- [ ] Users request deeper learning resources on YAGNI
+- [ ] Questions show misunderstanding of when YAGNI applies
+- [ ] Common misconceptions emerge from real usage
+- [ ] Teams struggle with philosophical understanding despite examples
+- [ ] 5+ requests for learning resources or deeper principles
+
+**Implementation Notes**:
+When creating principles reference:
+- Focus on areas where users show actual confusion
+- Include real examples from user projects (anonymized)
+- Address specific misconceptions that emerged
+- Link to authoritative external resources
+- Keep practical and actionable, not purely theoretical
+
+**Related Documents**:
+- `.architecture/principles.md` (existing principles)
+- External: Martin Fowler YAGNI article
+- External: Kent Beck XP principles
+- `.architecture/decisions/exploration-pragmatic-guard-mode.md` (rationale)
+
+**Last Reviewed**: 2025-11-05
+
+---
+
+### Common Pitfalls Documentation (Phase 4B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Documentation
+**Priority**: Low
+
+**What Was Deferred**:
+Documenting common pitfalls and anti-patterns when using pragmatic mode
+
+**Original Proposal**:
+Phase 4 roadmap included documenting common pitfalls:
+- Mistakes users make when applying pragmatic mode
+- Anti-patterns in using YAGNI principles
+- When pragmatic mode is applied inappropriately
+- Balancing simplicity with necessary complexity
+- Avoiding under-engineering critical systems
+
+**Rationale for Deferring**:
+- Current need score: 1/10 (cannot do without real usage)
+- Complexity score: 4/10 (straightforward documentation once known)
+- Cost of waiting: Zero - literally cannot do this before it happens!
+- **CANNOT document pitfalls that haven't been encountered**
+- Don't know yet what mistakes users will make
+- Speculating about pitfalls risks documenting wrong things
+- Real usage will reveal actual problems vs imagined ones
+
+**Simpler Current Approach**:
+Wait for real usage to reveal pitfalls:
+- Monitor first users' experiences
+- Collect actual problems encountered
+- Document real anti-patterns as they emerge
+- Learn from mistakes rather than speculate
+
+**Trigger Conditions** (Implement when):
+- [ ] 5+ users have used pragmatic mode on real projects
+- [ ] Common mistakes emerge from real usage
+- [ ] Patterns of misuse are observed
+- [ ] Specific scenarios repeatedly cause problems
+- [ ] Anti-patterns identified from actual projects
+
+**Implementation Notes**:
+When creating pitfalls documentation:
+- Base entirely on real problems encountered
+- Include real examples (anonymized if needed)
+- Explain why the pitfall is problematic
+- Provide corrective guidance
+- Show before/after examples
+- This document MUST wait for real usage data
+
+**Related Documents**:
+- Future: Real user feedback and usage reports
+- `.architecture/decisions/phase-4-pragmatic-analysis.md` (why deferred)
+
+**Last Reviewed**: 2025-11-05
+
+---
+
+### Behavioral Pattern Refinement (Phase 4B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Enhancement
+**Priority**: Medium
+
+**What Was Deferred**:
+Refining pragmatic mode behavioral patterns based on real-world usage feedback
+
+**Original Proposal**:
+Phase 4 roadmap included behavioral refinement:
+- Test with real projects
+- Refine question frameworks
+- Adjust response patterns
+- Improve challenge structure
+- Enhance collaborative discussion integration
+
+**Rationale for Deferring**:
+- Current need score: 0/10 (literally impossible without usage data)
+- Complexity score: 6/10 (requires analysis and iteration)
+- Cost of waiting: Zero until we have usage data
+- **CANNOT refine patterns without seeing them in real usage**
+- Current patterns are well-designed based on YAGNI principles
+- Need real usage to know what works and what doesn't
+- Premature refinement risks optimizing wrong things
+
+**Simpler Current Approach**:
+Ship current behavioral patterns as-is:
+- Question framework is well-designed
+- Response patterns are clear and structured
+- Assessment framework (0-10 scoring) is straightforward
+- Wait for real usage to show what needs refinement
+
+**Trigger Conditions** (Implement when):
+- [ ] 10+ pragmatic mode reviews/ADRs conducted
+- [ ] Patterns emerge showing specific questions are unclear
+- [ ] Users report challenge structure is confusing
+- [ ] Response format proves inadequate for real scenarios
+- [ ] Feedback indicates specific improvements needed
+- [ ] Behavioral patterns produce unhelpful or confusing results
+
+**Implementation Notes**:
+When refining behavioral patterns:
+- Analyze actual reviews and ADRs created with pragmatic mode
+- Identify what worked well vs what caused confusion
+- Refine based on real usage patterns, not speculation
+- A/B test changes if possible
+- Update templates, examples, and documentation consistently
+
+**Related Documents**:
+- `.architecture/reviews/template.md` (current patterns)
+- `.architecture/templates/adr.md` (current patterns)
+- Future: Analysis of real pragmatic mode usage
+
+**Last Reviewed**: 2025-11-05
+
+---
+
+### Intensity Calibration Adjustment (Phase 4B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Enhancement
+**Priority**: Medium
+
+**What Was Deferred**:
+Adjusting intensity level calibration (strict, balanced, lenient) based on real project data
+
+**Original Proposal**:
+Phase 4 roadmap included intensity calibration:
+- Validate current thresholds with real projects
+- Adjust complexity/necessity ratio targets
+- Refine strict/balanced/lenient behaviors
+- Tune trigger sensitivity
+- Optimize for different project types/sizes
+
+**Rationale for Deferring**:
+- Current need score: 0/10 (impossible without real project data)
+- Complexity score: 7/10 (requires data collection and analysis)
+- Cost of waiting: Zero until we have real usage data
+- **CANNOT calibrate without seeing actual intensity levels in use**
+- Current calibration is well-designed based on principles
+- Thresholds (e.g., <1.5 ratio for balanced mode) are reasonable
+- Need real projects to validate or adjust thresholds
+
+**Simpler Current Approach**:
+Ship current calibration as-is:
+- Strict: Aggressive challenges, high bar for complexity
+- Balanced: Thoughtful challenges, middle ground (RECOMMENDED)
+- Lenient: Raise concerns, suggest alternatives
+- Thresholds: complexity/necessity ratio <1.5 for balanced
+- Wait for real usage to show if calibration is appropriate
+
+**Trigger Conditions** (Implement when):
+- [ ] 20+ projects using pragmatic mode
+- [ ] Data shows intensity levels produce unexpected results
+- [ ] Users report strict/balanced/lenient not behaving as expected
+- [ ] Thresholds prove too aggressive or too permissive
+- [ ] Different project types/sizes need different calibration
+- [ ] Quantitative analysis shows calibration issues
+
+**Implementation Notes**:
+When adjusting intensity calibration:
+- Collect data from real projects using each intensity level
+- Analyze necessity scores, complexity scores, and ratios
+- Identify patterns in recommendations (approve/simplify/defer/reject)
+- Measure project outcomes with different intensity levels
+- Adjust thresholds based on data, not intuition
+- Document reasoning for any calibration changes
+- Update config.yml, examples, and documentation
+
+**Related Documents**:
+- `.architecture/config.yml` (current calibration)
+- `.architecture/reviews/example-pragmatic-api-feature.md` (balanced mode example)
+- `.architecture/decisions/adrs/example-pragmatic-caching-layer.md` (balanced mode example)
+- Future: Analysis of intensity level usage across projects
+
+**Last Reviewed**: 2025-11-05
+
+---
+
 ## Review Process
 
 This document should be reviewed:
@@ -428,8 +731,8 @@ Track deferral outcomes to improve decision-making:
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| Total deferrals | 7 | All-time count (3 Phase 2B + 4 Phase 3B) |
-| Active deferrals | 7 | Currently deferred |
+| Total deferrals | 12 | All-time count (3 Phase 2B + 4 Phase 3B + 5 Phase 4B) |
+| Active deferrals | 12 | Currently deferred |
 | Triggered awaiting implementation | 0 | Need to address |
 | Implemented | 0 | Were eventually needed |
 | Cancelled | 0 | Were never needed |

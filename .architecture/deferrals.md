@@ -167,6 +167,233 @@ When implementing:
 
 ---
 
+### Multiple Example ADRs (Phase 3B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Documentation
+**Priority**: Low
+
+**What Was Deferred**:
+Creating 3-5 comprehensive example ADRs demonstrating pragmatic mode analysis for various decision types
+
+**Original Proposal**:
+Phase 3 roadmap included creating 3-5 complete example ADRs to demonstrate pragmatic analysis in different contexts:
+- Infrastructure decisions
+- Technology stack choices
+- Design pattern adoptions
+- Performance optimization decisions
+- Security architecture decisions
+
+**Rationale for Deferring**:
+- Current need score: 4/10 (helpful but not essential)
+- Complexity score: 7/10 (more complex than review examples, need realistic decisions)
+- Cost of waiting: Very low
+- Already have one complete example (`example-pragmatic-caching-layer.md`)
+- ADR format is well-understood, adding pragmatic section is straightforward
+- Real ADRs will provide better examples than synthetic ones
+- Risk of creating examples that don't reflect actual architectural decisions
+- Technology choices in examples may become dated
+
+**Simpler Current Approach**:
+Single comprehensive ADR example demonstrating complete pragmatic analysis pattern. Users understand ADR format; one example shows how to add pragmatic section.
+
+**Trigger Conditions** (Implement when):
+- [ ] Users request more ADR examples
+- [ ] First 3 real ADRs with pragmatic mode reveal patterns not covered
+- [ ] Feedback indicates one example is insufficient
+- [ ] Specific decision types emerge that need dedicated examples
+- [ ] Common architectural decisions need documented patterns
+
+**Implementation Notes**:
+When creating additional examples:
+- Base on real ADRs that have been created with pragmatic mode
+- Focus on decision types that proved challenging
+- Show different pragmatic outcomes (approved, simplified, deferred, rejected)
+- Include examples at different intensity levels
+- Cover different trigger scenarios and exemptions
+
+**Related Documents**:
+- `.architecture/decisions/adrs/example-pragmatic-caching-layer.md` (current example)
+- `.architecture/templates/adr.md` (updated template)
+- `.architecture/decisions/phase-3-pragmatic-analysis.md` (deferral decision)
+
+**Last Reviewed**: 2025-11-05
+
+---
+
+### Extensive ADR Process Documentation (Phase 3B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Documentation
+**Priority**: Low
+
+**What Was Deferred**:
+Additional documentation for ADR creation process with pragmatic mode beyond template and single example
+
+**Original Proposal**:
+Create comprehensive documentation covering:
+- Detailed ADR creation workflow with pragmatic mode
+- How to conduct pragmatic analysis
+- Guidelines for scoring necessity and complexity
+- When to defer decisions
+- How to set trigger conditions
+- Best practices for phased implementations
+- Integration with architecture reviews
+
+**Rationale for Deferring**:
+- Current need score: 3/10 (would be nice but not required)
+- Complexity score: 5/10 (time-consuming)
+- Cost of waiting: Very low
+- ADR template is self-documenting
+- Example ADR shows complete pattern
+- CLAUDE.md already covers ADR creation process
+- Don't know yet what users will find confusing about ADR pragmatic analysis
+- Can document actual pain points instead of speculating
+
+**Simpler Current Approach**:
+Rely on existing documentation:
+- ADR template with Pragmatic Enforcer Analysis section
+- One complete example showing full pattern
+- CLAUDE.md instructions for pragmatic mode
+- Configuration file with thresholds and settings
+- Review example showing pragmatic analysis patterns
+
+**Trigger Conditions** (Implement when):
+- [ ] Users ask questions not covered in existing docs
+- [ ] Specific pain points emerge from actual ADR creation
+- [ ] Common scoring confusion emerges
+- [ ] 5+ support requests on same ADR-related topic
+- [ ] Teams struggle with pragmatic analysis despite example
+
+**Implementation Notes**:
+Document actual problems users encounter when creating ADRs with pragmatic mode. Focus on real confusion, not imagined difficulties.
+
+**Related Documents**:
+- `.architecture/templates/adr.md`
+- `.architecture/decisions/adrs/example-pragmatic-caching-layer.md`
+- `CLAUDE.md`
+- `.architecture/config.yml`
+
+**Last Reviewed**: 2025-11-05
+
+---
+
+### Comprehensive ADR Integration Testing (Phase 3B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Testing
+**Priority**: Medium
+
+**What Was Deferred**:
+Extensive integration testing suite for Phase 3 ADR template with pragmatic analysis
+
+**Original Proposal**:
+Create comprehensive tests:
+- ADR template rendering with pragmatic section
+- Different decision types and outcomes
+- Necessity/complexity scoring calculations
+- Trigger condition formats
+- Integration with review process
+- Different intensity levels affecting recommendations
+- Exemption scenario handling
+- Migration paths and phased approaches
+
+**Rationale for Deferring**:
+- Current need score: 5/10 (testing is valuable but not urgent)
+- Complexity score: 7/10 (time-consuming, requires test framework)
+- Cost of waiting: Low
+- Manual testing verifies template is well-formed
+- First real ADRs will reveal actual edge cases
+- Can test with real scenarios vs synthetic ones
+- ADR template is straightforward enough for manual verification
+- Template structure is simpler than review template
+
+**Simpler Current Approach**:
+- Manual verification that template is well-formed
+- Verify example ADR uses template correctly
+- Monitor first real ADRs for issues
+- Add tests for patterns that prove problematic
+
+**Trigger Conditions** (Implement when):
+- [ ] Bugs found in ADR pragmatic analysis
+- [ ] ADR template changes frequently and needs regression protection
+- [ ] Complex logic added for scoring or recommendations
+- [ ] Multiple contributors need test suite
+- [ ] Automated validation of necessity/complexity ratios needed
+
+**Implementation Notes**:
+When implementing:
+- Focus on testing actual failure modes discovered
+- Test template structure and completeness
+- Test pragmatic scoring calculations if automated
+- Test integration with review process
+- Test different intensity levels if behavior varies
+
+**Related Documents**:
+- `.architecture/templates/adr.md`
+- `.architecture/decisions/adrs/example-pragmatic-caching-layer.md`
+- `.architecture/PHASE-1-TEST.md`
+
+**Last Reviewed**: 2025-11-05
+
+---
+
+### Cross-Reference Example Library (Phase 3B)
+
+**Status**: Deferred
+**Deferred Date**: 2025-11-05
+**Category**: Documentation
+**Priority**: Low
+
+**What Was Deferred**:
+Building a comprehensive cross-referenced library of pragmatic mode examples across reviews, ADRs, and decision scenarios
+
+**Original Proposal**:
+Create an organized library:
+- Index of all examples by scenario type
+- Cross-references between review and ADR examples
+- Searchable catalog of pragmatic challenges
+- Decision tree for when to defer vs simplify vs implement
+- Pattern library of common architectural over-engineering traps
+
+**Rationale for Deferring**:
+- Current need score: 3/10 (nice to have, not essential)
+- Complexity score: 6/10 (requires corpus of examples to cross-reference)
+- Cost of waiting: Very low
+- Only have 2 examples currently (1 review, 1 ADR)
+- Need more real examples before patterns emerge
+- Premature to create index with limited content
+- Pattern library should emerge from actual usage, not speculation
+
+**Simpler Current Approach**:
+Let example corpus grow organically from real usage. Cross-reference when patterns emerge naturally.
+
+**Trigger Conditions** (Implement when):
+- [ ] 10+ documented examples exist (reviews + ADRs)
+- [ ] Clear patterns emerge across multiple examples
+- [ ] Users request ability to search examples by scenario
+- [ ] Common architectural traps documented from real usage
+- [ ] Teaching/training need for organized example library
+
+**Implementation Notes**:
+When implementing:
+- Wait for corpus of real examples to accumulate
+- Identify patterns from actual usage, not speculation
+- Create taxonomy based on real decision types encountered
+- Build index only when content justifies the structure
+
+**Related Documents**:
+- `.architecture/reviews/example-pragmatic-api-feature.md`
+- `.architecture/decisions/adrs/example-pragmatic-caching-layer.md`
+- Future examples to be added as they're created
+
+**Last Reviewed**: 2025-11-05
+
+---
+
 ## Review Process
 
 This document should be reviewed:
@@ -201,8 +428,8 @@ Track deferral outcomes to improve decision-making:
 
 | Metric | Value | Notes |
 |--------|-------|-------|
-| Total deferrals | 3 | All-time count |
-| Active deferrals | 3 | Currently deferred |
+| Total deferrals | 7 | All-time count (3 Phase 2B + 4 Phase 3B) |
+| Active deferrals | 7 | Currently deferred |
 | Triggered awaiting implementation | 0 | Need to address |
 | Implemented | 0 | Were eventually needed |
 | Cancelled | 0 | Were never needed |

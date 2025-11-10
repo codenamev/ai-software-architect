@@ -14,7 +14,7 @@
 pragmatic_mode:
   # Enable or disable Pragmatic Guard Mode
   # Default: false (opt-in feature)
-  enabled: false
+  enabled: true
 
   # Intensity level controls how aggressively the Pragmatic Enforcer challenges
   # complexity and pushes for simplicity

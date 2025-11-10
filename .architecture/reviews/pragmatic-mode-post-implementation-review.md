@@ -189,11 +189,10 @@ But NOW:
 
 **Recommendation**: ❌ **Remove all 7 meta-documents**
 
-**If keeping historical record is desired**:
-- Create `.architecture/decisions/adrs/ADR-003-pragmatic-mode-implementation-retrospective.md`
-- Consolidate key insights from all 7 files into single ADR
+**Implementation**:
+- Consolidate key insights from all 7 files into ADR-002
 - Remove the 7 individual files
-- Result: 1 comprehensive retrospective vs. 7 scattered documents
+- Result: Single comprehensive ADR with implementation lessons included
 
 ---
 
@@ -267,13 +266,9 @@ The meta-documents served their purpose during development. Time to clean up."
 
 ---
 
-## Optional: Create Consolidated Retrospective
+## Consolidate Into ADR-002
 
-If historical record is desired, create single ADR:
-
-**`.architecture/decisions/adrs/ADR-003-pragmatic-mode-implementation-retrospective.md`**
-
-Consolidate key insights:
+Merge key insights into ADR-002:
 - Implementation approach (pragmatic mode applied to itself)
 - Time savings achieved (20x faster, 3.8 weeks saved)
 - Deferrals tracked (12 total, 0% hit rate)
@@ -282,7 +277,7 @@ Consolidate key insights:
 
 Then remove the 7 individual meta-documents.
 
-**Benefit**: Single comprehensive retrospective vs. 7 scattered documents
+**Benefit**: Single comprehensive ADR with complete story
 
 ---
 
@@ -311,14 +306,13 @@ Then remove the 7 individual meta-documents.
 - [x] Remove phase-2-pragmatic-analysis.md
 - [x] Remove phase-3-pragmatic-analysis.md
 - [x] Remove phase-4-pragmatic-analysis.md
-- [x] Create ADR-003 consolidated retrospective
-- [ ] Commit cleanup changes
-- [ ] Push to remote
+- [x] Merge implementation lessons into ADR-002
+- [x] Commit cleanup changes
 
 ---
 
 **Review Status**: ✅ Complete
-**Cleanup Status**: ✅ Complete (7 files removed, ADR-003 created)
+**Cleanup Status**: ✅ Complete (7 files removed, lessons merged into ADR-002)
 **Recommendation**: ❌ Remove 7 meta-documents - **COMPLETED**
 **Consensus**: Unanimous agreement from all reviewers including Pragmatic Enforcer
 **Pragmatic Score**: Necessity 2/10, Complexity 6/10, Ratio 3.0 (exceeds target)

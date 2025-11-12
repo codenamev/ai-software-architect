@@ -426,11 +426,19 @@ jobs:
             fi
             
             # Check 2: Team members context accessible
-            if [ -f ".architecture/members.yml" ] && grep -q "specialties:" ".architecture/members.yml" 2>/dev/null; then
-              echo "✓ Team members context available"
-              ((context_score++))
+            if [ -f ".architecture/members.yml" ]; then
+              set +e  # Temporarily disable exit on error for grep
+              grep -q "specialties:" ".architecture/members.yml" 2>/dev/null
+              grep_result=$?
+              set -e  # Re-enable exit on error
+              if [ $grep_result -eq 0 ]; then
+                echo "✓ Team members context available"
+                ((context_score++))
+              else
+                echo "✗ Team members context missing - file exists but pattern not found"
+              fi
             else
-              echo "✗ Team members context missing"
+              echo "✗ Team members context missing - file not found"
             fi
             
             # Check 3: Decision templates accessible

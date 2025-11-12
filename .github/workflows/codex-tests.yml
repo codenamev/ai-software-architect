@@ -384,6 +384,7 @@ jobs:
         name: codex-test-${{ matrix.project-type }}
         path: test-projects/${{ matrix.project-type }}/
         retention-days: 7
+        include-hidden-files: true
 
   codex-context-integration-test:
     runs-on: ubuntu-latest

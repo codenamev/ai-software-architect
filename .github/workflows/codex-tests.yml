@@ -408,13 +408,15 @@ jobs:
         for project_type in nodejs python generic; do
           if [ -d "test-artifacts/codex-test-$project_type" ]; then
             cd "test-artifacts/codex-test-$project_type"
-            
+
             echo "Testing context integration for $project_type..."
-            
+            echo "Directory contents:"
+            ls -la
+
             # Test architectural context consistency
             context_score=0
             total_checks=5
-            
+
             # Check 1: Architecture principles accessible
             if [ -f ".architecture/principles.md" ] && [ -s ".architecture/principles.md" ]; then
               echo "✓ Architecture principles context available"
@@ -424,7 +426,7 @@ jobs:
             fi
             
             # Check 2: Team members context accessible
-            if [ -f ".architecture/members.yml" ] && grep -q "specialties:" ".architecture/members.yml"; then
+            if [ -f ".architecture/members.yml" ] && grep -q "specialties:" ".architecture/members.yml" 2>/dev/null; then
               echo "✓ Team members context available"
               ((context_score++))
             else

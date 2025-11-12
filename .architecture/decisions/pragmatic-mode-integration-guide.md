@@ -112,7 +112,7 @@ Follow these steps:
 
 ### 4. Review Template Updates
 
-Add Pragmatic Enforcer section to `.architecture/reviews/template.md`:
+Add Pragmatic Enforcer section to `.architecture/templates/review-template.md`:
 
 ```markdown
 ### Pragmatic Enforcer Review
@@ -167,7 +167,7 @@ Add Pragmatic Enforcer section to `.architecture/reviews/template.md`:
 
 ### 5. ADR Template Updates
 
-Add pragmatic analysis section to `.architecture/templates/adr.md`:
+Add pragmatic analysis section to `.architecture/templates/adr-template.md`:
 
 ```markdown
 ## Pragmatic Analysis

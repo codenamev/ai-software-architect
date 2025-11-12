@@ -249,8 +249,8 @@ The meta-documents served their purpose during development. Time to clean up."
 - ✅ `.architecture/deferrals.md` - Deferral tracking
 
 **Template Updates**:
-- ✅ `.architecture/reviews/template.md` (modified)
-- ✅ `.architecture/templates/adr.md` (modified)
+- ✅ `.architecture/templates/review-template.md` (modified)
+- ✅ `.architecture/templates/adr-template.md` (modified)
 
 **Examples**:
 - ✅ `.architecture/reviews/example-pragmatic-api-feature.md`

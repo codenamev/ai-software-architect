@@ -360,9 +360,11 @@ jobs:
         for project_type in nodejs rails python generic; do
           if [ -d "test-artifacts/claude-test-$project_type" ]; then
             cd "test-artifacts/claude-test-$project_type"
-            
+
             echo "Testing $project_type compatibility..."
-            
+            echo "Contents of test-artifacts/claude-test-$project_type:"
+            ls -la
+
             # Verify Cursor can access the architecture
             if [ -d ".coding-assistants/cursor" ]; then
               echo "✓ Cursor configurations present"

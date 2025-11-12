@@ -160,7 +160,7 @@ When implementing:
 - Test different intensity levels
 
 **Related Documents**:
-- `.architecture/reviews/template.md`
+- `.architecture/templates/review-template.md`
 - `.architecture/PHASE-1-TEST.md`
 
 **Last Reviewed**: 2025-11-05
@@ -215,7 +215,7 @@ When creating additional examples:
 
 **Related Documents**:
 - `.architecture/decisions/adrs/example-pragmatic-caching-layer.md` (current example)
-- `.architecture/templates/adr.md` (updated template)
+- `.architecture/templates/adr-template.md` (updated template)
 - `.architecture/decisions/phase-3-pragmatic-analysis.md` (deferral decision)
 
 **Last Reviewed**: 2025-11-05
@@ -271,7 +271,7 @@ Rely on existing documentation:
 Document actual problems users encounter when creating ADRs with pragmatic mode. Focus on real confusion, not imagined difficulties.
 
 **Related Documents**:
-- `.architecture/templates/adr.md`
+- `.architecture/templates/adr-template.md`
 - `.architecture/decisions/adrs/example-pragmatic-caching-layer.md`
 - `CLAUDE.md`
 - `.architecture/config.yml`
@@ -333,7 +333,7 @@ When implementing:
 - Test different intensity levels if behavior varies
 
 **Related Documents**:
-- `.architecture/templates/adr.md`
+- `.architecture/templates/adr-template.md`
 - `.architecture/decisions/adrs/example-pragmatic-caching-layer.md`
 - `.architecture/PHASE-1-TEST.md`
 
@@ -626,8 +626,8 @@ When refining behavioral patterns:
 - Update templates, examples, and documentation consistently
 
 **Related Documents**:
-- `.architecture/reviews/template.md` (current patterns)
-- `.architecture/templates/adr.md` (current patterns)
+- `.architecture/templates/review-template.md` (current patterns)
+- `.architecture/templates/adr-template.md` (current patterns)
 - Future: Analysis of real pragmatic mode usage
 
 **Last Reviewed**: 2025-11-05

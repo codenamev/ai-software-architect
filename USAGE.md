@@ -29,7 +29,7 @@ Use Architectural Decision Records (ADRs) to document significant design decisio
 
 ```bash
 # Copy the ADR template
-cp .architecture/templates/adr.md .architecture/decisions/adrs/ADR-001-your-decision-name.md
+cp .architecture/templates/adr-template.md .architecture/decisions/adrs/ADR-001-your-decision-name.md
 
 # Edit the new ADR
 nano .architecture/decisions/adrs/ADR-001-your-decision-name.md

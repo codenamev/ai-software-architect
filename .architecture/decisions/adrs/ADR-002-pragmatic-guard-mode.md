@@ -75,8 +75,8 @@ We will implement a **Pragmatic Guard Mode** for the AI Software Architect frame
 **Architectural Components Affected:**
 * `.architecture/members.yml` - Add Pragmatic Enforcer member
 * `.architecture/config.yml` - New configuration system for mode control
-* `.architecture/reviews/template.md` - Add Pragmatic Enforcer section
-* `.architecture/templates/adr.md` - Add pragmatic analysis section
+* `.architecture/templates/review-template.md` - Add Pragmatic Enforcer section
+* `.architecture/templates/adr-template.md` - Add pragmatic analysis section
 * `CLAUDE.md` - Add pragmatic mode request recognition
 * `.architecture/deferrals.md` - New file for tracking deferred decisions
 

@@ -63,7 +63,12 @@ jobs:
         cd test-projects/${{ matrix.project-type }}
         cp -r ../../.architecture ./.architecture
         cp -r ../../.coding-assistants ./.coding-assistants
-        
+
+        # Verify copy succeeded
+        echo "Verifying framework copy..."
+        ls -la | grep -E "(architecture|coding-assistants)"
+        ls -la .coding-assistants/ | grep -E "(cursor|codex)"
+
     - name: Simulate Claude Code setup process
       run: |
         cd test-projects/${{ matrix.project-type }}
@@ -331,6 +336,23 @@ jobs:
         echo ""
         echo "All Claude Code integration tests passed for ${{ matrix.project-type }} project type."
         
+    - name: Verify files before upload
+      if: always()
+      run: |
+        echo "=== Files in test-projects/${{ matrix.project-type }} before upload ==="
+        ls -la test-projects/${{ matrix.project-type }}/
+        if [ -d "test-projects/${{ matrix.project-type }}/.coding-assistants" ]; then
+          echo "✓ .coding-assistants directory exists"
+          ls -la test-projects/${{ matrix.project-type }}/.coding-assistants/
+        else
+          echo "✗ .coding-assistants directory missing"
+        fi
+        if [ -d "test-projects/${{ matrix.project-type }}/.architecture" ]; then
+          echo "✓ .architecture directory exists"
+        else
+          echo "✗ .architecture directory missing"
+        fi
+
     - name: Upload test artifacts
       uses: actions/upload-artifact@v4
       if: always()
@@ -338,6 +360,7 @@ jobs:
         name: claude-test-${{ matrix.project-type }}
         path: test-projects/${{ matrix.project-type }}/
         retention-days: 7
+        include-hidden-files: true
 
   cross-compatibility-test:
     runs-on: ubuntu-latest

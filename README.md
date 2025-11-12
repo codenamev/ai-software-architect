@@ -79,10 +79,20 @@ See [USAGE-WITH-CODEX.md](USAGE-WITH-CODEX.md) for detailed setup instructions. 
 After installation, start using the framework:
 
 - **Create architecture decisions**: "Help me create an ADR for our new authentication system"
-- **Start architecture reviews**: "Start an architecture review for version 2.0.0"  
+- **Start architecture reviews**: "Start an architecture review for version 2.0.0"
 - **Get specialist opinions**: "Ask Security Architect to review this API design"
 
 See [USAGE.md](USAGE.md) for detailed workflow instructions.
+
+## Upgrading
+
+Already have AI Software Architect installed? Upgrade to get the latest features:
+
+```
+Upgrade my AI Software Architect framework from https://github.com/codenamev/ai-software-architect
+```
+
+See [UPGRADE.md](UPGRADE.md) for detailed upgrade instructions.
 
 ## Directory Structure
 

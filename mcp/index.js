@@ -157,6 +157,29 @@ class ArchitectureServer {
               required: ["projectPath"],
             },
           },
+          {
+            name: "configure_pragmatic_mode",
+            description: "Enable and configure Pragmatic Mode (YAGNI Enforcement) to prevent over-engineering",
+            inputSchema: {
+              type: "object",
+              properties: {
+                projectPath: {
+                  type: "string",
+                  description: "Path to the project root directory",
+                },
+                enabled: {
+                  type: "boolean",
+                  description: "Enable or disable Pragmatic Mode",
+                },
+                intensity: {
+                  type: "string",
+                  description: "Intensity level: 'strict', 'balanced', or 'lenient'",
+                  enum: ["strict", "balanced", "lenient"],
+                },
+              },
+              required: ["projectPath"],
+            },
+          },
         ],
       };
     });
@@ -178,6 +201,8 @@ class ArchitectureServer {
             return await this.listArchitectureMembers(args);
           case "get_architecture_status":
             return await this.getArchitectureStatus(args);
+          case "configure_pragmatic_mode":
+            return await this.configurePragmaticMode(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -1127,7 +1152,7 @@ ${member.domains.map(d => `- ${d}`).join('\n')}
   async getArchitectureStatus(args) {
     const { projectPath } = args;
     const architecturePath = path.join(projectPath, ".architecture");
-    
+
     if (!(await fs.pathExists(architecturePath))) {
       return {
         content: [
@@ -1173,6 +1198,71 @@ ${member.domains.map(d => `- ${d}`).join('\n')}
         {
           type: "text",
           text: `## Architecture Framework Status\n\n✅ **Framework Setup**: Complete\n📋 **ADRs Created**: ${status.adrs}\n🔍 **Reviews Conducted**: ${status.reviews}\n👥 **Team Members**: ${status.members}\n\n### Available Actions\n- Use \`create_adr\` to document architectural decisions\n- Use \`start_architecture_review\` for comprehensive reviews\n- Use \`specialist_review\` for focused specialist input\n- Use \`list_architecture_members\` to see team composition`,
+        },
+      ],
+    };
+  }
+
+  async configurePragmaticMode(args) {
+    const { projectPath, enabled, intensity } = args;
+    const architecturePath = path.join(projectPath, ".architecture");
+
+    if (!(await fs.pathExists(architecturePath))) {
+      throw new Error("Architecture framework not set up. Run setup_architecture first.");
+    }
+
+    const configPath = path.join(architecturePath, "config.yml");
+    const templatePath = path.join(architecturePath, "templates", "config.yml");
+
+    // Load or create config
+    let config;
+    if (await fs.pathExists(configPath)) {
+      const configContent = await fs.readFile(configPath, 'utf8');
+      config = yaml.parse(configContent);
+    } else if (await fs.pathExists(templatePath)) {
+      // Copy from template
+      const templateContent = await fs.readFile(templatePath, 'utf8');
+      config = yaml.parse(templateContent);
+    } else {
+      throw new Error("Configuration template not found. Framework may be incomplete.");
+    }
+
+    // Update pragmatic mode settings
+    if (!config.pragmatic_mode) {
+      config.pragmatic_mode = {};
+    }
+
+    if (enabled !== undefined) {
+      config.pragmatic_mode.enabled = enabled;
+    }
+
+    if (intensity !== undefined) {
+      config.pragmatic_mode.intensity = intensity;
+    }
+
+    // Ensure deferrals.md exists if tracking is enabled
+    if (config.pragmatic_mode.enabled && config.pragmatic_mode.behavior?.track_deferrals) {
+      const deferralsPath = path.join(architecturePath, "deferrals.md");
+      const deferralsTemplatePath = path.join(architecturePath, "templates", "deferrals.md");
+
+      if (!(await fs.pathExists(deferralsPath)) && (await fs.pathExists(deferralsTemplatePath))) {
+        await fs.copy(deferralsTemplatePath, deferralsPath);
+      }
+    }
+
+    // Write updated config
+    await fs.writeFile(configPath, yaml.stringify(config));
+
+    // Build status message
+    const statusEnabled = config.pragmatic_mode.enabled ? "✅ Enabled" : "❌ Disabled";
+    const statusIntensity = config.pragmatic_mode.intensity || "balanced";
+    const deferralsTracking = config.pragmatic_mode.behavior?.track_deferrals ? "Enabled" : "Disabled";
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `## Pragmatic Mode Configuration Updated\n\n**Status**: ${statusEnabled}\n**Intensity**: ${statusIntensity}\n**Deferrals Tracking**: ${deferralsTracking}\n\n### How Pragmatic Mode Works\n\nWhen enabled, the Pragmatic Enforcer will:\n- Challenge complexity and abstractions\n- Question "best practices" that may not apply\n- Propose simpler alternatives that meet current requirements\n- Score necessity vs. complexity (target ratio <1.5)\n- ${deferralsTracking === "Enabled" ? "Track deferred decisions in .architecture/deferrals.md" : "Not track deferrals"}\n\n### Intensity Levels\n\n**Strict**: Challenges aggressively, requires strong justification\n**Balanced**: Thoughtful challenges, accepts justified complexity (recommended)\n**Lenient**: Raises concerns without blocking\n\n### Configuration\n\nFull configuration saved to: \`.architecture/config.yml\`\n\nYou can manually edit this file to customize:\n- Exemptions (security, compliance, etc.)\n- Triggers (when to challenge)\n- Thresholds (complexity scores)\n- Review phases where Pragmatic Mode applies\n\n### Next Steps\n\n${config.pragmatic_mode.enabled ? "The Pragmatic Enforcer will now participate in:\n- Architecture reviews (start_architecture_review)\n- Specialist reviews (specialist_review)\n- ADR creation (create_adr)\n\nUse these tools and the Pragmatic Enforcer will challenge over-engineering." : "Pragmatic Mode is disabled. Set enabled=true to activate YAGNI enforcement."}`,
         },
       ],
     };

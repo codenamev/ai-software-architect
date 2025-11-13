@@ -117,15 +117,122 @@ Setup architecture using: https://github.com/codenamev/ai-software-architect
 
 See [USAGE-WITH-CODEX.md](USAGE-WITH-CODEX.md) for detailed setup instructions. The framework will be configured with context files that GitHub Copilot and Codex can automatically understand.
 
+## Integration Method Comparison
+
+Choose the right integration method for your workflow:
+
+| Feature | Claude Skills | MCP Server | Traditional | Best For |
+|---------|---------------|------------|-------------|----------|
+| **Installation** | Copy skills to ~/.claude/ | npm install -g | Clone repo | Skills: Reusable across projects<br>MCP: Programmatic use<br>Traditional: Quick start |
+| **Setup Complexity** | ⭐ Simple | ⭐⭐ Medium | ⭐ Simple | Skills & Traditional easiest |
+| **AI Assistants** | Claude Code | Claude, Cursor | All assistants | Skills: Claude only<br>MCP: Claude, Cursor<br>Traditional: Universal |
+| **Invocation** | Automatic | Programmatic tools | Natural language | Skills: Most seamless<br>MCP: Most precise<br>Traditional: Most flexible |
+| **Dependencies** | None | Node.js ≥18 | None | Skills & Traditional: No deps |
+| **Core Features** | ✅ All 7 | ✅ All 7 | ✅ All 7 | All methods support core features |
+| **Advanced Features** | ⚠️ 60% | ⚠️ 33% | ✅ 100% | Traditional most feature-complete |
+| **Input Validation** | ✅ Yes | ⚠️ Basic | ❌ No | Skills has best validation |
+| **Pragmatic Mode** | ✅ Yes | ✅ Yes | ✅ Yes | All methods support YAGNI enforcement |
+| **Dynamic Members** | ✅ Yes | ❌ No | ✅ Yes | Skills & Traditional auto-create specialists |
+| **Recalibration** | ⚠️ Planned | ❌ No | ✅ Yes | Traditional fully supports |
+| **Project Analysis** | ⚠️ Basic | ✅ Advanced | ⚠️ Basic | MCP has best analysis |
+| **Error Handling** | ✅ Explicit | ✅ Explicit | ⚠️ Implicit | Skills & MCP clearest |
+| **Documentation** | ✅ Detailed | ✅ Detailed | ✅ Detailed | All well-documented |
+| **Customization** | ⚠️ Edit skills | ⚠️ Fork code | ✅ Easy | Traditional most customizable |
+| **Updates** | Re-copy files | npm update | Git pull | Each has update path |
+| **Portability** | ✅ High | ⚠️ Medium | ✅ High | Skills & Traditional most portable |
+
+### Recommendation by Use Case
+
+**Choose Claude Skills if**:
+- You use Claude Code exclusively
+- You want the simplest setup
+- You want automatic skill invocation
+- You value portability across projects
+
+**Choose MCP Server if**:
+- You use Claude Code or Cursor
+- You want programmatic automation
+- You need advanced project analysis
+- You're building integrations
+
+**Choose Traditional if**:
+- You use multiple AI assistants
+- You want maximum flexibility
+- You need all advanced features (pragmatic mode, recalibration)
+- You want easy customization
+
+### Feature Availability Matrix
+
+| Feature | Claude Skills | MCP Server | Traditional |
+|---------|---------------|------------|-------------|
+| Setup Architecture | ✅ | ✅ | ✅ |
+| Create ADR | ✅ | ✅ | ✅ |
+| Architecture Review | ✅ | ✅ | ✅ |
+| Specialist Review | ✅ | ✅ | ✅ |
+| List Members | ✅ | ✅ | ✅ |
+| Get Status | ✅ | ✅ | ✅ |
+| Pragmatic Mode (YAGNI) | ✅ | ✅ | ✅ |
+| Dynamic Member Creation | ✅ | ❌ | ✅ |
+| Recalibration Process | ⚠️ | ❌ | ✅ |
+| Initial System Analysis | ❌ | ✅ | ✅ |
+| Input Validation | ✅ | ⚠️ | ❌ |
+| Tool Restrictions | ✅ | N/A | N/A |
+
+**Legend**: ✅ Fully supported, ⚠️ Partially supported, ❌ Not supported, N/A Not applicable
+
+See [Feature Parity Analysis](.architecture/reviews/feature-parity-analysis.md) for detailed comparison.
+
 ## Getting Started
 
-After installation, start using the framework:
+After installation, start using the framework with these standardized commands:
 
-- **Create architecture decisions**: "Help me create an ADR for our new authentication system"
-- **Start architecture reviews**: "Start an architecture review for version 2.0.0"
-- **Get specialist opinions**: "Ask Security Architect to review this API design"
+### Standard Commands
 
-See [USAGE.md](USAGE.md) for detailed workflow instructions.
+**Setup**:
+```
+Setup ai-software-architect
+```
+
+**Create ADR**:
+```
+Create ADR for [decision topic]
+```
+Example: "Create ADR for PostgreSQL database choice"
+
+**Architecture Review**:
+```
+Start architecture review for [version/feature]
+```
+Examples: "Start architecture review for version 2.0.0" or "Start architecture review for authentication feature"
+
+**Specialist Review**:
+```
+Ask [Specialist Name] to review [target]
+```
+Example: "Ask Security Specialist to review API authentication"
+
+**List Members**:
+```
+List architecture members
+```
+
+**Check Status**:
+```
+What's our architecture status?
+```
+
+**Enable Pragmatic Mode** (Optional):
+```
+Enable pragmatic mode
+```
+Example: "Enable pragmatic mode with balanced intensity"
+
+**Recalibration** (Traditional method):
+```
+Start architecture recalibration for [target]
+```
+
+See [USAGE.md](USAGE.md) for detailed workflow instructions and platform-specific variations.
 
 ## Upgrading
 
@@ -170,42 +277,64 @@ For Claude Code users, see [USAGE-WITH-CLAUDE-SKILLS.md](USAGE-WITH-CLAUDE-SKILL
 - **list-members**: Shows your architecture team
 - **architecture-status**: Displays current documentation state
 
-**Key Commands**:
-- **Setup & Customization**: "Setup ai-software-architect", "Setup .architecture"
-- **Reviews**: "Start architecture review for version X.Y.Z" or "Review architecture for 'component'"
-- **Specialized Reviews**: "Ask Security Specialist to review these code changes"
-- **Recalibration**: "Start architecture recalibration for 'feature name'"
-- **ADR Creation**: "Create ADR for 'topic'"
-- **Status Check**: "What's our architecture status?"
-- **Team Info**: "List architecture members"
+**Standard Commands**:
+- **Setup**: "Setup ai-software-architect"
+- **Create ADR**: "Create ADR for [topic]"
+- **Architecture Review**: "Start architecture review for [version/feature]"
+- **Specialist Review**: "Ask [Specialist Name] to review [target]"
+- **List Members**: "List architecture members"
+- **Check Status**: "What's our architecture status?"
+- **Recalibration**: "Start architecture recalibration for [target]" (Traditional method)
+
+**Alternative Phrases**:
+- Setup: "Setup .architecture", "Initialize architecture framework"
+- Create ADR: "Document architectural decision for [topic]", "Write ADR about [topic]"
+- Reviews: "Conduct architecture review", "Review architecture for [scope]"
+- Specialist: "Get [specialist]'s opinion on [topic]", "Have [role] review [component]"
 
 Claude can dynamically create new specialist roles if they don't exist in your `members.yml` file.
 
 ### Cursor
 
-For Cursor users, see [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md) for detailed instructions. Key capabilities include:
+For Cursor users, see [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md) for detailed instructions.
 
-- **Setup & Customization**: "Setup ai-software-architect", "Setup architecture"
-- **Architecture Reviews**: "Review this architecture using the AI Software Architect framework"
-- **Specialized Reviews**: "Analyze this from a security perspective using AI Software Architect"
-- **Documentation Creation**: "Create an ADR for this decision using the AI Software Architect format"
+**Standard Commands**:
+- **Setup**: "Setup ai-software-architect"
+- **Create ADR**: "Create ADR for [topic]"
+- **Architecture Review**: "Start architecture review for [version/feature]"
+- **Specialist Review**: "Ask [Specialist Name] to review [target]"
+- **List Members**: "List architecture members"
+- **Check Status**: "What's our architecture status?"
 
-Cursor uses .mdc rule files in the `.coding-assistants/cursor` directory to understand the framework.
+**Natural Alternatives** (Cursor also understands):
+- "Review this architecture"
+- "Analyze this from a security perspective"
+- "Create an ADR for this decision"
+
+Cursor uses .mdc rule files in the `.coding-assistants/cursor/` directory to understand the framework.
 
 ### GitHub Copilot / Codex
 
-For GitHub Copilot and OpenAI Codex users, see [USAGE-WITH-CODEX.md](USAGE-WITH-CODEX.md) for detailed instructions. Key features include:
+For GitHub Copilot and OpenAI Codex users, see [USAGE-WITH-CODEX.md](USAGE-WITH-CODEX.md) for detailed instructions.
 
-- **Natural Language Commands**: Uses context-based recognition - no need to mention the framework explicitly
-- **Architecture Reviews**: "Review this architecture", "What are the security implications?"
-- **ADR Creation**: "Create an ADR for our database choice"
-- **Code Generation**: Generate code that follows established architectural patterns and ADRs
-- **Inline Guidance**: Get architectural suggestions directly in your IDE
+**Natural Language Commands** (context-based recognition):
+- **Setup**: "Setup architecture"
+- **Create ADR**: "Create an ADR for [decision]"
+- **Architecture Review**: "Review this architecture", "Start architecture review for [target]"
+- **Specialist Review**: "Review this for security issues", "Analyze this for performance"
+- **Check Status**: "Summarize our architectural decisions"
 
-Examples of natural commands:
+**Key Features**:
+- No need to mention the framework explicitly
+- Context-based recognition from project files
+- Inline architectural guidance in your IDE
+- Code generation following established patterns
+- Natural conversation about architecture
+
+**Example Commands**:
 - "What are the architectural implications of this change?"
 - "Review this database schema for performance"
-- "Create an ADR for our microservices approach"
+- "Does this code follow our architectural principles?"
 
 ### Other AI Assistants
 
@@ -227,6 +356,32 @@ Architecture reviews consider multiple specialized perspectives:
 - Maintainability
 - AI Engineering
 - And dynamically created specialists as needed
+
+### Pragmatic Mode (YAGNI Enforcement)
+
+Pragmatic Mode helps prevent over-engineering by adding a "Pragmatic Enforcer" who:
+- **Challenges complexity** - Questions abstractions, patterns, and "best practices" that may not be needed yet
+- **Proposes simpler alternatives** - Suggests minimal implementations that meet current requirements
+- **Calculates trade-offs** - Scores necessity vs. complexity (target ratio <1.5)
+- **Tracks deferrals** - Documents decisions to defer features with clear trigger conditions
+
+**When to use**:
+- New projects or MVPs
+- Teams prone to over-engineering
+- Resource-constrained environments
+- Projects with tight deadlines
+
+**Configurable intensity**:
+- **Strict**: Challenges aggressively, requires strong justification
+- **Balanced**: Thoughtful challenges, accepts justified complexity (recommended)
+- **Lenient**: Raises concerns without blocking
+
+Enable with:
+```
+Enable pragmatic mode
+```
+
+See [ADR-002](/.architecture/decisions/adrs/ADR-002-pragmatic-guard-mode.md) and [Pragmatic Mode Summary](/.architecture/decisions/PRAGMATIC-MODE-SUMMARY.md) for details.
 
 ### Feature-Based Architecture Management
 

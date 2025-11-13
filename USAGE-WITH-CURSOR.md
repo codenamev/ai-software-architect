@@ -36,41 +36,87 @@ The framework provides pre-configured Rule files for Cursor:
 
 This follows Cursor's updated [Rules documentation](https://docs.cursor.com/context/rules).
 
-## Setup Commands
+## Standard Commands
 
-After installation, Cursor recognizes these setup commands:
+After installation, use these standardized commands in Cursor:
 
-| Command | Description |
-|---------|-------------|
-| `Setup ai-software-architect` | Full framework setup and customization |
-| `Setup architecture` | Alias for framework setup |
-| `Customize software architect` | Customize existing framework for project changes |
+### Setup & Customization
 
-## Key Commands for Cursor
+**Primary Command**:
+```
+Setup ai-software-architect
+```
 
-### Architecture Reviews
+**Alternative Phrases**:
+- "Setup architecture"
+- "Initialize architecture framework"
+- "Customize software architect" (for updates)
 
-| Command | Description |
-|---------|-------------|
-| `Review this architecture` | Begin a comprehensive review |
-| `Analyze this feature` | Review a specific feature or component |
-| `Evaluate this code's architecture` | Analyze existing code architecture |
+### Create ADR
 
-### Specialized Reviews
+**Primary Command**:
+```
+Create ADR for [decision topic]
+```
 
-| Command | Description |
-|---------|-------------|
-| `Analyze this from a security perspective` | Get security-focused review |
-| `Review this for performance` | Get performance-focused review |
-| `Evaluate maintainability` | Get maintainability assessment |
+**Alternative Phrases**:
+- "Create an ADR for this decision"
+- "Document architectural decision for [topic]"
 
-### Documentation Creation
+### Architecture Review
 
-| Command | Description |
-|---------|-------------|
-| `Create an ADR for this decision` | Draft an Architectural Decision Record |
-| `Document this architectural approach` | Create documentation in the framework style |
-| `Help me write an architecture review` | Create a review document |
+**Primary Command**:
+```
+Start architecture review for [version/feature]
+```
+
+**Natural Alternatives** (Cursor understands):
+- "Review this architecture"
+- "Analyze this feature"
+- "Evaluate this code's architecture"
+
+### Specialist Review
+
+**Primary Command**:
+```
+Ask [Specialist Name] to review [target]
+```
+
+**Natural Alternatives** (Cursor understands):
+- "Analyze this from a security perspective"
+- "Review this for performance"
+- "Evaluate maintainability"
+
+### List Members
+
+**Primary Command**:
+```
+List architecture members
+```
+
+**Alternative**: "Who's on the architecture team?"
+
+### Check Status
+
+**Primary Command**:
+```
+What's our architecture status?
+```
+
+**Alternative**: "Show architecture documentation"
+
+### Enable Pragmatic Mode
+
+**Primary Command**:
+```
+Enable pragmatic mode
+```
+
+**Examples**:
+- "Enable pragmatic mode with balanced intensity"
+- "Turn on YAGNI enforcement"
+
+**Note**: Available when using Cursor Rules integration. This mode adds a Pragmatic Enforcer who challenges over-engineering.
 
 ## Advanced Usage
 
@@ -110,18 +156,28 @@ Create an implementation plan based on the architecture review in .architecture/
 ### New Feature Design
 
 ```
-1. "Design a new authentication feature using the AI Software Architect framework"
-2. "Create an ADR for the authentication approach using AI Software Architect format"
-3. "Review the authentication design from a security perspective with AI Software Architect"
-4. "Create an implementation plan for the authentication feature based on the AI Software Architect review"
+1. "Start architecture review for authentication feature"
+2. "Ask Security Specialist to review authentication design"
+3. "Create ADR for authentication approach"
+4. "Start architecture recalibration for authentication feature"
 ```
 
 ### Architectural Assessment
 
 ```
-1. "Review our current API design using the AI Software Architect framework"
-2. "Identify architectural debt in our codebase using AI Software Architect principles"
-3. "Create a recalibration plan for API improvements using AI Software Architect"
+1. "Start architecture review for API design"
+2. "Ask Maintainability Expert to review architectural debt"
+3. "Create ADR for API improvements"
+4. "Start architecture recalibration for API improvements"
+```
+
+### Pre-Release Workflow
+
+```
+1. "What's our architecture status?"
+2. "Start architecture review for version 2.0.0"
+3. "Create ADR for key decisions"
+4. "Start architecture recalibration for version 2.0.0"
 ```
 
 ## Integration with Other Tools

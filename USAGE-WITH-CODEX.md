@@ -20,50 +20,63 @@ GitHub Copilot/Codex will automatically:
 - Conduct a collaborative architectural analysis with all framework members
 - Create an initial system analysis document in `.architecture/reviews/initial-system-analysis.md`
 
-## Natural Language Commands
+## Standard Commands
 
-The framework uses context-based recognition - no need to mention "AI Software Architect" explicitly. Just use natural language:
+The framework uses context-based recognition. You can use structured commands or natural language:
 
-### Setup & Customization
+### Structured Commands (Recommended for Clarity)
 
-| Command | Description |
-|---------|-------------|
-| `Setup architecture` | Initial setup and customization |
-| `Customize software architect` | Refine or update framework configuration |
+**Setup**:
+```
+Setup architecture
+```
 
-### Architecture Reviews
+**Create ADR**:
+```
+Create an ADR for [decision]
+```
+Example: "Create an ADR for database choice"
 
-| Command | Description |
-|---------|-------------|
-| `Review this architecture` | Begin a comprehensive review |
-| `Start architecture review for version 2.0.0` | Version-specific review |
-| `Review this feature` | Analyze a specific feature or component |
-| `What are the architectural implications of this change?` | Impact analysis |
+**Architecture Review**:
+```
+Start architecture review for [version/feature]
+```
+OR
+```
+Review this architecture
+```
 
-### Specialized Reviews
+**Specialist Review**:
+```
+Review this for [concern] issues
+```
+Examples:
+- "Review this for security issues"
+- "Analyze this database schema for performance"
+- "Check this code for maintainability problems"
 
-| Command | Description |
-|---------|-------------|
-| `Review this for security issues` | Security-focused analysis |
-| `Analyze this database schema for performance` | Performance review |
-| `Check this code for maintainability problems` | Maintainability assessment |
-| `What are the scalability concerns here?` | Scalability analysis |
+**Check Status**:
+```
+Summarize our architectural decisions
+```
 
-### ADR Creation
+**Enable Pragmatic Mode**:
+```
+Enable pragmatic mode
+```
+Examples:
+- "Enable YAGNI enforcement with balanced intensity"
+- "Turn on simplicity guard"
 
-| Command | Description |
-|---------|-------------|
-| `Create an ADR for our database choice` | Draft architectural decision record |
-| `Document this architectural decision` | Alternative ADR creation |
-| `Help me write an ADR for microservices` | Guided ADR creation |
+### Natural Language Alternatives
 
-### Code Generation & Analysis
-
-| Command | Description |
-|---------|-------------|
-| `Generate code following our architecture patterns` | Architecture-compliant code |
-| `Refactor this to match our ADRs` | Align code with decisions |
-| `Does this code follow our architectural principles?` | Compliance check |
+Copilot/Codex also understands natural phrasing:
+- "What are the architectural implications of this change?"
+- "What are the scalability concerns here?"
+- "Does this code follow our architectural principles?"
+- "Generate code following our architecture patterns"
+- "Refactor this to match our ADRs"
+- "Help me write an ADR for microservices"
 
 ## Context-Based Features
 

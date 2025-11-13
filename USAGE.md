@@ -48,36 +48,77 @@ Start architecture recalibration for version X.Y.Z
 ## Working with AI Assistants
 
 This framework is optimized for AI assistant collaboration. For detailed assistant-specific instructions, see:
-- [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md) - For Claude Code users
-- [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md) - For Cursor users  
+- [USAGE-WITH-CLAUDE-SKILLS.md](USAGE-WITH-CLAUDE-SKILLS.md) - For Claude Skills (recommended)
+- [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md) - For Claude Code (traditional method)
+- [USAGE-WITH-CURSOR.md](USAGE-WITH-CURSOR.md) - For Cursor users
 - [USAGE-WITH-CODEX.md](USAGE-WITH-CODEX.md) - For GitHub Copilot/Codex users
 
-### Starting an Architecture Review
+### Standard Commands
 
-Prompt: "Start architecture review for version X.Y.Z"
+All AI assistants support these standardized commands:
 
-This will guide the AI to:
+**Setup**:
+```
+Setup ai-software-architect
+```
+
+**Create ADR**:
+```
+Create ADR for [decision topic]
+```
+
+**Architecture Review**:
+```
+Start architecture review for [version/feature]
+```
+
+**Specialist Review**:
+```
+Ask [Specialist Name] to review [target]
+```
+
+**List Members**:
+```
+List architecture members
+```
+
+**Check Status**:
+```
+What's our architecture status?
+```
+
+**Enable Pragmatic Mode** (Optional):
+```
+Enable pragmatic mode
+```
+
+**Recalibration**:
+```
+Start architecture recalibration for [target]
+```
+
+### How Commands Work
+
+**Architecture Review**: "Start architecture review for version 2.0.0"
+
+The AI will:
 1. Create a new review document based on the template
 2. Adopt personas from members.yml for multiple perspectives
 3. Conduct a thorough review from each perspective
 4. Synthesize findings into cohesive recommendations
 
-### Starting Architecture Recalibration
+**Recalibration**: "Start architecture recalibration for version 2.0.0"
 
-Prompt: "Start architecture recalibration for version X.Y.Z"
-
-This will guide the AI to:
+The AI will:
 1. Analyze the review document for actionable findings
 2. Create a prioritized recalibration plan
 3. Draft necessary ADRs for architectural changes
 4. Create an implementation roadmap
 5. Set up progress tracking
 
-### Creating ADRs
+**Create ADR**: "Create ADR for PostgreSQL database choice"
 
-Prompt: "Create an ADR for [architectural decision]"
-
-This will guide the AI to:
+The AI will:
 1. Use the ADR template
 2. Document context, decision drivers, and alternatives
 3. Outline implementation approach

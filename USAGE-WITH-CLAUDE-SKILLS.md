@@ -137,6 +137,62 @@ Check documentation state.
 - Analyzes documentation health
 - Provides recommendations
 
+### 7. pragmatic-guard
+Enables Pragmatic Mode (YAGNI Enforcement).
+
+**Usage**: "Enable pragmatic mode" or "Turn on YAGNI enforcement"
+
+**Actions**:
+- Configures pragmatic mode settings
+- Challenges over-engineering
+- Proposes simpler alternatives
+- Tracks deferred decisions
+
+**Example**: "Enable pragmatic mode with balanced intensity"
+
+## Standard Commands
+
+Once skills are installed, use these commands in Claude Code:
+
+**Setup**:
+```
+Setup ai-software-architect
+```
+
+**Create ADR**:
+```
+Create ADR for [decision topic]
+```
+Example: "Create ADR for database choice"
+
+**Architecture Review**:
+```
+Start architecture review for [version/feature]
+```
+Example: "Start architecture review for version 1.0"
+
+**Specialist Review**:
+```
+Ask [Specialist Name] to review [target]
+```
+Example: "Ask Security Specialist to review authentication"
+
+**List Members**:
+```
+List architecture members
+```
+
+**Check Status**:
+```
+What's our architecture status?
+```
+
+**Enable Pragmatic Mode**:
+```
+Enable pragmatic mode
+```
+Example: "Enable pragmatic mode with balanced intensity"
+
 ## Quick Start
 
 ```bash
@@ -144,13 +200,16 @@ Check documentation state.
 cp -r ai-software-architect/.claude/skills ~/.claude/
 
 # 2. In Claude Code, setup framework
-"Setup ai-software-architect"
+Setup ai-software-architect
 
 # 3. Start documenting
-"Create ADR for database choice"
-"Ask Security Specialist to review auth"
-"Start architecture review for version 1.0"
-"What's our architecture status?"
+Create ADR for database choice
+Ask Security Specialist to review auth
+Start architecture review for version 1.0
+What's our architecture status?
+
+# 4. Optional: Enable pragmatic mode to prevent over-engineering
+Enable pragmatic mode
 ```
 
 ## Typical Workflow
@@ -399,7 +458,9 @@ A: Possible but unnecessary. Choose one.
 │   └── SKILL.md
 ├── list-members/
 │   └── SKILL.md
-└── architecture-status/
+├── architecture-status/
+│   └── SKILL.md
+└── pragmatic-guard/
     └── SKILL.md
 
 .claude/skills/                      # Project-specific (optional)

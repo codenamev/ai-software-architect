@@ -25,48 +25,128 @@ Claude will automatically:
 
 After installation, Claude is ready to help with architecture tasks. Use natural language commands - Claude understands the framework context automatically.
 
-## Key Commands for Claude Code
+## Standard Commands
 
 ### Setup & Customization
 
-| Command | Description |
-|---------|-------------|
-| `Setup .architecture` | Initial setup and customization of the framework |
-| `Customize software architect` | Refine or update the framework configuration |
-| `Setup software architect` | Alternative phrasing for initial setup |
+**Primary Command**:
+```
+Setup ai-software-architect
+```
+
+**Alternative Phrases**:
+- "Setup .architecture"
+- "Setup architecture"
+- "Initialize architecture framework"
+- "Customize software architect" (for updates)
+
+### Create Architectural Decision Record (ADR)
+
+**Primary Command**:
+```
+Create ADR for [decision topic]
+```
+
+**Examples**:
+- "Create ADR for PostgreSQL database choice"
+- "Create ADR for microservices architecture"
+- "Create ADR for authentication approach"
+
+**Alternative Phrases**:
+- "Document architectural decision for [topic]"
+- "Write ADR about [topic]"
 
 ### Architecture Reviews
 
-| Command | Description |
-|---------|-------------|
-| `Start architecture review for version X.Y.Z` | Begin a comprehensive review for a version |
-| `Start architecture review for 'feature name'` | Review a specific feature or component |
-| `Review architecture for 'component description'` | Analyze a particular component |
+**Primary Command**:
+```
+Start architecture review for [version/feature]
+```
 
-### Specialized Reviews
+**Examples**:
+- "Start architecture review for version 2.0.0"
+- "Start architecture review for authentication system"
+- "Start architecture review for payment feature"
 
-| Command | Description |
-|---------|-------------|
-| `Ask Security Architect to review these code changes` | Get security-focused review |
-| `Have Performance Specialist review this database schema` | Get performance-focused review |
-| `Ask Ruby Expert if my use of modules follows best practices` | Get language-specific expertise |
+**Alternative Phrases**:
+- "Review architecture for [component]"
+- "Conduct architecture review for [scope]"
 
-Claude will dynamically create new specialist roles if they don't exist in your members.yml file.
+### Specialist Reviews
+
+**Primary Command**:
+```
+Ask [Specialist Name] to review [target]
+```
+
+**Examples**:
+- "Ask Security Specialist to review API authentication"
+- "Ask Performance Expert to review database queries"
+- "Ask Ruby Expert to review module structure"
+
+**Alternative Phrases**:
+- "Have [specialist] review [target]"
+- "Get [specialist]'s opinion on [topic]"
+
+**Note**: Claude will dynamically create new specialist roles if they don't exist in your members.yml file.
+
+### List Architecture Team
+
+**Primary Command**:
+```
+List architecture members
+```
+
+**Alternative Phrases**:
+- "Who's on the architecture team?"
+- "Show me the architects"
+- "What specialists are available?"
+
+### Check Architecture Status
+
+**Primary Command**:
+```
+What's our architecture status?
+```
+
+**Alternative Phrases**:
+- "Show architecture documentation"
+- "Architecture health check"
+- "How many ADRs do we have?"
+
+### Enable Pragmatic Mode (YAGNI Enforcement)
+
+**Primary Command**:
+```
+Enable pragmatic mode
+```
+
+**Examples**:
+- "Enable pragmatic mode with balanced intensity"
+- "Turn on YAGNI enforcement"
+- "Activate simplicity guard"
+
+**Alternative Phrases**:
+- "Challenge complexity"
+- "Configure pragmatic enforcer"
+
+**Note**: Available when using CLAUDE.md integration. This mode adds a Pragmatic Enforcer who challenges over-engineering and proposes simpler alternatives.
 
 ### Recalibration
 
-| Command | Description |
-|---------|-------------|
-| `Start architecture recalibration for version X.Y.Z` | Plan implementation based on review |
-| `Recalibrate architecture for 'feature name'` | Create action plan for a feature |
-| `Implement architecture changes for 'component'` | Get implementation guidance |
+**Primary Command**:
+```
+Start architecture recalibration for [target]
+```
 
-### ADR Creation
+**Examples**:
+- "Start architecture recalibration for version 2.0.0"
+- "Recalibrate architecture for authentication feature"
+- "Create action plan from security review"
 
-| Command | Description |
-|---------|-------------|
-| `Create an ADR for 'topic'` | Draft an Architectural Decision Record |
-| `Document architectural decision for 'approach'` | Alternative way to create an ADR |
+**Alternative Phrases**:
+- "Plan implementation of [review findings]"
+- "Implement architecture changes for [component]"
 
 ## Advanced Usage
 
@@ -118,29 +198,37 @@ Create an implementation roadmap for the architectural changes identified in our
 ### New Feature Review
 
 ```
-1. "Start architecture review for adding OAuth 2.0 to our authentication system"
-2. "Ask Security Specialist to focus on the token handling in the OAuth implementation"
-3. "Create an ADR documenting our OAuth integration approach"
-4. "Start architecture recalibration based on the OAuth review"
-5. "Create implementation roadmap for OAuth integration"
+1. "Start architecture review for OAuth 2.0 authentication feature"
+2. "Ask Security Specialist to review token handling"
+3. "Create ADR for OAuth integration approach"
+4. "Start architecture recalibration for OAuth feature"
 ```
 
 ### Technical Debt Assessment
 
 ```
-1. "Review our current data access layer for technical debt"
-2. "Ask Maintainability Expert to suggest refactoring priorities"
-3. "Create an ADR for our data access layer refactoring approach"
+1. "Start architecture review for data access layer"
+2. "Ask Maintainability Expert to review refactoring priorities"
+3. "Create ADR for data layer refactoring approach"
 4. "Start architecture recalibration for data layer improvements"
 ```
 
 ### Cross-Cutting Concern Analysis
 
 ```
-1. "Start architecture review for our logging and monitoring infrastructure"
-2. "Ask Operations Specialist to review our observability approach"
-3. "Create an ADR for standardizing observability across services"
-4. "Start architecture recalibration for implementing the new standards"
+1. "Start architecture review for logging infrastructure"
+2. "Ask Performance Specialist to review observability approach"
+3. "Create ADR for standardized observability"
+4. "Start architecture recalibration for observability standards"
+```
+
+### Pre-Release Workflow
+
+```
+1. "What's our architecture status?"
+2. "Start architecture review for version 2.0.0"
+3. "Create ADR for key decisions identified in review"
+4. "Start architecture recalibration for version 2.0.0"
 ```
 
 ## Remember

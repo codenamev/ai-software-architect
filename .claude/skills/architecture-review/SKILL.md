@@ -1,6 +1,6 @@
 ---
 name: architecture-review
-description: Conducts a comprehensive multi-perspective architecture review using all architecture team members. Use when the user requests "Start architecture review", "Review architecture for version X.Y.Z", "Conduct architecture review", or when they want a full architectural assessment of their system or a specific feature.
+description: Conducts a comprehensive multi-perspective architecture review using ALL architecture team members. Use when the user requests "Start architecture review", "Full architecture review", "Review architecture for version X.Y.Z", "Conduct comprehensive review", or when they want assessment from multiple perspectives. Do NOT use for single-specialist reviews (use specialist-review instead) or for status checks (use architecture-status instead).
 ---
 
 # Architecture Review
@@ -16,8 +16,22 @@ Conducts comprehensive multi-perspective architecture reviews with all team memb
 
 If unclear, ask: "What would you like me to review?"
 
-### 2. Load Team
-Read `.architecture/members.yml` to get all members (id, name, title, specialties, perspective).
+**Validate and Sanitize Input**:
+- **Version numbers**: Validate format (X.Y.Z), only digits and dots, convert dots to hyphens
+- **Feature/component names**: Remove `..`, `/`, `\`, null bytes, control characters
+- Convert to lowercase kebab-case: spaces → hyphens, remove special chars
+- Limit length: max 80 characters
+- Validate result: [a-z0-9-] for names, [0-9-] for versions
+
+**Examples**:
+- Valid: "version 2.1.0" → `2-1-0.md`
+- Valid: "User Authentication" → `feature-user-authentication.md`
+- Invalid blocked: "../../../etc" → sanitized or rejected
+
+### 2. Load Configuration and Team
+- Read `.architecture/config.yml` to check if pragmatic_mode is enabled
+- Read `.architecture/members.yml` to get all members (id, name, title, specialties, perspective)
+- If pragmatic_mode.enabled is true and applies to reviews, include pragmatic_enforcer member
 
 ### 3. Analyze System
 **For version reviews**: Overall architecture, components, interactions, patterns, technical debt, ADRs
@@ -47,6 +61,13 @@ For each member in members.yml, review from their perspective:
 #### Recommendations
 1. **[Recommendation]** (Priority: High/Medium/Low, Effort: Small/Medium/Large)
 ```
+
+**If pragmatic_enforcer is included**: Add pragmatic analysis after each member's review:
+- Apply necessity assessment (0-10): current need, future need, cost of waiting
+- Apply complexity assessment (0-10): added complexity, maintenance, learning curve
+- Propose simpler alternatives where applicable
+- Recommend: Implement now / Simplified version / Defer / Skip
+- Calculate pragmatic score (complexity/necessity ratio, target <1.5)
 
 ### 5. Collaborative Discussion
 Simulate discussion between members:
@@ -152,6 +173,24 @@ Next Steps:
 - **Features**: Significant features before merge
 - **Regular**: Quarterly or bi-annually
 - **Triggered**: When concerns arise
+
+## Related Skills
+
+**Before Architecture Review**:
+- "What's our architecture status?" - Check current documentation state
+- "List architecture members" - See who will participate in review
+
+**During Review** (if specific concerns emerge):
+- "Ask [specialist] to review [specific concern]" - Deep-dive on particular issues
+- "Create ADR for [decision]" - Document key decisions discovered
+
+**After Architecture Review**:
+- "Start architecture recalibration for [target]" - Plan implementation of recommendations
+- Create ADRs for critical architectural decisions identified
+
+**Workflow Examples**:
+1. Status check → Full architecture review → Create ADRs → Recalibration
+2. Architecture review → Specialist reviews for concerns → Address findings → Follow-up review
 
 ## Notes
 - Be comprehensive but focused

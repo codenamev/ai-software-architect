@@ -1,6 +1,7 @@
 ---
 name: list-members
-description: Lists all architecture team members and their specialties. Use when the user asks "Who's on the architecture team?", "List architecture members", "Show me the architects", "What specialists are available?", or when they want to know who they can request reviews from.
+description: Displays the roster of architecture team members with their specialties and expertise areas. Use when the user asks "Who's on the architecture team?", "List architecture members", "Show me the architects", "What specialists are available?", "Who can I ask for reviews?", or wants to discover available experts. Do NOT use for requesting reviews (use specialist-review or architecture-review) or checking documentation status (use architecture-status).
+allowed-tools: [Read, Glob, Grep]
 ---
 
 # List Architecture Members
@@ -150,6 +151,22 @@ Ready to use your architecture team:
 - No `.architecture/`: Offer setup instructions
 - Empty `members.yml`: Show default team and offer setup
 - Malformed YAML: Show what's parseable, note issues
+
+## Related Skills
+
+**After Listing Members**:
+- "Ask [specialist] to review [target]" - Request focused expert review
+- "Start architecture review for [scope]" - Comprehensive review with all members
+- "What's our architecture status?" - See how team has been used
+
+**When Adding Members**:
+- Just request a specialist that doesn't exist - they'll be created automatically
+- "Setup ai-software-architect" - Adds members based on your tech stack
+
+**Workflow Examples**:
+1. List members → Identify relevant specialist → Request review
+2. Need new expertise → Request it → Specialist auto-created → List to verify
+3. Status check → List members → Review with specific specialists
 
 ## Notes
 - Keep presentation clear and scannable

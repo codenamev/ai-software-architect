@@ -1,6 +1,6 @@
 ---
 name: create-adr
-description: Creates an Architectural Decision Record (ADR) in the AI Software Architect framework. Use when the user requests "Create ADR for [topic]", "Document architectural decision for [topic]", "Write ADR about [topic]", or when they describe an architectural decision that should be documented.
+description: Creates a NEW Architectural Decision Record (ADR) documenting a specific architectural decision. Use when the user requests "Create ADR for [topic]", "Document decision about [topic]", "Write ADR for [choice]", or when documenting technology choices, patterns, or architectural approaches. Do NOT use for reviews (use architecture-review or specialist-review), checking existing ADRs (use architecture-status), or general documentation.
 ---
 
 # Create Architectural Decision Record (ADR)
@@ -23,83 +23,49 @@ ls .architecture/decisions/adrs/ | grep -E "^ADR-[0-9]+" | sed 's/ADR-//' | sed 
 ```
 New ADR = next sequential number (e.g., if highest is 003, create 004)
 
-### 3. Create Filename
+### 3. Validate and Sanitize Input
+**Security**: Sanitize user input to prevent path traversal and injection:
+- Remove or replace: `..`, `/`, `\`, null bytes, control characters
+- Convert to lowercase kebab-case: spaces → hyphens, remove special chars
+- Limit length: max 80 characters for filename portion
+- Validate result: ensure filename contains only [a-z0-9-]
+
+### 4. Create Filename
 Format: `ADR-XXX-kebab-case-title.md`
 
 Examples:
 - `ADR-001-use-react-for-frontend.md`
 - `ADR-002-choose-postgresql-database.md`
 
-### 4. Write ADR
-Use this structure:
+**Valid input**: "Use React for Frontend" → `use-react-for-frontend`
+**Invalid blocked**: "../etc/passwd" → sanitized or rejected
 
-```markdown
-# ADR-XXX: [Title]
+### 5. Check Configuration
+- Read `.architecture/config.yml` to check if pragmatic_mode is enabled
+- If enabled and applies to ADR creation, include Pragmatic Enforcer analysis
 
-**Date**: [YYYY-MM-DD]
-**Status**: Proposed | Accepted | Deprecated | Superseded
-**Deciders**: [Who made this decision]
+### 6. Write ADR
+Use the template from `.architecture/templates/adr-template.md`:
 
-## Context
-[What's the background? What problem are we solving?]
+**Core sections**:
+- Status, Context, Decision Drivers, Decision, Consequences
+- Implementation, Alternatives Considered, Validation, References
 
-### Goals
-- [Goal 1]
-- [Goal 2]
+**If pragmatic_mode is enabled**: Add Pragmatic Enforcer Analysis section:
+- Necessity Assessment (0-10): Current need, future need, cost of waiting, evidence
+- Complexity Assessment (0-10): Added complexity, maintenance, learning curve, dependencies
+- Alternative Analysis: Review if simpler alternatives adequately considered
+- Simpler Alternative Proposal: Concrete proposal for simpler approach
+- Recommendation: Approve / Approve with simplifications / Defer / Recommend against
+- Pragmatic Score: Necessity, Complexity, Ratio (target <1.5)
+- Overall Assessment: Appropriate engineering vs over-engineering
 
-### Constraints
-- [Constraint 1]
-- [Constraint 2]
+**If deferrals enabled**: Track deferred decisions in `.architecture/deferrals.md`
 
-## Decision Drivers
-- **[Driver 1]**: [Why this matters]
-- **[Driver 2]**: [Why this matters]
-
-## Considered Options
-
-### Option 1: [Name]
-**Pros**: [Pro 1], [Pro 2]
-**Cons**: [Con 1], [Con 2]
-
-### Option 2: [Name]
-**Pros**: [Pro 1], [Pro 2]
-**Cons**: [Con 1], [Con 2]
-
-## Decision
-Chose **Option X** because: [rationale]
-
-## Consequences
-
-### Positive
-- [Benefit 1]
-- [Benefit 2]
-
-### Negative
-- [Trade-off 1 and mitigation]
-- [Trade-off 2 and mitigation]
-
-## Implementation
-1. [Step 1]
-2. [Step 2]
-
-**Timeline**: [Estimated timeframe]
-**Risks**: [Key risks and mitigations]
-
-## Validation
-**Success Criteria**:
-- [How we'll know this was right]
-
-**Review**: [When to review this decision]
-
-## References
-- [Related ADR-XXX]
-- [External resources]
-```
-
-### 5. Save ADR
+### 7. Save ADR
 Write to: `.architecture/decisions/adrs/ADR-XXX-title.md`
 
-### 6. Report to User
+### 8. Report to User
 ```
 Created ADR-XXX: [Title]
 
@@ -133,6 +99,20 @@ Next Steps:
 - **Accepted**: Approved and should be implemented
 - **Deprecated**: No longer best practice
 - **Superseded**: Replaced by newer ADR (reference it)
+
+## Related Skills
+
+**Before Creating ADR**:
+- "What's our architecture status?" - Check existing ADRs to avoid duplication
+- "List architecture members" - See who should review the decision
+
+**After Creating ADR**:
+- "Ask [specialist] to review [the ADR]" - Get focused expert review
+- "Start architecture review for [version]" - Include in comprehensive review
+
+**Workflow Examples**:
+1. Create ADR → Ask Security Specialist to review → Revise ADR
+2. Architecture review → Create ADRs for key decisions → Status check
 
 ## Notes
 - Focus on "why" more than "what"

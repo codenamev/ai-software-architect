@@ -1,6 +1,6 @@
 ---
 name: specialist-review
-description: Conducts a focused architectural review from a specific specialist's perspective. Use when the user requests "Ask [specialist role] to review [target]", "Get [specialist]'s opinion on [topic]", or when they want focused expertise on a specific architectural concern like security, performance, or domain design.
+description: Conducts a focused review from ONE specific specialist's perspective (e.g., Security Specialist, Performance Expert). Use when the user requests "Ask [specialist role] to review [target]", "Get [specialist]'s opinion on [topic]", "Have [role] review [code/component]", or when they want deep expertise in ONE specific domain. Do NOT use for comprehensive multi-perspective reviews (use architecture-review instead) or for listing available specialists (use list-members instead).
 ---
 
 # Specialist Review
@@ -13,6 +13,18 @@ Conducts focused reviews from a specific specialist's perspective.
 Extract:
 - **Specialist role**: Which expert? (e.g., "Security Specialist", "Performance Expert", "Ruby Expert")
 - **Target**: What to review? (e.g., "API authentication", "database queries", "ActiveRecord models")
+
+**Validate and Sanitize Input**:
+- **Specialist role**: Convert to kebab-case for filename, validate alphanumeric + spaces/hyphens only
+- **Target**: Remove `..`, `/`, `\`, null bytes, control characters
+- Convert to lowercase kebab-case: spaces → hyphens, remove special chars
+- Limit combined length: max 100 characters for filename
+- Validate result: [a-z0-9-] only
+
+**Examples**:
+- Valid: "Security Specialist" + "API authentication" → `security-specialist-api-authentication.md`
+- Valid: "Ruby Expert" + "ActiveRecord models" → `ruby-expert-activerecord-models.md`
+- Invalid blocked: "../../../passwd" → sanitized or rejected
 
 ### 2. Load or Create Specialist
 Check `.architecture/members.yml` for the specialist.
@@ -180,6 +192,26 @@ Focus: Code quality, documentation, testability, code smells, technical debt, re
 
 ### Language/Framework Experts (Ruby, JavaScript, etc.)
 Focus: Idiomatic usage, best practices, framework conventions, ecosystem patterns
+
+## Related Skills
+
+**Before Specialist Review**:
+- "List architecture members" - See available specialists
+- "What's our architecture status?" - Check if area was previously reviewed
+
+**If Specialist Doesn't Exist**:
+- Specialist is automatically created and added to team
+- View with: "List architecture members"
+
+**After Specialist Review**:
+- "Create ADR for [decision]" - Document decisions from review findings
+- "Start architecture review for [scope]" - Include in comprehensive review
+- Request another specialist if concerns span multiple domains
+
+**Workflow Examples**:
+1. Ask Security Specialist → Finds auth issue → Create ADR → Ask Performance Specialist
+2. Ask Ruby Expert → Get Rails-specific guidance → Implement → Ask for follow-up review
+3. Full architecture review → Deep-dive with specialists on specific concerns
 
 ## Notes
 - Stay laser-focused within specialist domain

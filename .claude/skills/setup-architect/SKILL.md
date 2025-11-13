@@ -1,6 +1,6 @@
 ---
 name: setup-architect
-description: Sets up the AI Software Architect framework in a project. Use when the user requests "Setup .architecture", "Setup ai-software-architect", "Setup software architect", "Setup architect", "Setup architecture", or similar phrases. This skill analyzes the project, customizes the framework, and creates an initial architectural analysis.
+description: Sets up and installs the AI Software Architect framework in a NEW project for the FIRST time. Use when the user requests "Setup .architecture", "Setup ai-software-architect", "Initialize architecture framework", "Install software architect", or similar setup/installation phrases. Do NOT use for checking status (use architecture-status), creating documents (use create-adr or reviews), or when framework is already set up.
 ---
 
 # Setup AI Software Architect Framework
@@ -27,6 +27,7 @@ rm -rf .architecture/.architecture
 mkdir -p .coding-assistants/{claude,cursor,codex}
 mkdir -p .architecture/decisions/adrs
 mkdir -p .architecture/{reviews,recalibration,comparisons}
+cp .architecture/templates/config.yml .architecture/config.yml
 ```
 
 ### 4. Customize Members
@@ -74,7 +75,14 @@ See `.architecture/` for all documentation.
 ### 7. Cleanup
 Remove from `.architecture/`:
 - Framework's README.md, USAGE*.md, INSTALL.md
-- `.git/` directory (**CRITICAL**: Only from .architecture, never project root!)
+- `.git/` directory with **CRITICAL SAFEGUARDS**:
+  - Verify we're in project root (check for project markers: package.json, .git in parent, etc.)
+  - Verify `.architecture/.git/` exists before attempting removal
+  - Verify `.architecture/.git/config` contains template repository URL (not project URL)
+  - Use absolute path: `rm -rf $(pwd)/.architecture/.git`
+  - Never use wildcards with rm -rf
+  - **STOP AND ASK USER** if any verification fails
+  - Only remove from .architecture, NEVER project root .git!
 
 ### 8. Initial Analysis
 Create `.architecture/reviews/initial-system-analysis.md`:
@@ -87,6 +95,7 @@ Create `.architecture/reviews/initial-system-analysis.md`:
 Summarize:
 - Customizations made (which specialists added, why)
 - Key findings from initial analysis (top 2-3)
+- Configuration: pragmatic mode (enabled/disabled), intensity level
 - How to use framework with their stack
 - Suggested next steps based on analysis
 
@@ -94,6 +103,22 @@ Summarize:
 - No `.architecture/`: Ask user to clone framework first
 - Already set up: Inform user
 - Unclear project: Ask about architecture
+
+## Related Skills
+
+**After Setup**:
+- "List architecture members" - View the customized team
+- "What's our architecture status?" - Verify setup completed correctly
+- "Create ADR for [first decision]" - Start documenting
+
+**Initial Architecture Work**:
+- Review initial-system-analysis.md in .architecture/reviews/
+- "Ask [specialist] to review [specific area]" - Deep-dive on analysis findings
+- "Create ADR for [key decisions]" - Document important existing decisions
+
+**Workflow Examples**:
+1. Setup → Review initial analysis → Create ADRs for key decisions → Status check
+2. Setup → List members → Ask specialists about specific concerns → Document findings
 
 ## Notes
 - Customize based on actual project, not every possible option

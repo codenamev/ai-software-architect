@@ -1,6 +1,7 @@
 ---
 name: architecture-status
-description: Shows the current state of architecture documentation including ADRs, reviews, and recalibration progress. Use when the user asks "What's our architecture status?", "Show architecture documentation", "What architectural decisions have we made?", or when they want an overview of the framework's usage.
+description: Reports on the health and state of architecture documentation (counts of ADRs, reviews, activity levels, documentation gaps). Use when the user asks "What's our architecture status?", "Show architecture documentation", "How many ADRs do we have?", "What decisions are documented?", "Architecture health check", or wants an overview/summary of documentation state. Do NOT use for listing team members (use list-members), creating new documents (use create-adr), or conducting reviews (use architecture-review or specialist-review).
+allowed-tools: [Read, Glob, Grep]
 ---
 
 # Architecture Status
@@ -197,6 +198,30 @@ Always end with:
 - Permission issues: Report and suggest fixes
 - Corrupted files: Note which have issues
 - Empty directories: Suggest starting points
+
+## Related Skills
+
+**Based on Status Results**:
+
+**If Documentation Gaps Found**:
+- "Create ADR for [missing decision]" - Fill documentation gaps
+- "Start architecture review for [area]" - Comprehensive assessment
+- "Ask [specialist] to review [weak area]" - Focused improvement
+
+**If Status is Good**:
+- "List architecture members" - See your active team
+- Continue regular documentation practices
+- Schedule periodic reviews
+
+**Regular Workflow**:
+1. Start work → "What's our architecture status?" → Identify gaps
+2. Make changes → Document with ADRs → Status check to verify
+3. Before release → Status check → Architecture review → Address findings
+
+**Workflow Examples**:
+1. Status check → Find 0 ADRs → Create ADRs for key decisions → Status check shows progress
+2. Status check → See old reviews → Request new architecture review → Update status
+3. Weekly: Status check → Track documentation health → Maintain good practices
 
 ## Notes
 - Be honest but encouraging

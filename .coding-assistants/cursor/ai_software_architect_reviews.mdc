@@ -1,66 +1,247 @@
----
-description: How to conduct architecture reviews using the AI Software Architect framework
-globs:
-  - ".architecture/reviews/**/*"
-  - ".architecture/members.yml"
-alwaysApply: false
----
-
-# AI Software Architect Reviews
-
-This rule explains how to conduct architecture reviews using the AI Software Architect framework.
+# AI Software Architect Framework - Reviews
 
 ## Review Types
 
-The framework supports several types of architecture reviews:
+### Full Architecture Reviews
+Comprehensive evaluation from all team perspectives.
 
-1. **Version Reviews**: Comprehensive reviews tied to version releases
-   - Format: `.architecture/reviews/1-0-0.md` (using version number)
-   - Used for major releases, significant updates, or milestone versions
+**When to Use**:
+- Before major version releases
+- Quarterly architecture assessments
+- After significant system changes
+- When cross-cutting concerns emerge
 
-2. **Feature Reviews**: Focused reviews of specific features or components
-   - Format: `.architecture/reviews/feature-name.md`
-   - Used for evaluating individual features or components
+**Command**: "Start architecture review for [version/feature]"
 
-3. **Specialized Reviews**: Reviews from specific architectural perspectives
-   - Security, Performance, Maintainability, Domain, etc.
-   - Conducted by specialized architecture roles
+**Process**:
+1. Individual member reviews from each perspective
+2. Collaborative discussion to synthesize findings
+3. Consolidated recommendations with priorities
+4. Risk assessment and mitigation strategies
 
-## Review Process
+**Output**: Comprehensive review document in `.architecture/reviews/`
 
-The review process follows these steps:
+### Specialist Reviews
+Focused evaluation from single expert perspective.
 
-1. **Individual Member Review Phase**:
-   - Each architecture member (from members.yml) reviews independently
-   - Members focus on their specific areas of expertise
-   - Document findings, recommendations, and concerns
+**When to Use**:
+- Specific concern in one domain (security, performance, etc.)
+- Deep-dive after full review
+- Targeted code/component analysis
+- Quick expert opinion needed
 
-2. **Collaborative Discussion Phase**:
-   - Members confer on findings and discuss trade-offs
-   - Prioritize recommendations and align on key issues
-   - Identify cross-cutting concerns
+**Command**: "Ask [Specialist Name] to review [target]"
 
-3. **Final Consolidated Report**:
-   - Create balanced perspective across all domains
-   - Document findings, recommendations, trade-offs analysis
-   - Suggest improvements with clear priorities
+**Process**:
+1. Load or create specialist
+2. Analyze from specialist's perspective only
+3. Provide focused recommendations
+4. Assess risks in specialty area
 
-## Specialized Architecture Members
+**Output**: Specialist review document in `.architecture/reviews/`
 
-Reviews incorporate perspectives from specialized members defined in `.architecture/members.yml`:
+## Architecture Team Members
 
-- Systems Architects (overall system design)
-- Domain Experts (business logic and domain modeling)
-- Security Specialists (security concerns and vulnerabilities)
-- Performance Experts (system performance and scalability)
-- Maintainability Architects (code quality and long-term maintenance)
-- AI Engineering Specialists (AI integration and optimization)
-- Language/Framework Experts (language or framework-specific expertise)
+### Core Members (Always Present)
 
-## Using Reviews with Cursor
+**Systems Architect**
+- Focus: Overall system coherence, integration patterns
+- Specialties: Distributed systems, scalability, service architecture
+- Use when: Evaluating system-wide changes
 
-You can request specialized architecture reviews by using prompts like:
+**Security Specialist**
+- Focus: Threat modeling, security patterns, data protection
+- Specialties: Authentication, authorization, encryption
+- Use when: Security implications exist
 
-- "Review this architecture from a security perspective using AI Software Architect"
-- "Conduct a performance review of this component using AI Software Architect"
-- "Analyze this feature's architecture using the AI Software Architect framework"
+**Performance Specialist**
+- Focus: Optimization, scalability, resource management
+- Specialties: Caching, database optimization, profiling
+- Use when: Performance concerns arise
+
+**Maintainability Expert**
+- Focus: Code quality, technical debt, refactoring
+- Specialties: Clean code, design patterns, testing
+- Use when: Long-term maintenance is consideration
+
+### Technology-Specific Members (Added During Setup)
+
+**JavaScript/TypeScript Expert**
+- Added for: JavaScript, TypeScript, Node.js projects
+- Focus: Modern JS patterns, async programming, tooling
+
+**Framework Specialists**
+- Added for: React, Vue, Angular, Rails, Django, etc.
+- Focus: Framework-specific patterns and best practices
+
+**Domain Experts**
+- Added as needed: Ruby Expert, Go Expert, etc.
+- Focus: Language-specific idioms and ecosystem
+
+### Dynamic Member Creation
+
+Request any specialist - they'll be created automatically:
+- "Ask Accessibility Expert to review forms"
+- "Have API Design Specialist review endpoints"
+- "Get Database Architect's opinion on schema"
+
+Created members are added to `.architecture/members.yml` permanently.
+
+## Review Process Details
+
+### Phase 1: Individual Reviews
+
+Each team member independently reviews from their perspective:
+- Analyzes relevant aspects
+- Identifies strengths
+- Notes concerns and risks
+- Provides recommendations
+
+**Duration**: Focused on specialist domain
+
+### Phase 2: Collaborative Discussion
+
+Team members discuss findings:
+- Identify common themes
+- Resolve conflicting perspectives
+- Prioritize concerns
+- Build consensus on recommendations
+
+**Duration**: Synthesis of individual findings
+
+### Phase 3: Consolidated Report
+
+Final document includes:
+- Executive summary
+- Individual perspectives
+- Collaborative findings
+- Prioritized recommendations:
+  - Immediate (0-2 weeks)
+  - Short-term (2-8 weeks)
+  - Long-term (2-6 months)
+- Risk assessment
+- Success metrics
+
+## Pragmatic Mode (YAGNI Enforcement)
+
+When enabled in `.architecture/config.yml`:
+
+**Pragmatic Enforcer** participates in reviews:
+- Challenges unnecessary complexity
+- Questions premature optimization
+- Proposes simpler alternatives
+- Calculates pragmatic scores
+
+**Modes**:
+- **Strict**: Aggressive challenge, require strong justification
+- **Balanced**: Thoughtful challenge, accept justified complexity
+- **Lenient**: Raise concerns without blocking
+
+**Exemptions** (full rigor applied):
+- Security-critical features
+- Data integrity requirements
+- Compliance mandates
+- Accessibility requirements
+
+## Review Findings Categories
+
+### Strengths
+What's working well and should be maintained/amplified.
+
+### Areas for Improvement
+Current state → Desired state, with priority.
+
+### Technical Debt
+Accumulated shortcuts and their impact:
+- **High Priority**: Impacting development velocity
+- **Medium Priority**: Manageable but growing
+- **Low Priority**: Minor annoyances
+
+### Risks
+**Technical Risks**: Architecture-related
+**Operational Risks**: Deployment/maintenance
+**Business Risks**: Impact on objectives
+
+Each with: Likelihood, Impact, Mitigation strategy
+
+## Post-Review Actions
+
+### 1. Review Findings
+Read complete review document.
+
+### 2. Prioritize Recommendations
+Determine which to act on immediately vs. defer.
+
+### 3. Start Recalibration
+"Start architecture recalibration for [target]"
+
+Creates action plan:
+- ADR updates needed
+- Refactoring tasks
+- Implementation roadmap
+- Progress tracking
+
+### 4. Create/Update ADRs
+Document decisions made based on review.
+
+### 5. Track Progress
+Monitor implementation of recommendations.
+
+### 6. Schedule Follow-up
+Plan next review based on findings.
+
+## Best Practices
+
+**Frequency**:
+- Major versions: Always review before release
+- Regular: Quarterly or bi-annually
+- Triggered: When concerns arise or major changes occur
+
+**Preparation**:
+- Update principles document
+- Ensure recent ADRs documented
+- Gather relevant metrics
+- Identify specific concerns to address
+
+**Participation**:
+- Include all relevant specialists
+- Request additional specialists as needed
+- Encourage diverse perspectives
+- Document dissenting opinions
+
+**Documentation**:
+- Reference specific files and line numbers
+- Include diagrams where helpful
+- Link to related ADRs
+- Date all recommendations
+
+**Follow-through**:
+- Don't let reviews gather dust
+- Create recalibration plans
+- Track implementation progress
+- Measure success against metrics
+
+## Review Outputs
+
+All reviews create:
+1. **Review Document**: Complete analysis and recommendations
+2. **Action Items**: Extracted from recommendations
+3. **ADR Candidates**: Decisions needing documentation
+4. **Recalibration Plan**: When started
+
+## Integration with Development
+
+**Code Reviews**:
+- Reference architecture reviews in PRs
+- Check alignment with recommendations
+- Document architectural changes
+
+**Planning**:
+- Use review findings in sprint planning
+- Allocate time for architectural work
+- Balance features with tech debt
+
+**Retrospectives**:
+- Include architectural discussions
+- Review progress on recommendations
+- Adjust approach based on learnings

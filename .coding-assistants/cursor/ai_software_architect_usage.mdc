@@ -1,42 +1,125 @@
----
-description: How to use the AI Software Architect framework for architecture documentation and reviews
-globs:
-  - ".architecture/**/*"
-  - "**/*.md"
-alwaysApply: false
----
+# AI Software Architect Framework - Usage
 
-# AI Software Architect Framework
+## Core Commands
 
-This rule provides guidance on using the AI Software Architect framework - a markdown-based system for implementing rigorous software architecture practices with AI assistant integration.
+### Create Architectural Decision Record (ADR)
 
-## Directory Structure
+**Command**: "Create ADR for [decision topic]"
 
-The AI Software Architect framework uses these key directories:
+**Examples**:
+- "Create ADR for using PostgreSQL database"
+- "Document architectural decision for microservices"
+- "Write ADR about authentication approach"
 
-- `.architecture/` - The main container for all architectural documentation
-  - `decisions/adrs/` - Contains Architectural Decision Records (ADRs)
-  - `decisions/principles.md` - Architectural principles document
-  - `reviews/` - Holds architecture review documents
-  - `recalibration/` - Contains plans for implementing architectural changes
-  - `comparisons/` - Version-to-version comparisons
-  - `templates/` - Templates for various document types
-  - `members.yml` - Defines architecture review team members
+**Result**: Creates numbered ADR in `.architecture/decisions/adrs/`
 
-- `.coding-assistants/` - Configuration for AI assistants to understand your architecture
-  - Each assistant has its own subdirectory (claude, cursor, codex)
+### Start Architecture Review
 
-## Key Workflows
+**Command**: "Start architecture review for [version/feature]"
 
-1. **Creating ADRs**: Document architectural decisions in `.architecture/decisions/adrs/`
-2. **Architecture Reviews**: Conduct and document reviews in `.architecture/reviews/` using:
-   - Version-based format (e.g., `1-0-0.md`) for version reviews
-   - Feature-based format (e.g., `feature-name.md`) for feature reviews
-3. **Recalibration**: Plan implementation in `.architecture/recalibration/`
-4. **Specialized Reviews**: Get focused feedback from specific architectural perspectives
+**Examples**:
+- "Start architecture review for version 2.0.0"
+- "Review architecture for authentication system"
+- "Conduct architecture review for payment feature"
 
-## Commands for Cursor Users
+**Result**: Comprehensive multi-perspective review document
 
-- "Review this architecture using AI Software Architect framework"
-- "Create an ADR for [topic] following the AI Software Architect format"
-- "Provide a security review for this code using the AI Software Architect framework"
+### Request Specialist Review
+
+**Command**: "Ask [Specialist Name] to review [target]"
+
+**Examples**:
+- "Ask Security Specialist to review API authentication"
+- "Have Performance Expert review database queries"
+- "Get Domain Expert's opinion on data model"
+
+**Result**: Focused review from specialist perspective
+
+**Note**: If specialist doesn't exist, they'll be created automatically
+
+### List Architecture Team
+
+**Command**: "List architecture members"
+
+**Alternatives**:
+- "Who's on the architecture team?"
+- "Show me the architects"
+- "What specialists are available?"
+
+**Result**: List of team members with specialties
+
+### Check Architecture Status
+
+**Command**: "What's our architecture status?"
+
+**Alternatives**:
+- "Show architecture documentation"
+- "Architecture health check"
+- "How many ADRs do we have?"
+
+**Result**: Summary of ADRs, reviews, team members, and health
+
+### Start Recalibration
+
+**Command**: "Start architecture recalibration for [target]"
+
+**Examples**:
+- "Start recalibration for version 2.0 review"
+- "Create action plan from authentication review"
+- "Plan implementation of security recommendations"
+
+**Result**: Prioritized action plan with ADR updates and roadmap
+
+## Workflow Patterns
+
+### New Feature Development
+1. "Start architecture review for [feature]"
+2. "Ask [relevant specialist] to review [specific concern]"
+3. "Create ADR for [key decisions]"
+4. "Start recalibration for [feature]"
+
+### Technical Debt Assessment
+1. "Review [component] for technical debt"
+2. "Ask Maintainability Expert to suggest priorities"
+3. "Create ADR for refactoring approach"
+4. "Start recalibration for improvements"
+
+### Pre-Release Review
+1. "What's our architecture status?"
+2. "Start architecture review for version X.Y.Z"
+3. "Address findings from review"
+4. "Start recalibration for next version"
+
+## Best Practices
+
+1. **Be Specific**: Include context and scope in requests
+2. **Use Specialists**: Leverage different perspectives
+3. **Document Decisions**: Create ADRs for significant choices
+4. **Regular Reviews**: Schedule reviews before major releases
+5. **Track Progress**: Use status checks regularly
+6. **Link Documents**: Reference ADRs in code and reviews
+
+## Tips for Cursor Integration
+
+- **Reference files**: Mention specific files when relevant
+- **Ask follow-ups**: Dive deeper into recommendations
+- **Request examples**: Get concrete code examples
+- **Validate against principles**: Check alignment with ADRs
+- **Iterative refinement**: Start broad, then focus
+
+## Common Questions
+
+**Q: How many ADRs should we have?**
+A: Document significant decisions - typically 10-30 for most projects
+
+**Q: How often should we review?**
+A: Before major releases, quarterly, or when significant changes occur
+
+**Q: Can we customize the team?**
+A: Yes, edit `.architecture/members.yml` to add or modify specialists
+
+**Q: What if a specialist doesn't exist?**
+A: Just request them - they'll be created automatically
+
+**Q: How do we track implementation?**
+A: Use recalibration process to create action plans

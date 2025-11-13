@@ -1,57 +1,174 @@
----
-description: Directory structure and organization of the AI Software Architect framework
-globs:
-  - ".architecture/**/*"
-alwaysApply: false
----
+# AI Software Architect Framework - Structure
 
-# AI Software Architect Framework Structure
+## Directory Organization
 
-This rule explains the directory structure and organization of the AI Software Architect framework.
+### `.architecture/` - Root Directory
 
-## Main Directories
+Main framework directory containing all architecture documentation.
 
+#### `.architecture/decisions/` - Decision Documentation
+
+**`adrs/`** - Architectural Decision Records
+- Numbered sequentially (ADR-001, ADR-002, etc.)
+- Captures context, decision, and consequences
+- Immutable historical record
+- Format: `ADR-XXX-kebab-case-title.md`
+
+**`principles.md`** - Core Architectural Principles
+- Project-specific principles
+- Technology stack guidelines
+- Decision-making criteria
+- Living document (can evolve)
+
+#### `.architecture/reviews/` - Review Documents
+
+Contains architecture review documents:
+- **Version reviews**: `1-0-0.md`, `2-0-0.md`
+- **Feature reviews**: `feature-kebab-case.md`
+- **Specialist reviews**: `specialist-role-target.md`
+- **Initial analysis**: `initial-system-analysis.md`
+
+Each review includes:
+- Individual member perspectives
+- Collaborative discussion
+- Consolidated findings
+- Prioritized recommendations
+
+#### `.architecture/recalibration/` - Action Plans
+
+Implementation plans derived from reviews:
+- Prioritized recommendations
+- ADR updates needed
+- Implementation roadmap
+- Progress tracking
+- Format matches corresponding review
+
+#### `.architecture/comparisons/` - Version Comparisons
+
+Version-to-version architecture evolution:
+- Changes in patterns
+- Decision impacts
+- Technical debt trends
+- Lessons learned
+
+#### `.architecture/templates/` - Document Templates
+
+Reusable templates:
+- **adr-template.md**: ADR structure
+- **review-template.md**: Review structure
+- **recalibration-template.md**: Recalibration structure
+- **config.yml**: Framework configuration
+
+#### `.architecture/members.yml` - Team Definitions
+
+Architecture team member personas:
+- ID, name, title
+- Specialties and domains
+- Perspective description
+- Used in reviews
+
+Example:
+```yaml
+members:
+  - id: security_specialist
+    name: "Security Specialist"
+    title: "Security Architecture Expert"
+    specialties:
+      - "Threat modeling"
+      - "Security patterns"
+      - "Data protection"
+    perspective: "Evaluates security implications..."
 ```
-.architecture/
-├── decisions/
-│   ├── adrs/                # Architectural Decision Records
-│   └── principles.md        # Architectural principles document
-├── reviews/                 # Architecture review documents
-├── recalibration/           # Recalibration plans and tracking
-├── comparisons/             # Version-to-version comparisons
-├── docs/                    # General architecture documentation
-├── templates/               # Templates for various documents
-└── members.yml              # Architecture review team members
-```
 
-## .coding-assistants/
+#### `.architecture/config.yml` - Configuration (Optional)
 
-```
-.coding-assistants/
-├── claude/                  # Claude Code configuration
-├── cursor/                  # Cursor configuration
-└── codex/                   # GitHub Copilot/Codex configuration
-```
+Framework behavior configuration:
+- Pragmatic mode settings
+- Deferral tracking
+- Custom workflows
+- Integration preferences
 
-## Document Types
+### `.coding-assistants/` - AI Assistant Configuration
 
-1. **ADRs** (.architecture/decisions/adrs/):
-   - Lightweight documents that capture architectural decisions
-   - Include context, decision, status, consequences, and alternatives
+Assistant-specific configurations:
+- **claude/**: Claude Code configurations
+- **cursor/**: Cursor Rules (this directory)
+- **codex/**: GitHub Copilot configurations
 
-2. **Reviews** (.architecture/reviews/):
-   - Version-based reviews (e.g., `1-0-0.md`) 
-   - Feature-based reviews (e.g., `feature-name.md`)
-   - Include multi-perspective analysis from different architecture roles
+## File Naming Conventions
 
-3. **Recalibration Plans** (.architecture/recalibration/):
-   - Action plans for implementing review recommendations
-   - Track progress on architectural improvements
+### ADRs
+Format: `ADR-XXX-kebab-case-title.md`
+- XXX: Zero-padded sequential number (001, 002, ...)
+- Title: Lowercase with hyphens
 
-4. **Principles** (.architecture/decisions/principles.md):
-   - Core architectural principles guiding the project
-   - High-level design philosophy and constraints
+Examples:
+- `ADR-001-use-postgresql.md`
+- `ADR-015-implement-cqrs-pattern.md`
 
-5. **Members** (.architecture/members.yml):
-   - Defines architecture review team members
-   - Each member has specialties, disciplines, and domains
+### Reviews
+**Version**: `X-Y-Z.md` (dots become hyphens)
+- `1-0-0.md`
+- `2-1-3.md`
+
+**Feature**: `feature-kebab-case.md`
+- `feature-authentication.md`
+- `feature-payment-processing.md`
+
+**Specialist**: `specialist-role-target.md`
+- `security-specialist-api-auth.md`
+- `performance-expert-database-queries.md`
+
+### Recalibration
+Matches corresponding review:
+- `1-0-0.md` (for version review)
+- `feature-authentication.md` (for feature review)
+
+## Content Structure
+
+### ADR Structure
+1. Status (Proposed/Accepted/Deprecated/Superseded)
+2. Context (problem and background)
+3. Decision Drivers (factors influencing decision)
+4. Decision (chosen approach)
+5. Consequences (positive and negative)
+6. Implementation (approach and timeline)
+7. Validation (success criteria)
+8. References (related docs)
+
+### Review Structure
+1. Executive Summary
+2. Individual Member Reviews
+3. Collaborative Discussion
+4. Consolidated Findings
+5. Recommendations (prioritized)
+6. Success Metrics
+7. Follow-up plan
+
+### Recalibration Structure
+1. Review Analysis & Prioritization
+2. Architectural Plan Updates
+3. Documentation Refresh
+4. Implementation Roadmap
+5. Progress Tracking
+
+## Best Practices
+
+**File Organization**:
+- Keep related documents together
+- Use consistent naming
+- Link documents with references
+- Maintain index in reviews
+
+**Content Guidelines**:
+- Be concise but complete
+- Focus on "why" over "what"
+- Include diagrams where helpful
+- Date all documents
+- Sign off on reviews
+
+**Maintenance**:
+- Archive superseded ADRs (don't delete)
+- Update principles as project evolves
+- Regular cleanup of drafts
+- Version control everything

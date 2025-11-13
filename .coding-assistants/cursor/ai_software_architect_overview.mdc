@@ -1,30 +1,65 @@
----
-description: High-level overview of the AI Software Architect framework
-globs:
-  - "**/*.md"
-  - ".architecture/**/*"
-alwaysApply: true
----
+# AI Software Architect Framework - Overview
 
-# AI Software Architect Overview
+This project uses the AI Software Architect framework for structured architecture management. The framework provides a systematic approach to documenting decisions, conducting reviews, and managing architectural evolution.
 
-AI Software Architect is a framework for organizing and structuring software architecture design with support for multiple AI coding assistants. It provides a structured approach to architecture documentation and decision-making.
+## Framework Purpose
 
-## Key Principles
+The AI Software Architect framework helps development teams:
+- Document architectural decisions systematically (ADRs)
+- Conduct multi-perspective architecture reviews
+- Track architectural evolution over time
+- Maintain alignment between decisions and implementation
+- Foster collaboration between stakeholders
 
-The framework follows these key principles:
+## Directory Structure
 
-1. **Architecture Documentation**: Central repository of architecture decisions and reviews in `.architecture/`
-2. **Coding Assistant Integration**: Support for multiple AI coding assistants in `.coding-assistants/`
-3. **Structured Review Process**: Formalized approach to architecture reviews and recalibration
-4. **Multi-Perspective Analysis**: Reviews from specialized architectural roles
-5. **Implementation Planning**: Concrete plans for architectural improvements
+```
+.architecture/
+├── decisions/
+│   ├── adrs/           # Architectural Decision Records
+│   └── principles.md   # Core architectural principles
+├── reviews/            # Architecture review documents
+├── recalibration/      # Implementation plans from reviews
+├── comparisons/        # Version-to-version comparisons
+├── templates/          # Document templates
+├── members.yml         # Architecture team member definitions
+└── config.yml          # Framework configuration (optional)
+```
 
-## Core Components
+## Core Concepts
 
-- **ADRs**: Lightweight, structured documentation of architectural decisions
-- **Architecture Reviews**: Multi-perspective analysis of architecture
-- **Recalibration Plans**: Action items for implementing changes
-- **Specialized Roles**: Different architectural perspectives (security, performance, etc.)
+### Architectural Decision Records (ADRs)
+Lightweight documents that capture important architectural decisions, including context, alternatives considered, and rationale for the chosen approach.
 
-Refer to the central architecture documentation in the `.architecture/` directory for definitive information on the system design.
+### Architecture Team Members
+Defined personas representing different architectural perspectives (security, performance, maintainability, domain expertise, etc.). Reviews leverage these personas for comprehensive analysis.
+
+### Review Process
+Structured evaluation of architecture from multiple specialized perspectives, resulting in prioritized findings and actionable recommendations.
+
+### Recalibration
+Translation of review findings into concrete action plans, including ADR updates, refactoring tasks, and implementation roadmaps.
+
+## Integration with Cursor
+
+This framework is designed to work seamlessly with Cursor's AI assistance. Use natural language commands to:
+- Request architecture reviews
+- Create ADRs
+- Get specialist perspectives
+- Analyze code against principles
+
+The framework's structure and documentation provide Cursor with the context needed to give architecturally sound recommendations.
+
+## Getting Started
+
+If the framework hasn't been set up yet, use:
+```
+Setup ai-software-architect
+```
+
+To check current status:
+```
+What's our architecture status?
+```
+
+For more information, see the other framework rule files in this directory.

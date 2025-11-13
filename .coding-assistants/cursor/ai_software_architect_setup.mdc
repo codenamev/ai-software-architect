@@ -1,77 +1,70 @@
----
-description: Setup and configuration instructions for AI Software Architect framework
-globs:
-  - "CLAUDE.md"
-  - ".coding-assistants/**/*"
-alwaysApply: false
----
+# AI Software Architect Framework - Setup
 
-# AI Software Architect Setup
+## Setup Command
 
-This rule provides setup instructions for configuring the AI Software Architect framework in a project.
+To set up the framework in this project, use:
+```
+Setup ai-software-architect
+```
 
-## Setup Recognition
+Alternative phrases:
+- "Setup architecture"
+- "Initialize architecture framework"
 
-Respond to these setup requests by following the setup process:
+## What Setup Does
 
-- "Setup ai-software-architect"
-- "Setup architecture" 
-- "Setup software architect"
-- "Setup architect"
-- "Customize architecture"
+1. **Analyzes Project**: Det
 
-## Setup Process
+ects languages, frameworks, and patterns
+2. **Creates Directory Structure**: Sets up `.architecture/` with proper subdirectories
+3. **Customizes Members**: Creates architecture team based on detected technologies
+4. **Customizes Principles**: Tailors principles to your technology stack
+5. **Sets up Templates**: Provides ready-to-use templates for ADRs and reviews
+6. **Conducts Initial Analysis**: Creates comprehensive initial system analysis
 
-When a user requests setup:
+## Setup Verification
 
-1. **Detect Setup Context**
-   - Check if `.architecture/` directory exists with framework files
-   - Verify running from user's project root (not within .architecture)
-   - Confirm user has framework reference in their project configuration
+After setup, verify with:
+```
+What's our architecture status?
+```
 
-2. **Analyze Target Project**
-   - Examine current directory to understand the codebase
-   - Identify programming languages, frameworks, and patterns
-   - Check for existing documentation, package files, project structure
-   - Look for technology-specific files
+You should see:
+- Framework setup: Complete
+- ADRs created: 0 (initial state)
+- Reviews conducted: 1 (initial analysis)
+- Team members: 4-8 (depending on stack)
 
-3. **Framework Installation**
-   - Move framework from `.architecture/.architecture/` to `.architecture/`
-   - Create `.coding-assistants/` directory structure with Cursor Rule files
-   - Set up initial directory structure for decisions, reviews, recalibration
+## Post-Setup Steps
 
-4. **Customize for Project**
-   - Update `.architecture/members.yml` with roles relevant to tech stack
-   - Modify `.architecture/principles.md` for project's architectural needs
-   - Customize templates in `.architecture/templates/` based on project patterns
-   - Create initial ADR structure
+1. **Review Initial Analysis**: Check `.architecture/reviews/initial-system-analysis.md`
+2. **Customize Members**: Edit `.architecture/members.yml` if needed
+3. **Review Principles**: Check `.architecture/decisions/principles.md`
+4. **Create First ADR**: Document an existing architectural decision
 
-5. **Cleanup & Finalize**
-   - Remove template repository files (README.md, USAGE*.md, INSTALL.md)
-   - Remove `.architecture/.git/` directory specifically
-   - Remove empty cloned repository structure
-   - Verify framework files are properly located
+## When to Run Setup
 
-6. **Collaborative Architectural Analysis**
-   - Conduct comprehensive analysis of the codebase from multiple architectural perspectives
-   - Adopt roles of all members defined in `.architecture/members.yml`
-   - Each member analyzes system from their specialized perspective
-   - Create comprehensive analysis document in `.architecture/reviews/initial-system-analysis.md`
-   - Include findings on: system structure, design patterns, technology choices, strengths, improvements, technical debt, recommendations
-   - Provide both individual member insights and collaborative synthesis
+- **First time**: When adding framework to project
+- **Do NOT re-run**: If `.architecture/` already exists
+- **Check first**: Use status command before setup
 
-7. **Guide Next Steps**
-   - Explain customizations made and reasoning
-   - Summarize key findings from initial architectural analysis
-   - Show how to use framework with their specific project
-   - Suggest immediate steps for architectural documentation based on analysis
-   - Provide examples relevant to their tech stack and identified patterns
+## Customization After Setup
 
-## Configuration Files
+You can customize:
+- Members (`.architecture/members.yml`)
+- Principles (`.architecture/decisions/principles.md`)
+- Templates (`.architecture/templates/`)
+- Configuration (`.architecture/config.yml`)
 
-When setting up, ensure these files are properly configured:
+## Troubleshooting
 
-- `.coding-assistants/cursor/` - Cursor Rule files for framework integration
-- `CLAUDE.md` - Add framework usage instructions (if present)
-- `.architecture/members.yml` - Customize for project's needs
-- `.architecture/principles.md` - Align with project architecture
+**Already set up error**: Framework is already installed, use status command instead
+**Permission errors**: Check directory permissions
+**Missing dependencies**: Ensure git is available if cloning
+
+## Next Steps
+
+After setup:
+1. "List architecture members" - See your team
+2. "Create ADR for [first decision]" - Document a decision
+3. "Start architecture review" - Conduct first review

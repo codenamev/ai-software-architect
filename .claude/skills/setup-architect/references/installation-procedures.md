@@ -53,8 +53,8 @@ fi
 Copy the framework from the cloned location to `.architecture/`:
 
 ```bash
-# Copy all framework files
-cp -r .architecture/.architecture/* .architecture/
+# Copy framework files (they're in the .architecture subfolder of the cloned repo)
+cp -r .architecture/.architecture/.architecture/* .architecture/
 
 # Verify copy succeeded
 if [ $? -eq 0 ]; then

@@ -17,12 +17,21 @@ Ask if needed:
 - What alternatives were considered?
 - What are the trade-offs?
 
-### 2. Generate ADR Number
+### 2. Check Numbering Format
+Read `.architecture/config.yml` to determine `adr.numbering_format`:
+
+- **`sequential`** (default): Use `ADR-XXX-title.md` format (e.g., `ADR-001`, `ADR-002`)
+- **`date-based`**: Use `YYYYMMDD-ADR-title.md` format (e.g., `20260125-ADR`)
+
+**For sequential format**:
 ```bash
 # Find highest ADR number
 ls .architecture/decisions/adrs/ | grep -E "^ADR-[0-9]+" | sed 's/ADR-//' | sed 's/-.*//' | sort -n | tail -1
 ```
 New ADR = next sequential number (e.g., if highest is 003, create 004)
+
+**For date-based format**:
+Use today's date in YYYYMMDD format. If multiple ADRs on the same day, the date alone is sufficient - the title provides uniqueness.
 
 ### 3. Validate and Sanitize Input
 **Security**: Sanitize user input to prevent path traversal and injection:
@@ -32,18 +41,22 @@ New ADR = next sequential number (e.g., if highest is 003, create 004)
 - Validate result: ensure filename contains only [a-z0-9-]
 
 ### 4. Create Filename
-Format: `ADR-XXX-kebab-case-title.md`
 
-Examples:
+**Sequential format**: `ADR-XXX-kebab-case-title.md`
 - `ADR-001-use-react-for-frontend.md`
 - `ADR-002-choose-postgresql-database.md`
+
+**Date-based format**: `YYYYMMDD-ADR-kebab-case-title.md`
+- `20260125-ADR-use-react-for-frontend.md`
+- `20260125-ADR-choose-postgresql-database.md`
 
 **Valid input**: "Use React for Frontend" → `use-react-for-frontend`
 **Invalid blocked**: "../etc/passwd" → sanitized or rejected
 
 ### 5. Check Configuration
-- Read `.architecture/config.yml` to check if pragmatic_mode is enabled
-- If enabled and applies to ADR creation, include Pragmatic Enforcer analysis
+- Read `.architecture/config.yml` to check:
+  - `adr.numbering_format`: `sequential` or `date-based` (determines filename format)
+  - `pragmatic_mode.enabled`: If true and applies to ADR creation, include Pragmatic Enforcer analysis
 
 ### 6. Write ADR
 Use the template from `.architecture/templates/adr-template.md`:
@@ -64,13 +77,15 @@ Use the template from `.architecture/templates/adr-template.md`:
 **If deferrals enabled**: Track deferred decisions in `.architecture/deferrals.md`
 
 ### 7. Save ADR
-Write to: `.architecture/decisions/adrs/ADR-XXX-title.md`
+Write to: `.architecture/decisions/adrs/ADR-[NUMBER]-title.md`
+- Sequential: `ADR-001-title.md`
+- Date-based: `20260125-ADR-title.md`
 
 ### 8. Report to User
 ```
-Created ADR-XXX: [Title]
+Created ADR-[NUMBER]: [Title]
 
-Location: .architecture/decisions/adrs/ADR-XXX-title.md
+Location: .architecture/decisions/adrs/ADR-[NUMBER]-title.md
 Status: [Status]
 
 Key Points:

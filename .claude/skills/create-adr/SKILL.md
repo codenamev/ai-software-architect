@@ -1,7 +1,7 @@
 ---
 name: create-adr
 description: Creates a NEW Architectural Decision Record (ADR) documenting a specific architectural decision. Use when the user requests "Create ADR for [topic]", "Document decision about [topic]", "Write ADR for [choice]", or when documenting technology choices, patterns, or architectural approaches. Do NOT use for reviews (use architecture-review or specialist-review), checking existing ADRs (use architecture-status), or general documentation.
-allowed-tools: Read,Write,Bash(ls:*,grep:*)
+allowed-tools: Read,Write,Bash(bash:*,ls:*,grep:*)
 ---
 
 # Create Architectural Decision Record (ADR)
@@ -18,11 +18,20 @@ Ask if needed:
 - What are the trade-offs?
 
 ### 2. Generate ADR Number
+
+Use the deterministic numbering script to get the next ADR prefix. The script reads `numbering_format`, `sequential_format`, and `date_format` from `.architecture/config.yml` and returns the correct prefix.
+
 ```bash
-# Find highest ADR number
-ls .architecture/decisions/adrs/ | grep -E "^ADR-[0-9]+" | sed 's/ADR-//' | sed 's/-.*//' | sort -n | tail -1
+bash "<skill-base-dir>/../scripts/next-adr-number.sh" ".architecture/decisions/adrs" "topic-slug"
 ```
-New ADR = next sequential number (e.g., if highest is 003, create 004)
+
+Where `<skill-base-dir>` is this skill's base directory shown at the top of the skill prompt, and `topic-slug` is the kebab-case topic from step 3.
+
+- The script outputs the prefix on stdout (e.g., `001` for sequential, `20260210` for date-based)
+- Exit code 2 means a collision was detected (ADR with same prefix and topic already exists) — alert the user
+- Exit code 1 means a config error — check stderr for details
+
+**Note**: Run step 3 (sanitize input) before step 2 so the topic-slug is available for collision detection. The numbering below is logical, not execution order.
 
 ### 3. Validate and Sanitize Input
 **Security**: Sanitize user input to prevent path traversal and injection:
@@ -32,7 +41,7 @@ New ADR = next sequential number (e.g., if highest is 003, create 004)
 - Validate result: ensure filename contains only [a-z0-9-]
 
 ### 4. Create Filename
-Format: `ADR-XXX-kebab-case-title.md`
+Format: `ADR-<prefix>-kebab-case-title.md` where `<prefix>` is the output from step 2.
 
 Examples:
 - `ADR-001-use-react-for-frontend.md`

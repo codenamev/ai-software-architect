@@ -8,11 +8,12 @@ This document contains reusable patterns referenced by AI Software Architect ski
 
 1. [Tool Permission Pattern](#tool-permission-pattern)
 2. [Progressive Disclosure Pattern](#progressive-disclosure-pattern)
-3. [Input Validation & Sanitization](#input-validation--sanitization)
-4. [Error Handling](#error-handling)
-5. [File Loading](#file-loading)
-6. [Reporting Format](#reporting-format)
-7. [Skill Workflow Template](#skill-workflow-template)
+3. [Script-Based Deterministic Operations](#script-based-deterministic-operations)
+4. [Input Validation & Sanitization](#input-validation--sanitization)
+5. [Error Handling](#error-handling)
+6. [File Loading](#file-loading)
+7. [Reporting Format](#reporting-format)
+8. [Skill Workflow Template](#skill-workflow-template)
 
 ---
 
@@ -85,7 +86,7 @@ allowed-tools: Read,Write,Edit,Glob,Grep,Bash
 |-------|-------|-----------|
 | `list-members` | `Read` | Only reads members.yml |
 | `architecture-status` | `Read,Glob,Grep` | Scans files and searches |
-| `create-adr` | `Read,Write,Bash(ls:*,grep:*)` | Creates ADRs, scans for numbering |
+| `create-adr` | `Read,Write,Bash(bash:*,ls:*,grep:*)` | Creates ADRs, runs numbering script |
 | `specialist-review` | `Read,Write,Glob,Grep` | Reviews code, writes reports |
 | `architecture-review` | `Read,Write,Glob,Grep,Bash(git:*)` | Full reviews + git status |
 | `pragmatic-guard` | `Read,Edit` | Reads/modifies config |
@@ -422,6 +423,67 @@ mkdir -p .claude/skills/skill-name/assets
 - [Phase 2B Results](../../.architecture/comparisons/phase-2b-specialist-review-results.md)
 - [Phase 2 Complete Summary](../../.architecture/comparisons/phase-2-complete-summary.md)
 - [ADR-008](../../.architecture/decisions/adrs/ADR-008-progressive-disclosure-pattern-for-large-skills.md)
+
+---
+
+## Script-Based Deterministic Operations
+
+**Status**: Implemented (2026-02-10)
+**Reference**: [ADR-009](../../.architecture/decisions/adrs/ADR-009-script-based-deterministic-operations.md)
+
+Operations that must produce identical results regardless of LLM interpretation should be implemented as shell scripts, not as inline skill instructions. Skills invoke scripts via `Bash`, scripts return structured output.
+
+### When to Script
+
+**Script when:**
+- Operation involves destructive actions (`rm -rf`, file overwrites)
+- Operation has an exact correct output (numbering, formatting, paths)
+- Operation reads configuration and must respect it deterministically
+- LLM improvisation has caused or could cause bugs
+- Trust erosion from incorrect results would undermine framework credibility
+
+**Keep interpretive when:**
+- Operation requires understanding context (project analysis, recommendations)
+- Output is naturally variable (reviews, summaries, team customization)
+- No single correct answer exists
+
+### Script Interface Convention
+
+Scripts follow a consistent interface pattern:
+
+- **Arguments**: Positional, documented in script header comments
+- **Stdout**: Structured tokens or single-value output (machine-readable)
+- **Stderr**: Human-readable errors and warnings
+- **Exit codes**: 0 = success, non-zero = specific failure category
+- **Safety**: `set -euo pipefail` in all scripts
+
+### Current Scripts
+
+| Script | Location | Used By | Purpose |
+|--------|----------|---------|---------|
+| `install-framework.sh` | `setup-architect/scripts/` | `setup-architect` | All installation file operations |
+| `next-adr-number.sh` | `scripts/` (shared) | `create-adr` | ADR prefix generation from config |
+
+### Skill Invocation Pattern
+
+Skills invoke scripts using the `<skill-base-dir>` path provided at the top of the skill prompt:
+
+```bash
+# Skill-specific script
+bash "<skill-base-dir>/scripts/install-framework.sh" "$(pwd)"
+
+# Shared script (one directory up from skill base)
+bash "<skill-base-dir>/../scripts/next-adr-number.sh" "<adrs-dir>" "<topic-slug>"
+```
+
+### Script Location Convention
+
+- **Skill-specific scripts**: `<skill-name>/scripts/` — used by one skill only
+- **Shared scripts**: `scripts/` (at skills root) — used by multiple skills
+
+### Background
+
+ADR-009 identified the need for deterministic operations but deferred implementation because it missed the highest-stakes candidate (framework installation with destructive `rm -rf`). The trigger condition — "bash command construction causes bugs" — was satisfied when the setup-architect skill repeatedly botched the installation copy path despite a prior fix (PR #5). This pattern was implemented to address both the installation failure and ADR numbering reliability.
 
 ---
 
@@ -890,6 +952,12 @@ Don't extract when:
 ---
 
 ## Version History
+
+**v1.3** (2026-02-10)
+- Added script-based deterministic operations pattern (ADR-009 implementation)
+- Documented when to script vs keep interpretive
+- Added script interface convention and location convention
+- Updated create-adr permission scope for script invocation
 
 **v1.2** (2025-12-04)
 - Added progressive disclosure pattern (ADR-008)

@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/codenamev-ai-software-architect-badge.png)](https://mseep.ai/app/codenamev-ai-software-architect)
+
 # AI Software Architect
 
 A markdown-based framework for implementing rigorous software architecture practices in any project, with specialized AI assistant integration.

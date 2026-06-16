@@ -219,7 +219,7 @@ output:
 # Version tracking
 version:
   # Current framework version
-  framework_version: "1.2.0"
+  framework_version: "1.5.4"
 
   # Project architecture version (update with each major architecture change)
   architecture_version: "1.0.0"

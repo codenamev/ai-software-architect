@@ -5,6 +5,19 @@ All notable changes to the AI Software Architect framework will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+#### Framework version unified across all channels (ADR-011 single-version commitment)
+ADR-011 committed to "a single version number shared across all channels," but the framework version had drifted four ways: plugin/marketplace `1.5.4`, MCP server (`mcp/package.json` + `mcp/index.js`) `1.3.0`, and `config.yml` / `CLAUDE.md` / `AGENTS.md` `1.2.0`. A user could not answer "what version am I running." All framework/MCP version strings are now `1.5.4`.
+
+- Left intentionally independent (distinct version concepts, not channels): `tools/package.json` (internal `architecture-tools` package), `config.yml` `architecture_version` (the target project's architecture version), and AGENTS.md "Documentation Version" (doc-structure version per ADR-006).
+
+### Added
+
+- **`version-check` governance command + recurrence guard.** `node tools/cli.js version-check` (and `npm run version-check`) verifies one framework version across all eight channel/doc sources and exits non-zero on drift. Backed by `tools/lib/version-consistency.js` and `tools/test/version-consistency.test.js`, whose repository test fails CI on any future drift — the per-file enforcement the ADR-011 release pipeline was meant to provide.
+
 ## [1.5.4] - 2026-05-04
 
 ### Fixed

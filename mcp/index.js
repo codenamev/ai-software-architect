@@ -20,7 +20,7 @@ class ArchitectureServer {
     this.server = new Server(
       {
         name: "ai-software-architect",
-        version: "1.3.0",
+        version: "1.5.4",
       },
       {
         capabilities: {

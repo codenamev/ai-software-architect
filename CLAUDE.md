@@ -121,6 +121,6 @@ Claude Code optimizes for natural language commands:
 
 ## Version Information
 
-**Framework Version**: 1.2.0
+**Framework Version**: 1.5.4
 **Last Updated**: 2025-12-04
 **Optimized For**: Claude Code with instruction capacity constraints (ADR-005)

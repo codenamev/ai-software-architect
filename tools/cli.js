@@ -14,6 +14,7 @@ import { countInstructions } from './lib/instruction-counter.js';
 import { validateAdr } from './lib/adr-validator.js';
 import { generateAll } from './lib/subagent-generator.js';
 import { discoverSource, PLUGIN_NAME } from './lib/setup-source-discovery.js';
+import { checkConsistency, FRAMEWORK_VERSION_SOURCES } from './lib/version-consistency.js';
 
 const [,, command, ...args] = process.argv;
 
@@ -23,6 +24,7 @@ const COMMANDS = {
   'generate-subagents': generateSubagentsCommand,
   'find-source': findSourceCommand,
   count: countCommand,
+  'version-check': versionCheckCommand,
   help: helpCommand
 };
 
@@ -284,6 +286,34 @@ function countCommand(args) {
 }
 
 /**
+ * Verify the framework version is consistent across all distribution channels.
+ * Enforces the single-version commitment from ADR-011. Exits 1 on drift.
+ */
+function versionCheckCommand() {
+  console.log(`\n🔖 Checking framework version consistency...\n`);
+
+  const entries = FRAMEWORK_VERSION_SOURCES.map(src => ({
+    label: src.label,
+    version: src.read(readFileSync(resolve('..', src.file), 'utf8')),
+  }));
+
+  const result = checkConsistency(entries);
+
+  for (const entry of entries) {
+    const mark = entry.version === null ? '❓' : entry.version === result.canonical ? '=' : '✗';
+    console.log(`  ${mark} ${entry.label}: ${entry.version ?? 'not found'}`);
+  }
+
+  if (result.consistent) {
+    console.log(`\n✨ All channels report ${result.canonical}.\n`);
+    return;
+  }
+
+  console.log(`\n❌ Version drift from canonical ${result.canonical} (ADR-011 requires one version).\n`);
+  process.exit(1);
+}
+
+/**
  * Show help
  */
 function helpCommand() {
@@ -296,6 +326,7 @@ Usage:
   node cli.js generate-subagents [--check] Generate agents/*.md from members.yml
   node cli.js find-source [--json]         Discover the framework source for setup-architect
   npm run count [files...]                 Count instructions (default: ../AGENTS.md ../CLAUDE.md)
+  node cli.js version-check                Verify one framework version across all channels (ADR-011)
 
 Examples:
   npm run validate

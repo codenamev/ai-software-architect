@@ -409,9 +409,9 @@ The framework works with any AI assistant that can:
 
 ## Version Information
 
-**Framework Version**: 1.2.0
+**Framework Version**: 1.5.4
 **Documentation Version**: 2.0.0 (Progressive Disclosure - ADR-006)
-**MCP Server Version**: 1.2.0
+**MCP Server Version**: 1.5.4
 **Last Updated**: 2025-12-04
 **Maintained By**: AI Software Architect Framework Contributors
 **Repository**: https://github.com/codenamev/ai-software-architect

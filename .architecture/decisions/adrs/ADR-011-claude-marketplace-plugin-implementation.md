@@ -145,6 +145,15 @@ See [Research Document](../../research/claude-marketplace-requirements.md) for c
 
 ### Architectural Decision (Regardless of Path)
 
+> **Amended by [ADR-015](./ADR-015-mcp-skills-parity-reconciliation.md) (2026-06-16):** Two claims in
+> this section did not hold and are corrected there (this passage is preserved as the historical
+> record, per the append-only ADR-amendment convention). (1) "**95%+ code sharing**" (line below)
+> describes the *marketplace-wrapper → MCP-npm* relationship only; the MCP server and the Skills share
+> **zero** code — they are independent reimplementations. (2) "**All channels provide identical core
+> features**" is false for LLM-orchestrated reviews: those are plugin/Skills-only by capability (an MCP
+> server cannot dispatch host subagents). ADR-015 adopts a two-tier capability model and **removed** the
+> three MCP pseudo-review tools rather than continue implying parity.
+
 **If marketplace plugin is built, the architectural approach is:**
 
 **Thin Wrapper Architecture** with 95%+ code sharing:

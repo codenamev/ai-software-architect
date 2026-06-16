@@ -215,18 +215,23 @@ Claude Code Plugin System
          ↓
 npx ai-software-architect (delegates to npm package)
          ↓
-MCP Server Tools (setup, ADRs, reviews, etc.)
+MCP Server Tier-1 Tools (setup, ADRs, status, etc.)
+         +
+Bundled Skills/Subagents (reviews, pragmatic enforcement — Tier 2)
 ```
 
 **Key points**:
 - The plugin itself is just configuration (manifest + MCP config)
-- All functionality comes from the `ai-software-architect` npm package
-- 100% code sharing with MCP Server installation method
+- Tier-1 deterministic tools come from the `ai-software-architect` npm package
+- Tier-2 capabilities (orchestrated reviews, specialist reviews, pragmatic
+  enforcement) come from the bundled Skills and `pragmatic-enforcer` subagent —
+  these are not MCP tools
+- 100% code sharing with the MCP Server install for Tier-1 tools
 - Updates to the npm package automatically benefit plugin users
 
 This design means:
 - Minimal maintenance burden
-- Guaranteed feature parity with MCP Server
+- Tier-1 parity with the MCP Server install, plus Tier-2 reviews via Skills
 - Reliable updates
 - Small download size
 

@@ -1,6 +1,6 @@
 {
   "name": "ai-software-architect",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "description": "MCP server for AI Software Architect framework",
   "main": "index.js",
   "type": "module",

@@ -5,14 +5,14 @@
   },
   "metadata": {
     "description": "Architecture documentation tools and frameworks",
-    "version": "1.5.4"
+    "version": "1.6.0"
   },
   "plugins": [
     {
       "name": "ai-software-architect",
       "source": "./",
       "description": "AI-powered architecture documentation framework with ADRs, reviews, and pragmatic mode",
-      "version": "1.5.4",
+      "version": "1.6.0",
       "author": {
         "name": "AI Software Architect Project"
       },

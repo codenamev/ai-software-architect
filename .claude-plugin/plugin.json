@@ -1,6 +1,6 @@
 {
   "name": "ai-software-architect",
-  "version": "1.5.4",
+  "version": "1.6.0",
   "description": "AI-powered architecture documentation framework with ADRs, reviews, and pragmatic mode",
   "author": {
     "name": "AI Software Architect Project"

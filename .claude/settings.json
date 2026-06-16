@@ -19,9 +19,7 @@
       "mcp__ai-software-architect__create_adr",
       "mcp__ai-software-architect__get_architecture_status",
       "mcp__ai-software-architect__list_architecture_members",
-      "mcp__ai-software-architect__setup_architecture",
-      "mcp__ai-software-architect__specialist_review",
-      "mcp__ai-software-architect__start_architecture_review"
+      "mcp__ai-software-architect__setup_architecture"
     ],
     "deny": [],
     "ask": []

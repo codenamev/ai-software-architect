@@ -5,18 +5,30 @@ All notable changes to the AI Software Architect framework will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.6.0] - 2026-06-16
+
+### Removed (BREAKING)
+
+#### Three Tier-2 MCP tools removed ([ADR-015](.architecture/decisions/adrs/ADR-015-mcp-skills-parity-reconciliation.md))
+`start_architecture_review`, `specialist_review`, and `pragmatic_enforcer` are removed from the MCP server (~520 lines of `mcp/index.js`). These tools only ever emitted blank templates/frameworks for manual completion — an MCP server has no agent loop and cannot dispatch the host subagents that make a real review (ADR-013); they shared a name with the Skills that *do* run real reviews, which misled users. **Orchestrated reviews and pragmatic enforcement are now plugin/Skills-only** (`architecture-review`, `specialist-review`, and the `pragmatic-enforcer` subagent). The MCP server retains its deterministic Tier-1 tools (`setup_architecture`, `create_adr`, `list_architecture_members`, `get_architecture_status`, `configure_pragmatic_mode`, `get_implementation_guidance`). The same template structures remain available as static files in `.architecture/templates/`. The two removed allow-list entries were dropped from `.claude/settings.json`.
+
+**Migration:** use the `architecture-review` / `specialist-review` skills (Claude Code plugin) for reviews. MCP-only clients can read `.architecture/templates/review.md` directly for the template.
+
+### Changed
+
+- **Two-tier capability model ([ADR-015](.architecture/decisions/adrs/ADR-015-mcp-skills-parity-reconciliation.md)).** Operations are classified Tier 1 (deterministic; all channels) or Tier 2 (LLM-orchestrated; plugin/Skills only). [ADR-011](.architecture/decisions/adrs/ADR-011-claude-marketplace-plugin-implementation.md)'s "identical core features across all channels" and "95%+ code sharing" claims are corrected by append-only amendment.
 
 ### Fixed
 
 #### Framework version unified across all channels (ADR-011 single-version commitment)
-ADR-011 committed to "a single version number shared across all channels," but the framework version had drifted four ways: plugin/marketplace `1.5.4`, MCP server (`mcp/package.json` + `mcp/index.js`) `1.3.0`, and `config.yml` / `CLAUDE.md` / `AGENTS.md` `1.2.0`. A user could not answer "what version am I running." All framework/MCP version strings are now `1.5.4`.
+ADR-011 committed to "a single version number shared across all channels," but the framework version had drifted four ways: plugin/marketplace `1.5.4`, MCP server (`mcp/package.json` + `mcp/index.js`) `1.3.0`, and `config.yml` / `CLAUDE.md` / `AGENTS.md` `1.2.0`. A user could not answer "what version am I running." All framework/MCP version strings are unified (now `1.6.0`).
 
 - Left intentionally independent (distinct version concepts, not channels): `tools/package.json` (internal `architecture-tools` package), `config.yml` `architecture_version` (the target project's architecture version), and AGENTS.md "Documentation Version" (doc-structure version per ADR-006).
 
 ### Added
 
 - **`version-check` governance command + recurrence guard.** `node tools/cli.js version-check` (and `npm run version-check`) verifies one framework version across all eight channel/doc sources and exits non-zero on drift. Backed by `tools/lib/version-consistency.js` and `tools/test/version-consistency.test.js`, whose repository test fails CI on any future drift — the per-file enforcement the ADR-011 release pipeline was meant to provide.
+- **ADRs:** [ADR-015](.architecture/decisions/adrs/ADR-015-mcp-skills-parity-reconciliation.md) (MCP/Skills two-tier reconciliation, Accepted) and [ADR-016](.architecture/decisions/adrs/ADR-016-setup-fidelity-canonical-sources.md) (setup must derive team/stack from canonical sources, Proposed), plus the supporting architecture review and structural examination under `.architecture/reviews/`.
 
 ## [1.5.4] - 2026-05-04
 

@@ -136,10 +136,11 @@ Choose the right installation method for your workflow:
 | **Dependencies** | Node.js ≥18 (auto) | Node.js ≥18 | None | Traditional: No deps<br>Plugin & MCP: Node auto-managed |
 | **Auto-Updates** | ✅ `/plugin update` | ✅ `npm update` | ❌ Git pull | Plugin & MCP: Auto-update |
 | **Offline Use** | ⚠️ Needs npm | ⚠️ Needs npm | ✅ Full | Traditional: Offline ready |
-| **Core Features** | ✅ All 7 | ✅ All 7 | ✅ All 7 | All methods identical |
+| **Tier-1 Deterministic Tools** | ✅ All 6 | ✅ All 6 | ✅ All 6 | All methods identical |
+| **Tier-2 Reviews / Enforcement** | ✅ Skills | ❌ MCP-only install | ✅ Yes | Plugin & Traditional run reviews |
 | **Advanced Features** | ⚠️ 33% | ⚠️ 33% | ✅ 100% | Traditional most complete |
 | **Input Validation** | ✅ Yes | ⚠️ Basic | ❌ No | Plugin best |
-| **Pragmatic Mode** | ✅ Yes | ✅ Yes | ✅ Yes | All support YAGNI |
+| **Pragmatic Mode** | ✅ Yes | ⚠️ Config only | ✅ Yes | MCP configures; reviews are Tier 2 |
 | **Dynamic Members** | ✅ Yes | ❌ No | ✅ Yes | Plugin & Traditional auto-create |
 | **Recalibration** | ❌ No | ❌ No | ✅ Yes | Traditional only |
 | **Project Analysis** | ✅ Advanced | ✅ Advanced | ⚠️ Basic | Plugin & MCP: Advanced |
@@ -176,13 +177,15 @@ Choose the right installation method for your workflow:
 
 | Feature | Plugin 🆕 | MCP Server | Traditional |
 |---------|----------|------------|-------------|
-| Setup Architecture | ✅ | ✅ | ✅ |
-| Create ADR | ✅ | ✅ | ✅ |
-| Architecture Review | ✅ | ✅ | ✅ |
-| Specialist Review | ✅ | ✅ | ✅ |
-| List Members | ✅ | ✅ | ✅ |
-| Get Status | ✅ | ✅ | ✅ |
-| Pragmatic Mode (YAGNI) | ✅ | ✅ | ✅ |
+| Setup Architecture (Tier 1) | ✅ | ✅ | ✅ |
+| Create ADR (Tier 1) | ✅ | ✅ | ✅ |
+| List Members (Tier 1) | ✅ | ✅ | ✅ |
+| Get Status (Tier 1) | ✅ | ✅ | ✅ |
+| Configure Pragmatic Mode (Tier 1) | ✅ | ✅ | ✅ |
+| Implementation Guidance (Tier 1) | ✅ | ✅ | ✅ |
+| Architecture Review (Tier 2) | ✅ Skills | ❌ MCP tool | ✅ |
+| Specialist Review (Tier 2) | ✅ Skills | ❌ MCP tool | ✅ |
+| Pragmatic Enforcement (Tier 2) | ✅ Subagent | ❌ MCP tool | ✅ |
 | Dynamic Member Creation | ✅ | ❌ | ✅ |
 | Recalibration Process | ❌ | ❌ | ✅ |
 | Initial System Analysis | ✅ | ✅ | ✅ |
@@ -193,6 +196,8 @@ Choose the right installation method for your workflow:
 **Legend**: ✅ Fully supported, ⚠️ Partially supported, ❌ Not supported, N/A Not applicable
 
 **Note**: The Plugin bundles the same npm package as the MCP Server option, plus the seven skills, generated subagents, and ADR-validation hook as a single install unit.
+
+**Two-tier capability model** (see [ADR-015](.architecture/decisions/adrs/ADR-015-mcp-skills-parity-reconciliation.md)): Tier-1 operations are deterministic file/config tasks available on every channel, including the MCP server. Tier-2 capabilities — orchestrated architecture reviews, specialist reviews, and pragmatic enforcement — require LLM reasoning and are delivered only through the plugin/Skills (`architecture-review`, `specialist-review`, and the `pragmatic-enforcer` subagent), not as MCP tools. The Plugin gets Tier 2 via its bundled Skills; an MCP-only install does not.
 
 See [Feature Parity Analysis](.architecture/reviews/feature-parity-analysis.md) for detailed comparison.
 

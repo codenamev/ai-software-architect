@@ -144,8 +144,13 @@ Add this to your Cursor settings (`settings.json`):
 
 3. **Start using the framework**:
    - Create ADRs: "Use create_adr to document our database choice"
-   - Run reviews: "Use start_architecture_review for version 1.0.0"
-   - Get specialist input: "Use specialist_review with Security Architect for our API"
+   - List your team: "Use list_architecture_members"
+   - Check status: "Use get_architecture_status"
+
+   > **Note**: Orchestrated architecture reviews and pragmatic enforcement are
+   > **not** MCP tools. Run them via the plugin/Skills instead (the
+   > `architecture-review` and `specialist-review` skills and the
+   > `pragmatic-enforcer` subagent). See [Two-Tier Capability Model](#two-tier-capability-model).
 
 ### For Other AI Assistants
 
@@ -158,9 +163,24 @@ Add this to your Cursor settings (`settings.json`):
 
 3. **Test and use** (same as steps 2-3 above)
 
-## Available Tools (8 Core Tools)
+## Two-Tier Capability Model
 
-The MCP server provides 8 core tools corresponding to the framework's main capabilities:
+The framework splits capabilities into two tiers (see [ADR-015](../.architecture/decisions/adrs/ADR-015-mcp-skills-parity-reconciliation.md)):
+
+- **Tier 1 — Deterministic operations**: File and config operations with
+  predictable output. Available on **all channels, including this MCP server**:
+  `setup_architecture`, `create_adr`, `list_architecture_members`,
+  `get_architecture_status`, `configure_pragmatic_mode`,
+  `get_implementation_guidance`.
+- **Tier 2 — LLM-orchestrated analysis**: Multi-perspective reviews and
+  pragmatic enforcement that require an LLM to reason and generate content.
+  These are **plugin/Skills only** and are **not** exposed as MCP tools. Use the
+  `architecture-review` and `specialist-review` skills and the
+  `pragmatic-enforcer` subagent.
+
+## Available Tools (6 Tier-1 Tools)
+
+The MCP server provides 6 deterministic Tier-1 tools corresponding to the framework's core operations:
 
 ### `setup_architecture`
 **Standard Command Equivalent**: "Setup ai-software-architect"
@@ -216,39 +236,10 @@ Creates a new Architectural Decision Record with automatic numbering.
 }
 ```
 
-### `start_architecture_review`
-**Standard Command Equivalent**: "Start architecture review for [version/feature]"
-
-Creates a comprehensive multi-perspective architecture review template.
-
-**Parameters:**
-- `reviewTarget` (string, required): Version ('1.0.0') or feature name ('authentication')
-- `projectPath` (string, required): Path to your project root directory
-
-**Creates:**
-- `.architecture/reviews/[target].md` with sections for each team member
-- Review template with individual perspectives and collaborative discussion sections
-
-**Note**: This tool creates the review template. You'll need to fill in the analysis for each team member.
-
-### `specialist_review`
-**Standard Command Equivalent**: "Ask [Specialist Name] to review [target]"
-
-Creates a focused review template from a specific specialist's perspective.
-
-**Parameters:**
-- `specialist` (string, required): Specialist name or role (e.g., 'Security Specialist', 'Performance Expert')
-- `target` (string, required): What to review (e.g., 'API authentication', 'database queries')
-- `projectPath` (string, required): Path to your project root directory
-
-**Creates:**
-- `.architecture/reviews/specialist-[role]-[target].md` with specialist focus template
-
-**Behavior:**
-- If specialist exists in `members.yml`: Uses their defined perspective
-- If specialist doesn't exist: Returns error with list of available specialists
-
-**Note**: Unlike Claude Skills/Traditional methods, MCP does not auto-create missing specialists.
+> **Reviews are Tier 2, not MCP tools.** Orchestrated architecture reviews and
+> specialist reviews require LLM reasoning and are available only via the
+> plugin/Skills (`architecture-review` and `specialist-review`). See
+> [Two-Tier Capability Model](#two-tier-capability-model).
 
 ### `list_architecture_members`
 **Standard Command Equivalent**: "List architecture members"
@@ -303,12 +294,11 @@ Enables and configures Pragmatic Mode (YAGNI Enforcement) to prevent over-engine
 - **Lenient**: Raises concerns without blocking, suggests alternatives as options
 
 **When Pragmatic Mode is Enabled:**
-The Pragmatic Enforcer participates in:
-- Architecture reviews (`start_architecture_review`)
-- Specialist reviews (`specialist_review`)
-- ADR creation (`create_adr`)
-
-The Pragmatic Enforcer will:
+This tool writes the configuration. The Pragmatic Enforcer that *acts* on that
+configuration — challenging complexity, scoring necessity vs. complexity, and
+proposing simpler alternatives — is a Tier-2 capability delivered by the
+`pragmatic-enforcer` subagent and the orchestrated review skills, not an MCP
+tool. With pragmatic mode enabled, those plugin/Skills flows will:
 - Challenge complexity and abstractions with structured questions
 - Score necessity vs. complexity (target ratio <1.5)
 - Propose simpler alternatives that meet current requirements
@@ -323,66 +313,21 @@ The Pragmatic Enforcer will:
 }
 ```
 
-**Note**: This tool provides the same pragmatic mode capabilities available in Claude Skills via the `pragmatic-guard` skill.
+**Note**: This tool only manages configuration. To *run* pragmatic analysis, use
+the `pragmatic-enforcer` subagent via the plugin/Skills (see
+[Two-Tier Capability Model](#two-tier-capability-model)).
 
-### `pragmatic_enforcer`
-**Standard Command Equivalent**: "Ask Pragmatic Enforcer to review..."
+### `get_implementation_guidance`
+**Standard Command Equivalent**: "What implementation guidance applies here?"
 
-Invokes the Pragmatic Enforcer to analyze proposals, code changes, designs, or architectural decisions for over-engineering and propose simpler alternatives. This tool allows selective pragmatic analysis independent of whether Pragmatic Mode is globally enabled.
-
-**What it does:**
-1. **Load Configuration** - Reads current pragmatic mode settings (intensity, exemptions, thresholds)
-2. **Provide Framework** - Presents structured analysis framework with key questions
-3. **Guide Analysis** - Guides through necessity assessment, complexity assessment, and ratio calculation
-4. **Template Output** - Provides structured template for consistent pragmatic reviews
-5. **Context-Aware** - Adapts guidance based on review type and configured intensity
+Reads `.architecture/config.yml` and returns the configured implementation
+methodology, influences, and practices for the project.
 
 **Parameters:**
 - `projectPath` (string, required): Path to your project root directory
-- `reviewType` (string, required): Type of review - one of:
-  - `"proposal"` - Architectural recommendation or suggestion
-  - `"code"` - Code changes or implementation
-  - `"design"` - Existing design or architecture
-  - `"decision"` - Architectural decision or ADR
-  - `"implementation"` - Feature implementation plan
-- `target` (string, required): The content to review (proposal text, code snippet, design description, etc.)
-- `context` (string, optional): Additional context about current requirements, constraints, or problem being solved
-- `source` (string, optional): Source attribution (architect name, file path, PR number, etc.)
 
-**Output Provides:**
-- Key questions framework (necessity, simplicity, cost, alternatives, best practices)
-- Structured analysis template with scoring guidelines
-- Complexity-to-necessity ratio calculation guide (target < 1.5)
-- Recommendation options (Implement Now / Simplified Version / Defer / Skip)
-- Intensity-specific guidance based on configuration
-- Exemption checks for security, compliance, accessibility
-
-**Review Types Explained:**
-- **proposal**: Use for architectural recommendations from other architects or team members
-- **code**: Use for reviewing actual code changes or implementations for over-engineering
-- **design**: Use for analyzing existing architectural designs or patterns
-- **decision**: Use for reviewing architectural decisions before documenting in ADRs
-- **implementation**: Use for analyzing feature implementation plans or technical approaches
-
-**Example:**
-```javascript
-{
-  projectPath: "/path/to/project",
-  reviewType: "proposal",
-  target: "We should implement a microservices architecture with event sourcing, CQRS, and a service mesh for inter-service communication",
-  context: "Current system is a monolith with 50k LOC serving 500 users. Performance is acceptable.",
-  source: "Lead Architect"
-}
-```
-
-**Benefits:**
-- **Selective Application**: Use pragmatic analysis only when needed, without enabling globally
-- **Structured Reviews**: Consistent framework ensures thorough analysis
-- **Educational**: Helps teams learn YAGNI principles through guided analysis
-- **Flexible**: Works with any review type - proposals, code, designs, decisions, implementations
-- **Context-Aware**: Adapts to project's intensity settings and exemptions
-
-**Note**: This tool can be used even when Pragmatic Mode is disabled in config.yml. It provides the analysis framework and guidance, allowing you or your AI assistant to perform pragmatic reviews on-demand.
+**Returns:**
+- Configured methodology, influences, and practices from `config.yml`
 
 ## Usage Examples
 
@@ -403,18 +348,15 @@ Use the create_adr tool with:
 - projectPath: /Users/me/projects/myapp
 ```
 
-### Start a Review
+### Run a Review (plugin/Skills, not MCP)
+Orchestrated and specialist reviews are Tier-2 capabilities. Invoke them through
+the plugin/Skills:
 ```
-Use the start_architecture_review tool to review version 2.0.0 of our system at /Users/me/projects/myapp
+Start an architecture review for version 2.0.0
+Ask the Security Specialist to review our API authentication system
 ```
-
-### Get Specialist Input
-```
-Use the specialist_review tool with:
-- specialist: "Security Specialist"
-- target: "API authentication system"
-- projectPath: /Users/me/projects/myapp
-```
+These run via the `architecture-review` and `specialist-review` skills. See
+[Two-Tier Capability Model](#two-tier-capability-model).
 
 ### Check Status
 ```
@@ -429,14 +371,12 @@ Use the configure_pragmatic_mode tool with:
 - intensity: "balanced"
 ```
 
-### Use Pragmatic Enforcer
+### Run Pragmatic Enforcement (plugin/Skills, not MCP)
+Pragmatic analysis is a Tier-2 capability delivered by the `pragmatic-enforcer`
+subagent. Configure it with `configure_pragmatic_mode` (above), then invoke the
+analysis through the plugin/Skills:
 ```
-Use the pragmatic_enforcer tool with:
-- projectPath: /Users/me/projects/myapp
-- reviewType: "code"
-- target: "[paste code changes or proposal here]"
-- context: "This is for handling user uploads in our MVP"
-- source: "PR #123"
+Ask the Pragmatic Enforcer to review these code changes for over-engineering
 ```
 
 ### Example Workflow
@@ -452,28 +392,32 @@ Use the pragmatic_enforcer tool with:
 
 **Pre-Release Review Workflow**:
 ```
-1. Use get_architecture_status to check current state
-2. Use start_architecture_review for version 2.0.0
-3. Fill in team member perspectives in the created template
-4. Use create_adr for any new decisions identified
+1. Use get_architecture_status to check current state (MCP)
+2. Start an architecture review for version 2.0.0 (plugin/Skills — Tier 2)
+3. Use create_adr for any new decisions identified (MCP)
 ```
 
 ## Feature Parity
 
-The MCP server provides all 8 core framework tools with full feature parity to Claude Skills:
+The MCP server provides the 6 deterministic Tier-1 tools. Orchestrated reviews
+and pragmatic enforcement (Tier 2) are delivered by the plugin/Skills, not MCP
+(see [Two-Tier Capability Model](#two-tier-capability-model)).
 
-### ✅ Fully Supported Features
+### ✅ Fully Supported Features (Tier 1, via MCP)
 - **Setup Architecture**: With advanced project analysis and initial system analysis
 - **Create ADR**: With automatic numbering
-- **Architecture Review**: Template creation with all team members
-- **Specialist Review**: Focused review templates
 - **List Members**: Complete team roster
 - **Get Status**: Documentation metrics and health
-- **Pragmatic Mode**: Full config.yml reading, mode configuration, and YAGNI enforcement
+- **Configure Pragmatic Mode**: config.yml reading and mode configuration
+- **Implementation Guidance**: Configured methodology, influences, and practices
+
+### 🔀 Tier-2 Capabilities (plugin/Skills only, not MCP)
+- **Architecture Review**: Multi-perspective orchestrated review (`architecture-review` skill)
+- **Specialist Review**: Focused single-specialist review (`specialist-review` skill)
+- **Pragmatic Enforcement**: On-demand YAGNI analysis (`pragmatic-enforcer` subagent)
 
 ### ⚠️ Partially Supported Features
 - **Input Validation**: Basic filename sanitization (no security-focused validation guidance)
-- **Review Generation**: Creates templates (manual completion required vs. AI-generated)
 
 ### ❌ Not Yet Supported Features
 - **Dynamic Member Creation**: Returns error for missing specialists (vs. auto-creating them)
@@ -490,8 +434,10 @@ The MCP server provides all 8 core framework tools with full feature parity to C
 
 | Feature | MCP Server | Claude Skills | Traditional |
 |---------|-----------|---------------|-------------|
-| Core Tools (7) | ✅ All | ✅ All | ✅ All |
-| Pragmatic Mode | ✅ | ✅ | ✅ |
+| Tier-1 Deterministic Tools (6) | ✅ All | ✅ All | ✅ All |
+| Orchestrated/Specialist Reviews (Tier 2) | ❌ Plugin/Skills only | ✅ | ✅ |
+| Pragmatic Mode config | ✅ | ✅ | ✅ |
+| Pragmatic Enforcement (Tier 2) | ❌ Plugin/Skills only | ✅ | ✅ |
 | Dynamic Members | ❌ | ✅ | ✅ |
 | Recalibration | ❌ | ⚠️ Planned | ✅ |
 | Initial Analysis | ✅ Best | ❌ | ✅ |
@@ -579,10 +525,11 @@ See [main README](../README.md#integration-method-comparison) for detailed featu
 - Check file permissions in `.architecture/` directory
 - Verify write permissions for creating files
 
-**Missing specialists in specialist_review**:
-- MCP server doesn't auto-create specialists
-- Manually add to `.architecture/members.yml` or
-- Use Claude Skills/Traditional method for auto-creation
+**Need a specialist review**:
+- Specialist reviews are a Tier-2 capability — run them via the
+  `specialist-review` skill (plugin/Skills), not the MCP server
+- The MCP server does not auto-create specialists; add them to
+  `.architecture/members.yml`, or use the plugin/Skills for auto-creation
 
 ## Support
 

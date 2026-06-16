@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+// @modelcontextprotocol/sdk is NOT imported statically here.  Static imports
+// are resolved at module-load time, which means any consumer that imports
+// ArchitectureServer (e.g. the setup-fidelity integration test running inside
+// the tools/ package) would fail with ERR_MODULE_NOT_FOUND because the SDK
+// lives in mcp/node_modules, not tools/node_modules.  The setup-only methods
+// (setupArchitecture, createADR, …) do not need the SDK at all, so we defer
+// loading it until run() via dynamic import.
 import fs from "fs-extra";
 import path from "path";
 import yaml from "yaml";
@@ -21,31 +22,33 @@ const __dirname = path.dirname(__filename);
 
 export class ArchitectureServer {
   constructor() {
-    this.server = new Server(
-      {
-        name: "ai-software-architect",
-        version: "1.6.0",
-      },
-      {
-        capabilities: {
-          tools: {},
-        },
-      }
-    );
-
-    this.setupToolHandlers();
-    this.setupErrorHandling();
-  }
-
-  setupErrorHandling() {
-    this.server.onerror = (error) => console.error("[MCP Error]", error);
+    // MCP server object is created lazily in _initServer() so that importing
+    // this class does not require @modelcontextprotocol/sdk to be resolvable.
     process.on("SIGINT", async () => {
-      await this.server.close();
+      if (this.server) await this.server.close();
       process.exit(0);
     });
   }
 
-  setupToolHandlers() {
+  // Lazily initialise the MCP Server and register all tool handlers.
+  // Safe to call multiple times (no-op after first call).
+  async _initServer() {
+    if (this.server) return;
+    const { Server } = await import("@modelcontextprotocol/sdk/server/index.js");
+    const { CallToolRequestSchema, ListToolsRequestSchema } = await import("@modelcontextprotocol/sdk/types.js");
+
+    this.server = new Server(
+      { name: "ai-software-architect", version: "1.6.0" },
+      { capabilities: { tools: {} } }
+    );
+    this.server.onerror = (error) => console.error("[MCP Error]", error);
+    this._setupToolHandlers(CallToolRequestSchema, ListToolsRequestSchema);
+  }
+
+  // Kept for API compatibility; no-op now that setup happens in _initServer.
+  setupErrorHandling() {}
+
+  _setupToolHandlers(CallToolRequestSchema, ListToolsRequestSchema) {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [
@@ -1247,6 +1250,8 @@ ${new Date().toISOString().split('T')[0]}
   }
 
   async run() {
+    await this._initServer();
+    const { StdioServerTransport } = await import("@modelcontextprotocol/sdk/server/stdio.js");
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     console.error("AI Software Architect MCP server running on stdio");

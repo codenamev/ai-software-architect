@@ -22,6 +22,10 @@ jobs:
         working-directory: tools
         run: npm ci
 
+      - name: Install MCP dependencies
+        working-directory: mcp
+        run: npm install --prefer-offline
+
       - name: Lint JSON config files
         run: |
           for f in \

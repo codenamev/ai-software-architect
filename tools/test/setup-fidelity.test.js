@@ -30,11 +30,12 @@ describe('Setup fidelity (ADR-016) — setup_architecture end-to-end', () => {
 
   after(async () => { if (dir) await rm(dir, { recursive: true, force: true }); });
 
-  it('seeds the full canonical team with correct ids (no drift)', async () => {
+  it('seeds exactly the canonical team (no drift, no extras)', async () => {
     const doc = parseYaml(await readFile(path.join(dir, '.architecture/members.yml'), 'utf8'));
-    const ids = doc.members.map(m => m.id);
-    for (const id of CANONICAL_IDS) assert.ok(ids.includes(id), `roster missing ${id}`);
-    assert.ok(ids.includes('security_specialist'), 'expected canonical security_specialist');
+    const ids = doc.members.map(m => m.id).sort();
+    // No advisors are appended initially, so the roster must equal the canonical
+    // 8 EXACTLY — this catches both omissions and a wrong-id member sneaking in.
+    assert.deepStrictEqual(ids, [...CANONICAL_IDS].sort());
     assert.ok(!ids.includes('security_architect'), 'drifted security_architect must be gone');
   });
 

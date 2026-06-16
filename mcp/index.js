@@ -11,8 +11,10 @@ import path from "path";
 import yaml from "yaml";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
-import { generateAll } from "../tools/lib/subagent-generator.js";
-import { assertContainsIds } from "../tools/lib/roster-seeding.js";
+// Note: setup-only helpers (subagent generator, roster validation) live in
+// ../tools/lib and are imported dynamically inside setupArchitecture so the MCP
+// server still loads when run outside the full framework tree (e.g. a thin npm
+// install where Tier-1 tools work but setup, which needs the framework tree, does not).
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -265,6 +267,7 @@ export class ArchitectureServer {
 
       // Step 5b: Generate dispatchable subagents from the seeded roster (ADR-016).
       // Seeding members.yml is not enough — the team must exist as agents/*.md.
+      const { generateAll } = await import("../tools/lib/subagent-generator.js");
       const seededMembersYaml = await fs.readFile(path.join(architecturePath, "members.yml"), "utf8");
       const subagents = generateAll(seededMembersYaml);
       const agentsDir = path.join(projectPath, "agents");
@@ -279,7 +282,14 @@ export class ArchitectureServer {
       // Step 6: Customize principles based on project
       results.push("\n📋 Customizing architectural principles...");
       await this.customizePrinciples(architecturePath, projectAnalysis);
-      
+
+      // Fail closed if the canonical config.yml (with pragmatic_mode) was not
+      // carried in by the copy (ADR-016 — pragmatic mode must work out of the box).
+      const configPath = path.join(architecturePath, "config.yml");
+      if (!(await fs.pathExists(configPath)) || !/pragmatic_mode/.test(await fs.readFile(configPath, "utf8"))) {
+        throw new Error("Seeded config.yml is missing or lacks pragmatic_mode; aborting (canonical copy incomplete).");
+      }
+
       // Step 7: Set up templates
       results.push("\n📄 Setting up templates...");
       await this.setupTemplates(architecturePath, projectAnalysis);
@@ -426,15 +436,13 @@ export class ArchitectureServer {
     // `security_architect`). Validate the copy against the framework source so a
     // failed/partial copy fails loudly rather than seeding a lossy team. No stack
     // advisors are appended initially (canonical team only).
+    const { assertContainsIds, CANONICAL_MEMBER_IDS } = await import("../tools/lib/roster-seeding.js");
     const targetMembersPath = path.join(architecturePath, "members.yml");
-    const sourceMembersPath = path.resolve(__dirname, "..", ".architecture", "members.yml");
-
     const target = yaml.parse(await fs.readFile(targetMembersPath, "utf8"));
-    const source = yaml.parse(await fs.readFile(sourceMembersPath, "utf8"));
-    const canonicalIds = (source?.members || []).map((m) => m.id);
 
-    // Fail closed if any canonical member did not make it into the target.
-    assertContainsIds(target?.members, canonicalIds);
+    // Fail closed against the KNOWN canonical contract (not the source copy,
+    // which would validate vacuously if the source were itself drifted).
+    assertContainsIds(target?.members, CANONICAL_MEMBER_IDS);
   }
   
   async customizePrinciples(architecturePath, analysis) {

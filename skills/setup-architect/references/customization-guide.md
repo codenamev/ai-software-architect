@@ -227,12 +227,14 @@ Add specialists based on your detected technology stack:
 
 ### Core Members (Keep These)
 
-These core members should remain for all projects:
+These canonical core members must remain for all projects (the 8 defined in the framework's `.architecture/members.yml`):
 - **Systems Architect**: Overall architecture coherence
 - **Domain Expert**: Business domain representation
 - **Security Specialist**: Security analysis
 - **Performance Specialist**: Performance and scalability
 - **Maintainability Expert**: Code quality and technical debt
+- **Implementation Strategist**: Change sequencing, blast radius, reversibility
+- **AI Engineer**: AI/ML integration and observability
 - **Pragmatic Enforcer**: YAGNI enforcement (if pragmatic mode enabled)
 
 **Add technology specialists, don't replace core members.**

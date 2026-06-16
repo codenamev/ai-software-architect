@@ -1,48 +1,40 @@
 /**
- * Roster seeding for setup (ADR-016).
+ * Roster validation for setup (ADR-016).
  *
  * Setup copies the framework's canonical `members.yml` into the target project.
- * These helpers preserve that canonical roster (never substitute a core member)
- * and append stack-specific advisors only when their id is unique. A separate
- * validation guards against a failed/partial copy (fail closed).
+ * This guards against a failed/partial/drifted copy by asserting the seeded
+ * roster contains the known canonical core team — a fixed contract, NOT derived
+ * from the copy itself (deriving it from the copy would pass vacuously when the
+ * source is itself drifted).
  *
- * Pure functions; file IO stays in the caller, mirroring the other lib modules.
+ * The canonical id list is contract data; the `roster-seeding` unit test pins it
+ * against the real `.architecture/members.yml`, so the two cannot silently drift.
+ *
+ * Pure functions; file IO stays in the caller.
  */
 
-/**
- * Merge advisors onto the canonical roster.
- * Canonical members are preserved in order; an advisor is appended only if its
- * id does not collide with an existing member (canonical members never substituted).
- *
- * @param {Array<{id: string}>} canonicalMembers - the copied canonical roster
- * @param {Array<{id: string}>} [advisors] - stack-specific advisors to append
- * @returns {Array} merged member list
- */
-export function seedRoster(canonicalMembers, advisors = []) {
-  if (!Array.isArray(canonicalMembers) || canonicalMembers.length === 0) {
-    throw new Error('seedRoster: canonical roster is missing or empty');
-  }
-  const ids = new Set(canonicalMembers.map(m => m && m.id));
-  const merged = [...canonicalMembers];
-  for (const advisor of advisors || []) {
-    if (advisor && typeof advisor.id === 'string' && advisor.id && !ids.has(advisor.id)) {
-      merged.push(advisor);
-      ids.add(advisor.id);
-    }
-  }
-  return merged;
-}
+/** The canonical core architecture team (ADR-016). Setup must seed all of these. */
+export const CANONICAL_MEMBER_IDS = [
+  'systems_architect',
+  'domain_expert',
+  'security_specialist',
+  'maintainability_expert',
+  'performance_specialist',
+  'implementation_strategist',
+  'ai_engineer',
+  'pragmatic_enforcer',
+];
 
 /**
  * Fail closed if any required (canonical) id is absent from the roster.
- * Used to detect a failed/partial framework copy before setup proceeds.
+ * Detects a failed/partial/drifted framework copy before setup proceeds.
  *
  * @param {Array<{id: string}>} members
- * @param {string[]} requiredIds
+ * @param {string[]} [requiredIds] - defaults to the canonical contract
  * @returns {true} when all present
  * @throws when any required id is missing
  */
-export function assertContainsIds(members, requiredIds) {
+export function assertContainsIds(members, requiredIds = CANONICAL_MEMBER_IDS) {
   const present = new Set((Array.isArray(members) ? members : []).map(m => m && m.id));
   const missing = (requiredIds || []).filter(id => !present.has(id));
   if (missing.length > 0) {

@@ -2,8 +2,16 @@
 
 ## Status
 
-Proposed
+Accepted
 
+> **Status (2026-06-16):** Accepted and implemented (core: preserve canonical members.yml + fail-closed
+> validation, generate subagents, seed pragmatic config via the copied canonical config, fix the
+> principles location, multi-valued stack detection, Skill-doc reconciliation, and an end-to-end
+> fidelity test). The implementation found a simplification the draft missed: setup already copies the
+> canonical files in, so the fix is to **stop overwriting** them — the discovery-rewiring (Phase 0) is
+> not needed for the team fix and remains a deferred robustness follow-up, along with the re-run merge,
+> the shared MCP/Skill module, and datastore surfacing.
+>
 > **Revision note (2026-06-16):** Revised after a full 8-architect review (see
 > [adr-016-architecture-review.md](../../reviews/adr-016-architecture-review.md)), which verified four
 > factual errors in the first draft against `mcp/index.js` and added a critical missing step. Changes:

@@ -119,7 +119,7 @@ Add technology-specific members to `.architecture/members.yml`:
 
 Use template from [assets/member-template.yml](assets/member-template.yml).
 
-**Keep core members**: Systems Architect, Domain Expert, Security, Performance, Maintainability, AI Engineer, Pragmatic Enforcer.
+**Keep all canonical core members** — never drop one. The framework's `.architecture/members.yml` defines 8: Systems Architect, Domain Expert, Security Specialist, Maintainability Expert, Performance Specialist, Implementation Strategist, AI Engineer, Pragmatic Enforcer. Append technology specialists as additional advisors.
 
 **Customization details**: [references/customization-guide.md § Customize Team Members](references/customization-guide.md#customize-architecture-team-members)
 
@@ -198,7 +198,7 @@ A first-time user can verify the install by checking that **all of these are tru
 
 - [ ] `.architecture/decisions/adrs/` exists and is empty
 - [ ] `.architecture/reviews/initial-system-analysis.md` exists and is non-empty
-- [ ] `.architecture/members.yml` lists at least the seven core members plus any technology specialists added in step 4
+- [ ] `.architecture/members.yml` lists all eight canonical core members (per the framework's `.architecture/members.yml`) plus any technology specialists added in step 4
 - [ ] `.architecture/principles.md` exists and includes any framework-specific principles added in step 5
 - [ ] `.architecture/config.yml` exists (pragmatic mode flag visible)
 - [ ] `.architecture/templates/` contains `adr-template.md` and `review-template.md`

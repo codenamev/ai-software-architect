@@ -11,11 +11,13 @@ import path from "path";
 import yaml from "yaml";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
+import { generateAll } from "../tools/lib/subagent-generator.js";
+import { assertContainsIds } from "../tools/lib/roster-seeding.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-class ArchitectureServer {
+export class ArchitectureServer {
   constructor() {
     this.server = new Server(
       {
@@ -222,7 +224,7 @@ class ArchitectureServer {
       results.push("\n📊 Analyzing project structure...");
       const projectAnalysis = await this.analyzeProject(projectPath);
       results.push(`- Detected languages: ${projectAnalysis.languages.join(', ')}`);
-      results.push(`- Framework: ${projectAnalysis.framework || 'None detected'}`);
+      results.push(`- Frameworks: ${projectAnalysis.frameworks.length ? projectAnalysis.frameworks.join(', ') : 'None detected'}`);
       results.push(`- Package manager: ${projectAnalysis.packageManager || 'None detected'}`);
 
       // Step 2: Clone framework if needed (simulate by copying from parent directory)
@@ -260,7 +262,20 @@ class ArchitectureServer {
       // Step 5: Customize members.yml based on project analysis
       results.push("\n👥 Customizing architecture team...");
       await this.customizeMembers(architecturePath, projectAnalysis);
-      
+
+      // Step 5b: Generate dispatchable subagents from the seeded roster (ADR-016).
+      // Seeding members.yml is not enough — the team must exist as agents/*.md.
+      const seededMembersYaml = await fs.readFile(path.join(architecturePath, "members.yml"), "utf8");
+      const subagents = generateAll(seededMembersYaml);
+      const agentsDir = path.join(projectPath, "agents");
+      await fs.ensureDir(agentsDir);
+      for (const { filename, content } of subagents) {
+        await fs.writeFile(path.join(agentsDir, filename), content);
+      }
+      const seededRoster = (yaml.parse(seededMembersYaml)?.members || []).map((m) => m.id);
+      results.push(`- Seeded ${seededRoster.length} architects: ${seededRoster.join(', ')}`);
+      results.push(`- Generated ${subagents.length} subagents in agents/`);
+
       // Step 6: Customize principles based on project
       results.push("\n📋 Customizing architectural principles...");
       await this.customizePrinciples(architecturePath, projectAnalysis);
@@ -303,6 +318,7 @@ class ArchitectureServer {
   async analyzeProject(projectPath) {
     const analysis = {
       languages: [],
+      frameworks: [],
       framework: null,
       packageManager: null,
       architecture: 'unknown',
@@ -321,11 +337,13 @@ class ArchitectureServer {
         
         // Detect frameworks
         const deps = { ...packageJson.dependencies, ...packageJson.devDependencies };
-        if (deps.react) analysis.framework = 'React';
-        else if (deps.vue) analysis.framework = 'Vue';
-        else if (deps.angular) analysis.framework = 'Angular';
-        else if (deps.express) analysis.framework = 'Express';
-        else if (deps.next) analysis.framework = 'Next.js';
+        // Multi-valued: a repo can use more than one framework, and one manifest
+        // must not mask another (ADR-016).
+        if (deps.next) analysis.frameworks.push('Next.js');
+        else if (deps.react) analysis.frameworks.push('React');
+        if (deps.vue) analysis.frameworks.push('Vue');
+        if (deps.angular) analysis.frameworks.push('Angular');
+        if (deps.express) analysis.frameworks.push('Express');
         
         if (deps.typescript || files.includes('tsconfig.json')) {
           analysis.languages.push('TypeScript');
@@ -335,20 +353,26 @@ class ArchitectureServer {
       if (files.includes('Gemfile') || files.includes('Rakefile')) {
         analysis.languages.push('Ruby');
         analysis.packageManager = 'bundler';
-        if (files.includes('config/application.rb')) analysis.framework = 'Rails';
+        // Detect Rails from Gemfile content, not just config/application.rb, so a
+        // Gemfile-only Rails app is not missed (ADR-016).
+        let gemfile = '';
+        try { gemfile = await fs.readFile(path.join(projectPath, 'Gemfile'), 'utf8'); } catch { /* ignore */ }
+        if (/gem\s+['"]rails['"]/.test(gemfile) || files.includes('config/application.rb')) {
+          analysis.frameworks.push('Rails');
+        }
       }
       
       if (files.includes('requirements.txt') || files.includes('pyproject.toml') || files.includes('setup.py')) {
         analysis.languages.push('Python');
         analysis.packageManager = 'pip';
-        if (files.includes('manage.py')) analysis.framework = 'Django';
-        else if (files.includes('app.py')) analysis.framework = 'Flask';
+        if (files.includes('manage.py')) analysis.frameworks.push('Django');
+        else if (files.includes('app.py')) analysis.frameworks.push('Flask');
       }
       
       if (files.includes('pom.xml')) {
         analysis.languages.push('Java');
         analysis.packageManager = 'maven';
-        analysis.framework = 'Spring Boot';
+        analysis.frameworks.push('Spring Boot');
       }
       
       if (files.includes('Cargo.toml')) {
@@ -371,6 +395,10 @@ class ArchitectureServer {
                       await fs.pathExists(path.join(projectPath, '.gitlab-ci.yml')) ||
                       files.includes('.travis.yml');
       
+      // Back-compat: keep a single `framework` (first detected) for any remaining
+      // caller; `frameworks` is the authoritative multi-valued list (ADR-016).
+      analysis.framework = analysis.frameworks[0] || null;
+
       if (analysis.languages.length === 0) {
         analysis.languages.push('Multiple/Unknown');
       }
@@ -392,139 +420,57 @@ class ArchitectureServer {
   }
   
   async customizeMembers(architecturePath, analysis) {
-    const members = [
-      {
-        id: "systems_architect",
-        name: "Systems Architect",
-        title: "Senior Systems Architect",
-        specialties: ["System Design", "Scalability", "Integration Patterns"],
-        disciplines: ["Software Architecture", "Systems Engineering", "Platform Design"],
-        skillsets: ["Microservices", "Event-Driven Architecture", "API Design"],
-        domains: ["Enterprise Systems", "Distributed Systems", "Cloud Architecture"],
-        perspective: "Focuses on overall system structure, scalability, and integration patterns"
-      },
-      {
-        id: "security_architect",
-        name: "Security Architect",
-        title: "Security Architecture Specialist",
-        specialties: ["Security Design", "Threat Modeling", "Compliance"],
-        disciplines: ["Security Engineering", "Risk Assessment", "Privacy Engineering"],
-        skillsets: ["Authentication", "Authorization", "Encryption", "Security Patterns"],
-        domains: ["Application Security", "Infrastructure Security", "Data Protection"],
-        perspective: "Evaluates security implications and ensures secure design patterns"
-      },
-      {
-        id: "performance_specialist",
-        name: "Performance Specialist",
-        title: "Performance Engineering Expert",
-        specialties: ["Performance Optimization", "Scalability", "Resource Management"],
-        disciplines: ["Performance Engineering", "Load Testing", "Profiling"],
-        skillsets: ["Caching", "Database Optimization", "CDN", "Monitoring"],
-        domains: ["Web Performance", "Database Performance", "Infrastructure Performance"],
-        perspective: "Focuses on system performance, bottlenecks, and optimization opportunities"
-      },
-      {
-        id: "maintainability_expert",
-        name: "Maintainability Expert",
-        title: "Code Quality and Maintainability Specialist",
-        specialties: ["Code Quality", "Technical Debt", "Refactoring"],
-        disciplines: ["Software Engineering", "Code Review", "Testing"],
-        skillsets: ["Clean Code", "Design Patterns", "Automated Testing", "Documentation"],
-        domains: ["Code Quality", "Developer Experience", "Long-term Maintenance"],
-        perspective: "Evaluates code maintainability, technical debt, and developer productivity"
-      }
-    ];
-    
-    // Add language-specific experts based on analysis
-    if (analysis.languages.includes('JavaScript') || analysis.languages.includes('TypeScript')) {
-      members.push({
-        id: "javascript_expert",
-        name: "JavaScript Expert",
-        title: "JavaScript/TypeScript Specialist",
-        specialties: ["JavaScript Patterns", "TypeScript", "Modern JS"],
-        disciplines: ["Frontend Architecture", "Node.js", "Package Management"],
-        skillsets: ["ES6+", "Async Programming", "Module Systems", "Build Tools"],
-        domains: ["Frontend Development", "Node.js Backend", "Full-stack JavaScript"],
-        perspective: "Evaluates JavaScript/TypeScript code quality, patterns, and best practices"
-      });
-    }
-    
-    if (analysis.framework) {
-      const frameworkId = analysis.framework.toLowerCase().replace(/[^a-z0-9]/g, '_');
-      members.push({
-        id: `${frameworkId}_specialist`,
-        name: `${analysis.framework} Specialist`,
-        title: `${analysis.framework} Architecture Expert`,
-        specialties: [`${analysis.framework} Patterns`, "Framework Best Practices", "Performance"],
-        disciplines: ["Framework Architecture", "Component Design", "State Management"],
-        skillsets: ["Framework APIs", "Ecosystem Tools", "Performance Optimization"],
-        domains: [`${analysis.framework} Applications`, "Framework Patterns", "Best Practices"],
-        perspective: `Evaluates ${analysis.framework} architecture, patterns, and framework-specific best practices`
-      });
-    }
-    
-    const membersData = { members };
-    await fs.writeFile(
-      path.join(architecturePath, "members.yml"),
-      yaml.stringify(membersData)
-    );
+    // ADR-016: the canonical members.yml is copied into the target during setup.
+    // Preserve it as the source of truth — do NOT overwrite it with a hardcoded
+    // list (that dropped 4 of the 8 architects and used the wrong id
+    // `security_architect`). Validate the copy against the framework source so a
+    // failed/partial copy fails loudly rather than seeding a lossy team. No stack
+    // advisors are appended initially (canonical team only).
+    const targetMembersPath = path.join(architecturePath, "members.yml");
+    const sourceMembersPath = path.resolve(__dirname, "..", ".architecture", "members.yml");
+
+    const target = yaml.parse(await fs.readFile(targetMembersPath, "utf8"));
+    const source = yaml.parse(await fs.readFile(sourceMembersPath, "utf8"));
+    const canonicalIds = (source?.members || []).map((m) => m.id);
+
+    // Fail closed if any canonical member did not make it into the target.
+    assertContainsIds(target?.members, canonicalIds);
   }
   
   async customizePrinciples(architecturePath, analysis) {
-    let principlesContent = `# Architectural Principles
+    // ADR-016: the canonical principles.md is copied into the target during
+    // setup. Preserve it — do NOT overwrite it, and do NOT write a separate
+    // .architecture/decisions/principles.md (that mislocated file was the source
+    // of broken links). Append a short technology-specific section to the
+    // canonical .architecture/principles.md.
+    const principlesPath = path.join(architecturePath, "principles.md");
+    const frameworks = analysis.frameworks && analysis.frameworks.length
+      ? analysis.frameworks
+      : (analysis.framework ? [analysis.framework] : []);
 
-## Core Principles
+    let techSection = `
 
-1. **Simplicity First** - Choose the simplest solution that meets requirements
-2. **Maintainability** - Code should be easy to understand and modify
-3. **Scalability** - Design for growth and changing requirements
-4. **Security by Design** - Security considerations integrated from the start
-5. **Performance Awareness** - Consider performance implications of decisions`;
-    
-    // Add framework-specific principles
-    if (analysis.framework) {
-      principlesContent += `
-6. **${analysis.framework} Best Practices** - Follow established ${analysis.framework} patterns and conventions`;
-    }
-    
-    if (analysis.hasTests) {
-      principlesContent += `
-7. **Test-Driven Architecture** - Design for testability and maintain comprehensive test coverage`;
-    }
-    
-    principlesContent += `
-
-## Technology-Specific Guidelines
+## Technology-Specific Guidelines (added at setup)
 
 ### Languages: ${analysis.languages.join(', ')}
 `;
-    
-    if (analysis.framework) {
-      principlesContent += `### Framework: ${analysis.framework}
-- Follow ${analysis.framework} architectural patterns
-- Leverage framework-specific optimization techniques
-- Maintain framework version compatibility
-
-`;
+    if (frameworks.length) {
+      techSection += `### Frameworks: ${frameworks.join(', ')}\n`;
+      for (const fw of frameworks) {
+        techSection += `- Follow ${fw} architectural patterns and conventions\n`;
+      }
     }
-    
-    principlesContent += `## Decision Making Process
-
-- Document significant architectural decisions as ADRs
-- Conduct regular architecture reviews
-- Involve relevant specialists in decision-making
-- Consider long-term implications
-- Align with project technology stack: ${analysis.languages.join(', ')}`;
-    
     if (analysis.packageManager) {
-      principlesContent += `
-- Follow ${analysis.packageManager} dependency management best practices`;
+      techSection += `- Follow ${analysis.packageManager} dependency-management best practices\n`;
     }
-    
-    await fs.writeFile(
-      path.join(architecturePath, "decisions", "principles.md"),
-      principlesContent
-    );
+
+    if (await fs.pathExists(principlesPath)) {
+      await fs.appendFile(principlesPath, techSection);
+    } else {
+      // Canonical principles missing (structure created without a source) — write
+      // the tech section as a minimal standalone file at the canonical path.
+      await fs.writeFile(principlesPath, `# Architectural Principles\n${techSection}`);
+    }
   }
   
   async setupTemplates(architecturePath, analysis) {
@@ -724,7 +670,7 @@ Project instructions for Claude Code.${frameworkInstructions}`);
 ## Project Overview
 
 **Languages**: ${analysis.languages.join(', ')}
-**Framework**: ${analysis.framework || 'None detected'}
+**Frameworks**: ${(analysis.frameworks && analysis.frameworks.length) ? analysis.frameworks.join(', ') : 'None detected'}
 **Package Manager**: ${analysis.packageManager || 'None detected'}
 **Has Tests**: ${analysis.hasTests ? 'Yes' : 'No'}
 **Has CI/CD**: ${analysis.hasCI ? 'Yes' : 'No'}
@@ -801,7 +747,7 @@ ${!analysis.hasCI ? '3. Set up CI/CD pipeline' : ''}
 
 ## Next Steps
 
-1. **Immediate**: Review and customize architectural principles in \`.architecture/decisions/principles.md\`
+1. **Immediate**: Review and customize architectural principles in \`.architecture/principles.md\`
 2. **Week 1**: Create ADRs for current major architectural decisions
 3. **Month 1**: Establish regular architecture review schedule
 4. **Ongoing**: Use framework for all significant architectural decisions
@@ -1299,5 +1245,9 @@ ${new Date().toISOString().split('T')[0]}
   }
 }
 
-const server = new ArchitectureServer();
-server.run().catch(console.error);
+// Run as a server only when invoked directly; allows importing the class for
+// tests/dogfood (ADR-016 fidelity test) without starting the stdio transport.
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  const server = new ArchitectureServer();
+  server.run().catch(console.error);
+}

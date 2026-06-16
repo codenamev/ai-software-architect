@@ -25,6 +25,15 @@ ADR-011 committed to "a single version number shared across all channels," but t
 
 - Left intentionally independent (distinct version concepts, not channels): `tools/package.json` (internal `architecture-tools` package), `config.yml` `architecture_version` (the target project's architecture version), and AGENTS.md "Documentation Version" (doc-structure version per ADR-006).
 
+#### Setup fidelity ([ADR-016](.architecture/decisions/adrs/ADR-016-setup-fidelity-canonical-sources.md))
+`setup_architecture` produced a divergent install. It now derives outputs from canonical sources instead of hardcoded logic:
+- **Team:** preserves the copied canonical `members.yml` (all 8 architects with correct ids) instead of overwriting it with a hardcoded 4-member list that used `security_architect` and dropped `domain_expert`, `implementation_strategist`, `ai_engineer`, and `pragmatic_enforcer`. Fails closed if the copy is partial.
+- **Subagents:** generates `agents/*.md` from the seeded roster, so the team is actually dispatchable (a fresh install previously had members but no subagents).
+- **Principles:** writes the technology section to the canonical `.architecture/principles.md` and no longer creates the mislocated `.architecture/decisions/principles.md` (fixing a broken generated link).
+- **Stack detection:** multi-valued frameworks (Rails is no longer masked by Express; Rails detected from Gemfile content).
+- **Skill parity:** `setup-architect` SKILL.md now references the canonical 8-member roster (was listing 7).
+- The `ArchitectureServer` class is now importable; added a roster-seeding lib + an end-to-end setup-fidelity test.
+
 ### Added
 
 - **`version-check` governance command + recurrence guard.** `node tools/cli.js version-check` (and `npm run version-check`) verifies one framework version across all eight channel/doc sources and exits non-zero on drift. Backed by `tools/lib/version-consistency.js` and `tools/test/version-consistency.test.js`, whose repository test fails CI on any future drift — the per-file enforcement the ADR-011 release pipeline was meant to provide.

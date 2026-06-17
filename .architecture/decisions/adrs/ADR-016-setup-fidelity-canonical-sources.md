@@ -57,6 +57,19 @@ canonically** (the team in `members.yml`, the perspectives in the subagents, pri
 `principles.md`). ADR-015's second tier-axis says a Tier-1 operation must read the same canonical
 artifacts as the other channels; setup currently violates it.
 
+**Related contributor work (issue #9 / PR #10, by sgbett).** Independently, sgbett identified a
+*complementary* setup defect: the install also copies the framework's **own** work product — its
+internal ADRs, reviews, comparisons, and `deferrals.md` — into target projects as cruft. This ADR does
+not fix that leak; PR #10 does, via a manifest that copies only what a new project needs. (Note #9's
+premise that the MCP path is already clean is outdated — `setupArchitecture` still moves the entire
+`.architecture/` into the target, so the leak affects both paths.) The two efforts converge cleanly: the
+manifest should **copy** the canonical `members.yml`/`principles.md` and **exclude** the framework's own
+decisions/reviews/comparisons/deferrals — pairing #10's exclusion with this ADR's
+copy-canonical-and-validate rule, with subagent generation running off the copied roster. A single
+manifest-driven installer shared by the MCP and skill paths is the natural end state (cf. ADR-015's
+deferred shared-module non-goal). Convergence is being coordinated on PR #10; pending that, manifest-based
+cruft exclusion is tracked as follow-up here rather than implemented in this ADR.
+
 ## Decision Drivers
 
 * **Fidelity**: a fresh install must reproduce the framework's real, *usable* team — YAML **and**
@@ -351,3 +364,5 @@ speculative additions.
 * [Architecture Review: ADR-016](../../reviews/adr-016-architecture-review.md) — the 8-architect review this revision incorporates
 * [ADR-015: Reconciling MCP and Skills](./ADR-015-mcp-skills-parity-reconciliation.md) — second tier axis; tracks this as the Tier-1 setup-parity fix
 * [Structural First-Principles Examination](../../reviews/structural-first-principles-examination.md) — the MCP↔canonical drift theme
+* [Issue #9: Skills-based setup copies framework's own files into target projects](https://github.com/codenamev/ai-software-architect/issues/9) — complementary cruft-leak defect (sgbett)
+* [PR #10: manifest-based selective installation for skills setup](https://github.com/codenamev/ai-software-architect/pull/10) — the manifest fix this ADR converges with (sgbett)

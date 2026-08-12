@@ -347,20 +347,21 @@ review_process:
 
 # Architecture Decision Record (ADR) configuration
 adr:
-  # Numbering format: sequential | date-based
-  # Sequential produces ADR-001, ADR-002, etc.
-  # Date-based produces ADR-20260210, ADR-20260211, etc.
-  numbering_format: sequential
+  # Numbering format: sequential | date-based | date-prefixed-sequential
+  # Sequential produces               ADR-001, ADR-002, ...
+  # Date-based produces               ADR-20260210, ADR-20260211, ...
+  # Date-prefixed-sequential produces 20260210_ADR-001, ...  (authoring-date prefix + sequential ADR number; filename sorts by date, H1 stays ADR-NNN)
+  numbering_format: date-prefixed-sequential
 
   # Sequential format: zero-padding pattern
   # Count of zeros determines digit width: "000" = 3 digits, "0000" = 4 digits
-  # Only used when numbering_format: sequential
-  # sequential_format: "000"
+  # Used by: sequential, date-prefixed-sequential
+  sequential_format: "000"
 
   # Date format: strftime format string passed to date command
-  # Only used when numbering_format: date-based
+  # Used by: date-based, date-prefixed-sequential
   # Examples: "%Y%m%d" = 20260210, "%Y-%m-%d" = 2026-02-10
-  # date_format: "%Y%m%d"
+  date_format: "%Y%m%d"
 
   # Require alternatives section
   require_alternatives: true

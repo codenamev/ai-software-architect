@@ -2,8 +2,7 @@
 # next-adr-number.sh - Deterministic ADR prefix generation
 #
 # Reads numbering config from .architecture/config.yml and returns the
-# next ADR prefix. Supports sequential (zero-padded) and date-based
-# (strftime format) numbering.
+# next ADR filename stem prefix (everything before "-<topic-slug>.md").
 #
 # Usage: next-adr-number.sh <adrs-dir> [topic-slug]
 #
@@ -12,9 +11,14 @@
 #   topic-slug  Optional kebab-case topic for collision detection
 #
 # Config options (in .architecture/config.yml under adr:):
-#   numbering_format:    "sequential" (default) or "date-based"
+#   numbering_format:
+#     "sequential"               -> ADR-001, ADR-002, ...             (default)
+#     "date-based"               -> ADR-20260210, ADR-20260211, ...
+#     "date-prefixed-sequential" -> 20260210_ADR-001, ...             (date prefix + sequential number)
 #   sequential_format:   Zero-padding pattern, e.g., "000" for 3 digits (default: "000")
 #   date_format:         strftime format string, e.g., "%Y%m%d" (default: "%Y%m%d")
+#
+# The returned value is the full stem prefix; callers append "-<slug>.md".
 #
 # Exit codes:
 #   0  Success - prefix written to stdout
@@ -51,70 +55,77 @@ done
 get_config_value() {
   local key="$1"
   local default="$2"
+  local line value
+  # POSIX character classes ([[:space:]]) and pure-bash trimming — portable
+  # across BSD (macOS) and GNU tools, unlike the \s escape.
   if [ -n "$CONFIG_FILE" ] && [ -f "$CONFIG_FILE" ]; then
-    local value
-    value=$(grep -E "^\s*${key}:" "$CONFIG_FILE" 2>/dev/null | head -1 | sed 's/^[^:]*:\s*//' | sed 's/\s*#.*//' | sed 's/^["'"'"']//' | sed 's/["'"'"']$//' | tr -d '[:space:]')
-    if [ -n "$value" ]; then
-      echo "$value"
-      return
+    line=$(grep -E "^[[:space:]]*${key}:" "$CONFIG_FILE" 2>/dev/null | head -1)
+    if [ -n "$line" ]; then
+      value="${line#*:}"                          # drop key and first colon
+      value="${value%%#*}"                         # drop inline comment
+      value="${value#"${value%%[![:space:]]*}"}"   # ltrim whitespace
+      value="${value%"${value##*[![:space:]]}"}"   # rtrim whitespace
+      case "$value" in                             # strip one layer of quotes
+        \"*\") value="${value#\"}"; value="${value%\"}" ;;
+        \'*\') value="${value#\'}"; value="${value%\'}" ;;
+      esac
+      if [ -n "$value" ]; then
+        printf '%s' "$value"
+        return
+      fi
     fi
   fi
-  echo "$default"
+  printf '%s' "$default"
 }
 
 NUMBERING_FORMAT=$(get_config_value "numbering_format" "sequential")
 SEQUENTIAL_FORMAT=$(get_config_value "sequential_format" "000")
 DATE_FORMAT=$(get_config_value "date_format" "%Y%m%d")
 
-# --- Generate prefix ---
+# --- Helpers ---
 
-generate_sequential_prefix() {
-  local format="$1"
-
-  # Count zeros to determine padding width
-  local width=${#format}
-  if [ "$width" -lt 1 ]; then
-    width=3
-  fi
-
-  # Find highest existing ADR number
+# Highest existing ADR-NNN in the directory. Matches the number wherever it
+# appears in the filename, so it works for both "ADR-001-*" and date-prefixed
+# "20260210_ADR-001-*". Returns 0 when there are no ADRs yet.
+highest_adr_number() {
   local highest=0
-  if ls "$ADRS_DIR"/ADR-* 1>/dev/null 2>&1; then
-    highest=$(ls -1 "$ADRS_DIR" | grep -Eo "^ADR-[0-9]+" | sed 's/ADR-//' | sort -n | tail -1)
-    # Strip leading zeros for arithmetic
+  if ls -1 "$ADRS_DIR" 2>/dev/null | grep -Eq "ADR-[0-9]+"; then
+    highest=$(ls -1 "$ADRS_DIR" | grep -Eo "ADR-[0-9]+" | sed 's/ADR-//' | sort -n | tail -1)
     highest=$((10#${highest}))
   fi
-
-  local next=$((highest + 1))
-  printf "%0${width}d" "$next"
+  echo "$highest"
 }
 
-generate_date_prefix() {
-  local fmt="$1"
-  date +"$fmt"
+next_padded_number() {
+  local width=${#SEQUENTIAL_FORMAT}
+  if [ "$width" -lt 1 ]; then width=3; fi
+  printf "%0${width}d" "$(( $(highest_adr_number) + 1 ))"
 }
 
-# --- Main ---
+# --- Generate the full stem prefix ---
 
 case "$NUMBERING_FORMAT" in
   sequential)
-    PREFIX=$(generate_sequential_prefix "$SEQUENTIAL_FORMAT")
+    PREFIX="ADR-$(next_padded_number)"
     ;;
   date-based|date_based|datebased)
-    PREFIX=$(generate_date_prefix "$DATE_FORMAT")
+    PREFIX="ADR-$(date +"$DATE_FORMAT")"
+    ;;
+  date-prefixed-sequential|date_prefixed_sequential|date-prefixed)
+    PREFIX="$(date +"$DATE_FORMAT")_ADR-$(next_padded_number)"
     ;;
   *)
-    echo "ERROR: Unknown numbering_format: $NUMBERING_FORMAT (expected: sequential or date-based)" >&2
+    echo "ERROR: Unknown numbering_format: $NUMBERING_FORMAT" >&2
+    echo "ERROR: expected: sequential | date-based | date-prefixed-sequential" >&2
     exit 1
     ;;
 esac
 
-# --- Collision detection ---
+# --- Collision detection (topic already used under this prefix) ---
 
 if [ -n "$TOPIC_SLUG" ]; then
-  # Check for existing file with same prefix and topic
-  if ls "$ADRS_DIR"/ADR-"${PREFIX}"-"${TOPIC_SLUG}"* 1>/dev/null 2>&1; then
-    existing=$(ls -1 "$ADRS_DIR"/ADR-"${PREFIX}"-"${TOPIC_SLUG}"* 2>/dev/null | head -1)
+  if ls "$ADRS_DIR"/"${PREFIX}"-"${TOPIC_SLUG}"* 1>/dev/null 2>&1; then
+    existing=$(ls -1 "$ADRS_DIR"/"${PREFIX}"-"${TOPIC_SLUG}"* 2>/dev/null | head -1)
     echo "ERROR: ADR already exists: $(basename "$existing")" >&2
     echo "ERROR: This is likely a duplicate — review before creating another" >&2
     exit 2

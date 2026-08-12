@@ -27,7 +27,7 @@ bash "<skill-base-dir>/../scripts/next-adr-number.sh" ".architecture/decisions/a
 
 Where `<skill-base-dir>` is this skill's base directory shown at the top of the skill prompt, and `topic-slug` is the kebab-case topic from step 3.
 
-- The script outputs the prefix on stdout (e.g., `001` for sequential, `20260210` for date-based)
+- The script outputs the full filename stem prefix on stdout (e.g., `20260210_ADR-001` for date-prefixed-sequential — the default; `ADR-001` for sequential; `ADR-20260210` for date-based)
 - Exit code 2 means a collision was detected (ADR with same prefix and topic already exists) — alert the user
 - Exit code 1 means a config error — check stderr for details
 
@@ -41,11 +41,14 @@ Where `<skill-base-dir>` is this skill's base directory shown at the top of the 
 - Validate result: ensure filename contains only [a-z0-9-]
 
 ### 4. Create Filename
-Format: `ADR-<prefix>-kebab-case-title.md` where `<prefix>` is the output from step 2.
+Format: `<prefix>-kebab-case-title.md` where `<prefix>` is the full stem output from step 2 (it already includes the `ADR-NNN` and/or date parts — do not prepend `ADR-` again).
 
-Examples:
-- `ADR-001-use-react-for-frontend.md`
-- `ADR-002-choose-postgresql-database.md`
+Examples (by `numbering_format`):
+- date-prefixed-sequential (default): `20260210_ADR-001-use-react-for-frontend.md`
+- sequential: `ADR-001-use-react-for-frontend.md`
+- date-based: `ADR-20260210-choose-postgresql-database.md`
+
+The ADR's H1 heading is `# ADR-NNN: Title` (the sequential number; the authoring date lives only in the filename prefix). For pure date-based projects the H1 is `# ADR-<date>: Title`.
 
 **Valid input**: "Use React for Frontend" → `use-react-for-frontend`
 **Invalid blocked**: "../etc/passwd" → sanitized or rejected

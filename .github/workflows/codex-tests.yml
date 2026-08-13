@@ -25,7 +25,7 @@ jobs:
         
     - name: Setup Python (for Python tests)
       if: matrix.project-type == 'python'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v7
       with:
         python-version: '3.9'
         

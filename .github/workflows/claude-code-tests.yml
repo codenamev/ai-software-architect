@@ -482,14 +482,14 @@ jobs:
 
         # No existing ADRs — should return 001
         OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
-        test "$OUTPUT" = "001" && echo "✓ first ADR: 001" || { echo "✗ expected 001, got '$OUTPUT'"; exit 1; }
+        test "$OUTPUT" = "ADR-001" && echo "✓ first ADR: ADR-001" || { echo "✗ expected ADR-001, got '$OUTPUT'"; exit 1; }
 
         # Create ADR-001 and ADR-002
         touch "$TMPDIR/decisions/adrs/ADR-001-first-decision.md"
         touch "$TMPDIR/decisions/adrs/ADR-002-second-decision.md"
 
         OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
-        test "$OUTPUT" = "003" && echo "✓ next after 002: 003" || { echo "✗ expected 003, got '$OUTPUT'"; exit 1; }
+        test "$OUTPUT" = "ADR-003" && echo "✓ next after 002: ADR-003" || { echo "✗ expected ADR-003, got '$OUTPUT'"; exit 1; }
 
         rm -rf "$TMPDIR"
         echo "=== sequential default test: PASSED ==="
@@ -508,7 +508,7 @@ jobs:
         YAML
 
         OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
-        test "$OUTPUT" = "0001" && echo "✓ 4-digit padding: 0001" || { echo "✗ expected 0001, got '$OUTPUT'"; exit 1; }
+        test "$OUTPUT" = "ADR-0001" && echo "✓ 4-digit padding: ADR-0001" || { echo "✗ expected ADR-0001, got '$OUTPUT'"; exit 1; }
 
         rm -rf "$TMPDIR"
         echo "=== sequential custom padding test: PASSED ==="
@@ -525,7 +525,7 @@ jobs:
           numbering_format: date-based
         YAML
 
-        EXPECTED=$(date +"%Y%m%d")
+        EXPECTED="ADR-$(date +"%Y%m%d")"
         OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
         test "$OUTPUT" = "$EXPECTED" && echo "✓ date-based: $EXPECTED" || { echo "✗ expected $EXPECTED, got '$OUTPUT'"; exit 1; }
 
@@ -545,7 +545,7 @@ jobs:
           date_format: "%Y-%m-%d"
         YAML
 
-        EXPECTED=$(date +"%Y-%m-%d")
+        EXPECTED="ADR-$(date +"%Y-%m-%d")"
         OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
         test "$OUTPUT" = "$EXPECTED" && echo "✓ custom date: $EXPECTED" || { echo "✗ expected $EXPECTED, got '$OUTPUT'"; exit 1; }
 
@@ -623,10 +623,37 @@ jobs:
         mkdir -p "$TMPDIR/decisions/adrs"
 
         OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
-        test "$OUTPUT" = "001" && echo "✓ default without config: 001" || { echo "✗ expected 001, got '$OUTPUT'"; exit 1; }
+        test "$OUTPUT" = "ADR-001" && echo "✓ default without config: ADR-001" || { echo "✗ expected ADR-001, got '$OUTPUT'"; exit 1; }
 
         rm -rf "$TMPDIR"
         echo "=== missing config defaults test: PASSED ==="
+
+    - name: "next-adr-number.sh: date-prefixed-sequential (default)"
+      run: |
+        echo "=== Testing next-adr-number.sh date-prefixed-sequential ==="
+        SCRIPT=".claude/skills/scripts/next-adr-number.sh"
+        TMPDIR="$(mktemp -d)"
+
+        mkdir -p "$TMPDIR/decisions/adrs"
+        cat > "$TMPDIR/config.yml" << 'YAML'
+        adr:
+          numbering_format: date-prefixed-sequential
+        YAML
+
+        TODAY=$(date +"%Y%m%d")
+
+        # No existing ADRs -> YYYYMMDD_ADR-001
+        OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
+        test "$OUTPUT" = "${TODAY}_ADR-001" && echo "✓ first: ${TODAY}_ADR-001" || { echo "✗ expected ${TODAY}_ADR-001, got '$OUTPUT'"; exit 1; }
+
+        # Sequential number tracks the max ADR-NNN even across other-day date prefixes
+        touch "$TMPDIR/decisions/adrs/20260101_ADR-001-a.md"
+        touch "$TMPDIR/decisions/adrs/20260101_ADR-002-b.md"
+        OUTPUT=$(bash "$SCRIPT" "$TMPDIR/decisions/adrs")
+        test "$OUTPUT" = "${TODAY}_ADR-003" && echo "✓ next after 002: ${TODAY}_ADR-003" || { echo "✗ expected ${TODAY}_ADR-003, got '$OUTPUT'"; exit 1; }
+
+        rm -rf "$TMPDIR"
+        echo "=== date-prefixed-sequential test: PASSED ==="
 
   cross-compatibility-test:
     runs-on: ubuntu-latest

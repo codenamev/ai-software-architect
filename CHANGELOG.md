@@ -5,6 +5,20 @@ All notable changes to the AI Software Architect framework will be documented in
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+#### MCP server exited silently when launched through its packaged `bin`
+The entrypoint guard added in 1.6.0 compared `process.argv[1]` against `__filename` as literal strings. Node resolves `import.meta.url` through symlinks but leaves `process.argv[1]` as the path it was handed, and npm installs the `mcp` bin as a symlink (`node_modules/.bin/mcp` → `../ai-software-architect/index.js`). The two never matched, so the guard did not fire: the process exited 0 with nothing on stderr and the transport was never started — a server that looks dead to its client, with no diagnostic anywhere. The comparison is now made between real paths.
+
+Scope, precisely: this affected every POSIX launch through the bin in 1.6.0, which is how `.mcp.json` starts the server (`npx -y ai-software-architect`) and how the `npm install -g` + `"command": "mcp"` configurations in `README.md` start it. Windows was unaffected — npm writes `cmd`/`ps1` shims there that hand Node the real path. Launching `node mcp/index.js` by path was also unaffected, which is why it went unnoticed. No released version shipped the bug: npm `latest` is 1.3.0, which calls `server.run()` unconditionally. This is a fix to unreleased code, not a user-facing regression.
+
+### Added
+
+#### Protocol-level smoke test for the MCP server (`mcp/test/protocol-smoke.test.js`)
+The existing suite reaches `ArchitectureServer` by importing the class, which never resolves `@modelcontextprotocol/sdk` — `mcp/index.js` loads it through dynamic `import()` inside `_initServer()`/`run()`. The SDK, the request handlers, the advertised tool schemas, the stdio transport and the entrypoint therefore had no coverage. The new tests spawn the server over a real stdio transport and assert the handshake, the exact tool set, schema well-formedness, a `tools/call` round-trip, and startup through a symlinked bin. Wired into the `validate-plugin` CI job.
+
 ## [1.6.0] - 2026-06-16
 
 ### Removed (BREAKING)

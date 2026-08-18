@@ -1258,9 +1258,32 @@ ${new Date().toISOString().split('T')[0]}
   }
 }
 
+// True when this file is the process entrypoint rather than an imported module.
+// Both sides must be compared as real paths: __filename comes from
+// import.meta.url, which Node has already resolved through symlinks, while
+// process.argv[1] is whatever the shell was handed. Launching the package's
+// `mcp` bin hands over the node_modules/.bin symlink, so a raw string compare
+// fails and the server exits 0 without ever starting the transport - which is
+// exactly how .mcp.json invokes it (`npx -y ai-software-architect`).
+function isProcessEntrypoint(argvPath, moduleFile) {
+  if (!argvPath) return false;
+  const resolved = path.resolve(argvPath);
+  try {
+    return fs.realpathSync(resolved) === fs.realpathSync(moduleFile);
+  } catch (error) {
+    // Either path may be unreadable (deleted, permissions); fall back to the
+    // literal compare rather than throwing during module evaluation. Say so on
+    // stderr: the fallback can only ever be wrong in the direction of not
+    // starting, and an unexplained silent exit is the failure mode this
+    // function exists to remove.
+    console.error(`[MCP] entrypoint realpath check failed (${error.message}); falling back to a literal path compare`);
+    return resolved === moduleFile;
+  }
+}
+
 // Run as a server only when invoked directly; allows importing the class for
 // tests/dogfood (ADR-016 fidelity test) without starting the stdio transport.
-if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+if (isProcessEntrypoint(process.argv[1], __filename)) {
   const server = new ArchitectureServer();
   server.run().catch(console.error);
 }

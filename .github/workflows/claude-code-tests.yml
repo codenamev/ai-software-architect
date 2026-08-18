@@ -41,6 +41,14 @@ jobs:
         working-directory: tools
         run: npm test
 
+      # The tools suite reaches the MCP server by importing the class, which
+      # never resolves @modelcontextprotocol/sdk. This step spawns the server
+      # over a real stdio transport so the SDK, the request handlers and the
+      # entrypoint are covered too.
+      - name: Run MCP protocol smoke test
+        working-directory: mcp
+        run: npm test
+
       - name: Validate every ADR against the template
         working-directory: tools
         run: node cli.js validate-adr

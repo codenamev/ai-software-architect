@@ -31,12 +31,12 @@
     "url": "https://github.com/codenamev/ai-software-architect/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.6.0",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "yaml": "^2.3.4",
     "fs-extra": "^11.2.0"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0"
+    "@types/node": "^26.2.0"
   },
   "engines": {
     "node": ">=18.0.0"

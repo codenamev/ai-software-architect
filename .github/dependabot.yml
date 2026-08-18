@@ -5,13 +5,22 @@ updates:
     schedule:
       interval: "weekly"
     labels: ["loop:deps"]
+    groups:
+      mcp:
+        patterns: ["*"]
   - package-ecosystem: "npm"
     directory: "/tools"
     schedule:
       interval: "weekly"
     labels: ["loop:deps"]
+    groups:
+      tools:
+        patterns: ["*"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     labels: ["loop:deps"]
+    groups:
+      github-actions:
+        patterns: ["*"]

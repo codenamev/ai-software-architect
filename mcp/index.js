@@ -10,7 +10,6 @@
 import fs from "fs-extra";
 import path from "path";
 import yaml from "yaml";
-import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 // Note: setup-only helpers (subagent generator, roster validation) live in
 // ../tools/lib and are imported dynamically inside setupArchitecture so the MCP
@@ -242,8 +241,10 @@ export class ArchitectureServer {
       await fs.copy(frameworkSourcePath, tempClonePath, {
         filter: (src) => {
           const relativePath = path.relative(frameworkSourcePath, src);
-          // Skip git, node_modules, and other non-template files
-          return !relativePath.match(/^(.git|\.git|node_modules|mcp\/node_modules)/)
+          // Skip git and any node_modules (root, mcp/, tools/, …) — a nested
+          // node_modules must never be copied into the target project.
+          return !relativePath.match(/^\.git(\/|$)/)
+            && !relativePath.split(path.sep).includes("node_modules")
             && !relativePath.includes('README.md')
             && !relativePath.includes('USAGE')
             && !relativePath.includes('INSTALL.md');
@@ -652,12 +653,13 @@ This project uses the AI Software Architect framework for structured architectur
 - **Recalibration**: "Start architecture recalibration for 'feature name'"
 
 ### Framework Structure
-- \`.architecture/decisions/\` - Architectural Decision Records and principles
+- \`.architecture/decisions/\` - Architectural Decision Records
+- \`.architecture/principles.md\` - Architectural principles
 - \`.architecture/reviews/\` - Architecture review documents
 - \`.architecture/recalibration/\` - Implementation plans from reviews
 - \`.architecture/members.yml\` - Architecture team member definitions
 
-Refer to \`.architecture/decisions/principles.md\` for architectural guidance.
+Refer to \`.architecture/principles.md\` for architectural guidance.
 `;
     
     if (await fs.pathExists(claudeMdPath)) {
@@ -800,7 +802,13 @@ The AI Software Architect framework has been configured with:
       .sort((a, b) => a - b);
     
     const nextNumber = adrNumbers.length > 0 ? Math.max(...adrNumbers) + 1 : 1;
-    const adrFilename = `${nextNumber.toString().padStart(4, '0')}-${title.toLowerCase().replace(/\s+/g, '-')}.md`;
+    // Slugify the title for the filename: path separators, colons, etc. must not
+    // survive (a "/" would make writeFile target a nonexistent subdirectory).
+    const titleSlug = title.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      || 'untitled';
+    const adrFilename = `${nextNumber.toString().padStart(4, '0')}-${titleSlug}.md`;
     
     const adrContent = `# ADR ${nextNumber}: ${title}
 

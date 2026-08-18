@@ -61,4 +61,29 @@ describe('Setup fidelity (ADR-016) — setup_architecture end-to-end', () => {
     assert.match(analysis, /Rails/, 'Rails should be detected');
     assert.match(analysis, /Express/, 'Express should be detected');
   });
+
+  it('CLAUDE.md integration points at the canonical principles path', async () => {
+    const claudeMd = await readFile(path.join(dir, 'CLAUDE.md'), 'utf8');
+    assert.match(claudeMd, /\.architecture\/principles\.md/, 'must reference canonical principles.md');
+    assert.ok(!claudeMd.includes('.architecture/decisions/principles.md'),
+      'must not reference the mislocated decisions/principles.md path (ADR-016)');
+  });
+
+  it('does not copy any node_modules into the target', () => {
+    assert.ok(!existsSync(path.join(dir, '.architecture-temp')), 'temp clone must be cleaned up');
+    assert.ok(!existsSync(path.join(dir, '.architecture', 'node_modules')),
+      'node_modules must never land in the installed .architecture');
+  });
+
+  it('createADR slugifies unsafe characters out of the filename', async () => {
+    await new ArchitectureServer().createADR({
+      title: 'Use REST/GraphQL: hybrid?',
+      context: 'ctx', decision: 'dec', consequences: 'conseq',
+      projectPath: dir,
+    });
+    const adrs = await readdir(path.join(dir, '.architecture/decisions/adrs'));
+    const created = adrs.find(f => f.includes('use-rest-graphql'));
+    assert.ok(created, `expected a slugified ADR filename, got: ${adrs.join(', ')}`);
+    assert.match(created, /^\d{4}-use-rest-graphql-hybrid\.md$/);
+  });
 });

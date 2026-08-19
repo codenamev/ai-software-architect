@@ -16,16 +16,16 @@ jobs:
         
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: '18'
         
     - name: Setup Python (for Python tests)
       if: matrix.project-type == 'python'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v7
       with:
         python-version: '3.9'
         
@@ -378,7 +378,7 @@ jobs:
         echo "All Codex integration tests passed for ${{ matrix.project-type }} project type."
         
     - name: Upload Codex test artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: codex-test-${{ matrix.project-type }}
@@ -392,10 +392,10 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       
     - name: Download all Codex test artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         pattern: codex-test-*
         path: test-artifacts/
@@ -482,10 +482,10 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       
     - name: Download Codex test artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         pattern: codex-test-*
         path: test-artifacts/

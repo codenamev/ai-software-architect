@@ -465,7 +465,13 @@ To modify or extend the server:
 1. Edit `index.js` to add new tools or modify existing ones
 2. Update the tool schemas in the `ListToolsRequestSchema` handler
 3. Add corresponding implementation methods
-4. Test with `npm start`
+4. Install dependencies with `npm install`, then run `npm test`
+
+`npm test` spawns the server over a real stdio transport and checks the
+handshake, the advertised tool set and schemas, a `tools/call` round-trip, and
+startup through a symlinked bin. The `validate-plugin` CI job gates on it, so
+run it before opening a pull request. Use `npm start` to drive the server by
+hand once the suite passes.
 
 **Contributing**: Contributions welcome! Priority areas:
 - Pragmatic mode integration

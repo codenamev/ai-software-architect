@@ -49,7 +49,7 @@ mcp/                  # MCP Server implementation
 git clone https://github.com/codenamev/ai-software-architect
 cd ai-software-architect
 
-# Install MCP server dependencies (optional)
+# Install MCP server dependencies (required to run or test the MCP server)
 cd mcp && npm install && cd ..
 
 # Review framework structure
@@ -73,8 +73,8 @@ cat .architecture/members.yml
 # View templates
 ls .architecture/templates/
 
-# Test MCP server (if Node.js installed)
-cd mcp && npm test
+# Test MCP server
+cd mcp && npm install && npm test
 ```
 
 ## Using the Framework in Your Project
@@ -257,6 +257,7 @@ cat .architecture/templates/AGENTS.md
 **MCP Server Testing:**
 ```bash
 cd mcp
+npm install  # Required before the first run
 npm test  # Run test suite
 npm run dev  # Test in watch mode
 ```

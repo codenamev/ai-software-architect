@@ -7,9 +7,21 @@ const GENERATED_BANNER =
 export function generateAll(membersYaml) {
   const doc = parseYaml(membersYaml);
   const members = Array.isArray(doc?.members) ? doc.members : [];
+  const seenSlugs = new Map();
   return members
     .filter(m => m && typeof m.id === 'string' && m.id.length > 0)
-    .map(generateSubagent);
+    .map(member => {
+      const result = generateSubagent(member);
+      const priorId = seenSlugs.get(result.filename);
+      if (priorId !== undefined) {
+        throw new Error(
+          `Member ids "${priorId}" and "${member.id}" both slug to ${result.filename}; ` +
+          'ids must be distinct after slugging or one agent file would silently overwrite the other.'
+        );
+      }
+      seenSlugs.set(result.filename, member.id);
+      return result;
+    });
 }
 
 export function generateSubagent(member) {
@@ -90,7 +102,18 @@ export function parseFrontmatter(content) {
 }
 
 function idToSlug(id) {
-  return id.replace(/_/g, '-').toLowerCase();
+  // Allowlist slug: the id becomes a filename, so path separators, dots, and
+  // any other special characters must not survive (a "/" or ".." in an id
+  // would make the generated file land outside agents/). An id with nothing
+  // usable left is rejected rather than mapped to a placeholder — a
+  // traversal-only id is a mistake or an attack, not a member.
+  const slug = id.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  if (!slug) {
+    throw new Error(`Member id "${id}" has no characters usable in a filename; use lowercase letters, digits, and underscores.`);
+  }
+  return slug;
 }
 
 function formatDescription(title, triggerKeywords) {

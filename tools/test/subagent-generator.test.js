@@ -26,6 +26,26 @@ describe('Subagent Generator', () => {
       assert.strictEqual(result.filename, 'security-specialist.md');
     });
 
+    it('strips path separators from ids so filenames cannot escape agents/', () => {
+      const result = generateSubagent({ ...SAMPLE_MEMBER, id: '../../.claude/hooks/evil' });
+      assert.ok(!result.filename.includes('/'), 'filename must not contain "/"');
+      assert.ok(!result.filename.includes('\\'), 'filename must not contain "\\"');
+      assert.ok(!result.filename.includes('..'), 'filename must not contain ".."');
+      assert.strictEqual(result.filename, 'claude-hooks-evil.md');
+    });
+
+    it('slugs dots, spaces, and other special characters to hyphens', () => {
+      const result = generateSubagent({ ...SAMPLE_MEMBER, id: 'api architect v2.0' });
+      assert.strictEqual(result.filename, 'api-architect-v2-0.md');
+    });
+
+    it('rejects ids with no usable characters instead of inventing a filename', () => {
+      assert.throws(
+        () => generateSubagent({ ...SAMPLE_MEMBER, id: '../..' }),
+        /no characters usable in a filename/
+      );
+    });
+
     it('emits valid YAML frontmatter at the top of the file', () => {
       const { content } = generateSubagent(SAMPLE_MEMBER);
       assert.ok(content.startsWith('---\n'), 'must open with YAML frontmatter');
@@ -152,6 +172,14 @@ members:
       const results = generateAll(MEMBERS_YAML);
       assert.strictEqual(results[0].filename, 'security-specialist.md');
       assert.strictEqual(results[1].filename, 'performance-specialist.md');
+    });
+
+    it('throws when two ids slug to the same filename instead of silently overwriting', () => {
+      const collidingYaml = MEMBERS_YAML + '\n  - id: "security.specialist"\n    name: "Impostor"\n    perspective: "x"\n';
+      assert.throws(
+        () => generateAll(collidingYaml),
+        /both slug to security-specialist\.md/
+      );
     });
 
     it('skips entries without an id (defensive)', () => {

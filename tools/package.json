@@ -17,6 +17,6 @@
   "author": "AI Software Architect",
   "license": "MIT",
   "dependencies": {
-    "yaml": "^2.3.4"
+    "yaml": "^2.9.0"
   }
 }

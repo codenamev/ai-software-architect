@@ -26,6 +26,21 @@ jobs:
         working-directory: mcp
         run: npm install --prefer-offline
 
+      - name: Verify the published npm package matches mcp/package.json
+        # main only: a version bump may land before it's published, but main
+        # stays red until `npm publish` catches up — the drift behind #27.
+        if: github.event_name == 'push'
+        working-directory: mcp
+        run: |
+          name="$(node -p "require('./package.json').name")"
+          repo="$(node -p "require('./package.json').version")"
+          published="$(npm view "$name" version)"
+          echo "repo=$repo published=$published"
+          [ "$repo" = "$published" ] || {
+            echo "::error::mcp/package.json is $repo but npm serves $published — run: cd mcp && npm publish"
+            exit 1
+          }
+
       - name: Lint JSON config files
         run: |
           for f in \

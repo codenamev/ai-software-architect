@@ -1137,15 +1137,25 @@ The AI Software Architect framework has been configured with:
 // so create_adr emits the same structure the create-adr skill and the validator
 // expect, instead of a third hand-rolled shape. Known fields fill the template's
 // leading "[...]" placeholder in their section; every other section keeps its
-// placeholders as prompts for the author. Exported for tests.
+// placeholders as prompts for the author. The installed template may be
+// customized: if it lacks one of the four sections a field targets (or the
+// canonical H1), that section is appended so the caller's text is never dropped
+// silently — validate-adr requires all four anyway. Exported for tests.
 export function renderAdrFromTemplate(template, { number, title, context, decision, consequences, date }) {
   const paddedNumber = String(number).padStart(3, '0');
-  let out = template.replace(/^# ADR-XXX: \[Title\][ \t]*$/m, `# ADR-${paddedNumber}: ${title}`);
+  const heading = `# ADR-${paddedNumber}: ${title}`;
+  let out = /^# ADR-XXX: \[Title\][ \t]*$/m.test(template)
+    ? template.replace(/^# ADR-XXX: \[Title\][ \t]*$/m, heading)
+    : `${heading}\n\n${template}`;
   out = replaceSectionBody(out, 'Status', `Proposed\n\n**Date**: ${date}`);
   out = fillSectionPlaceholder(out, 'Context', context);
   out = fillSectionPlaceholder(out, 'Decision', decision);
   out = fillSectionPlaceholder(out, 'Consequences', consequences);
   return out;
+}
+
+function appendSection(text, name, body) {
+  return `${text.replace(/\s*$/, '')}\n\n## ${name}\n\n${body}\n`;
 }
 
 // Locate "## Name" and return [bodyStart, bodyEnd) — bodyEnd is the next "## "
@@ -1162,7 +1172,7 @@ function sectionBounds(text, name) {
 
 function replaceSectionBody(text, name, body) {
   const bounds = sectionBounds(text, name);
-  if (!bounds) return text;
+  if (!bounds) return appendSection(text, name, body);
   const [bodyStart, bodyEnd] = bounds;
   return `${text.slice(0, bodyStart)}\n\n${body}\n\n${text.slice(bodyEnd)}`;
 }
@@ -1172,7 +1182,7 @@ function replaceSectionBody(text, name, body) {
 // starts at "### Positive"), insert `value` as the opening paragraph.
 function fillSectionPlaceholder(text, name, value) {
   const bounds = sectionBounds(text, name);
-  if (!bounds) return text;
+  if (!bounds) return appendSection(text, name, value);
   const [bodyStart, bodyEnd] = bounds;
   const body = text.slice(bodyStart, bodyEnd);
   const placeholder = /^\[[^\]]*\][ \t]*$/m.exec(body);

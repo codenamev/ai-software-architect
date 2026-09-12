@@ -171,9 +171,20 @@ describe('renderAdrFromTemplate', () => {
     assert.match(out, /^## References\n\n\* \[r\]/m, 'untouched sections keep their placeholders');
   });
 
-  it('leaves a template without a known section untouched rather than throwing', () => {
-    const out = renderAdrFromTemplate('# ADR-XXX: [Title]\n\n## Status\n\n[x]\n', fields);
-    assert.match(out, /^# ADR-003: T$/m);
-    assert.ok(!out.includes('CTX'), 'no Context section, nothing to fill');
+  it('appends any targeted section a customized template lacks, so no field is dropped silently', () => {
+    // A user's adr-template.md that renamed "## Decision" to "## Decision Outcome"
+    // (MADR style) and dropped Consequences: the caller's text must still land,
+    // and the result must still satisfy validate-adr's required sections.
+    const custom = '# ADR-XXX: [Title]\n\n## Status\n\n[x]\n\n## Context\n\n[c]\n\n## Decision Outcome\n\n[d]\n';
+    const out = renderAdrFromTemplate(custom, fields);
+    assert.match(out, /^## Decision Outcome\n\n\[d\]/m, 'unrelated custom sections are left alone');
+    assert.match(out, /^## Decision\n\nDEC\n/m, 'missing Decision section is appended with the value');
+    assert.match(out, /^## Consequences\n\nCONSEQ\n/m, 'missing Consequences section is appended with the value');
+    assert.ok(validateAdr('ADR-003-t.md', out).valid, 'rendered output must satisfy the validator');
+  });
+
+  it('prepends the H1 when a customized template has none', () => {
+    const out = renderAdrFromTemplate('## Status\n\n[x]\n\n## Context\n\n[c]\n\n## Decision\n\n[d]\n\n## Consequences\n\n[q]\n', fields);
+    assert.ok(out.startsWith('# ADR-003: T\n\n## Status'), `got: ${JSON.stringify(out.slice(0, 40))}`);
   });
 });

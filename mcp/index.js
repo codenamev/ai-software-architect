@@ -692,7 +692,7 @@ The AI Software Architect framework has been configured with:
       content: [
         {
           type: "text",
-          text: `✅ ADR created successfully!\n\nFile: .architecture/decisions/adrs/${adrFilename}\nNumber: ${nextNumber}\nTitle: ${title}`,
+          text: `✅ ADR created successfully!\n\nFile: .architecture/decisions/adrs/${adrFilename}\nNumber: ${nextNumber}\nTitle: ${title}\n\nRendered from .architecture/templates/adr-template.md: Status, Context, Decision and Consequences carry your input; the remaining [bracketed] prompts (Decision Drivers, the Consequences sub-lists, Alternatives Considered, …) are left for you to complete or delete.`,
         },
       ],
     };

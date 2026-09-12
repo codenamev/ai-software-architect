@@ -223,7 +223,7 @@ Creates a new Architectural Decision Record with automatic numbering.
 
 **Creates:**
 - `.architecture/decisions/adrs/ADR-XXX-title.md` with sequential numbering
-- An ADR rendered from `.architecture/templates/adr-template.md` (the installed copy, so your customizations apply): Status is set to `Proposed` with the date, and your context, decision, and consequences fill their sections; the template's remaining sections (Decision Drivers, Implementation Strategy, Alternatives Considered, …) stay as prompts to complete
+- An ADR rendered from `.architecture/templates/adr-template.md` (the installed copy, so your customizations apply): Status is set to `Proposed` with the date, and your context, decision, and consequences become the opening paragraph of their sections. Every other `[bracketed]` prompt in the template stays — including the sub-lists inside Decision and Consequences (Positive/Negative/Neutral) and whole sections like Decision Drivers and Alternatives Considered — for you to complete or delete. The tool gives you a scaffold that passes `validate-adr`, not a finished record.
 
 **Example:**
 ```javascript

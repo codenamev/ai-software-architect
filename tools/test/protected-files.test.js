@@ -36,6 +36,43 @@ describe('Protected files', () => {
       assert.strictEqual(isProtected('config.yml'), false);
     });
 
+    it('resolves . and .. segments before matching', () => {
+      for (const p of [
+        '.architecture/./members.yml',
+        '.architecture/decisions/../config.yml',
+        '/abs/.architecture/../.architecture/principles.md',
+        './.architecture/members.yml',
+      ]) {
+        assert.strictEqual(isProtected(p), true, `should flag ${p}`);
+      }
+    });
+
+    it('collapses duplicate separators before matching', () => {
+      assert.strictEqual(isProtected('.architecture//members.yml'), true);
+      assert.strictEqual(isProtected('/abs//path/.architecture///config.yml'), true);
+    });
+
+    it('accepts Windows separators regardless of host platform', () => {
+      assert.strictEqual(isProtected('C:\\proj\\.architecture\\members.yml'), true);
+      assert.strictEqual(isProtected('.architecture\\config.yml'), true);
+      assert.strictEqual(isProtected('C:\\proj\\.architecture\\templates\\config.yml'), false);
+    });
+
+    it('does not flag when .. walks out of .architecture', () => {
+      assert.strictEqual(isProtected('.architecture/../members.yml'), false);
+      assert.strictEqual(isProtected('.architecture/../docs/config.yml'), false);
+    });
+
+    it('does not flag a directory whose name merely ends in .architecture', () => {
+      assert.strictEqual(isProtected('foo.architecture/members.yml'), false);
+      assert.strictEqual(isProtected('/abs/my.architecture/config.yml'), false);
+    });
+
+    it('does not flag protected names nested deeper under .architecture', () => {
+      assert.strictEqual(isProtected('.architecture/templates/config.yml'), false);
+      assert.strictEqual(isProtected('.architecture/decisions/principles.md'), false);
+    });
+
     it('handles empty or undefined paths defensively', () => {
       assert.strictEqual(isProtected(''), false);
       assert.strictEqual(isProtected(undefined), false);
@@ -69,6 +106,18 @@ describe('Protected files', () => {
     it('mentions the override pathway (env var or pragmatic-guard skill)', () => {
       const msg = protectedFileMessage('.architecture/principles.md');
       assert.match(msg, /CLAUDE_ALLOW_PROTECTED|override/i);
+    });
+
+    it('returns an empty string for unprotected paths', () => {
+      assert.strictEqual(protectedFileMessage('README.md'), '');
+      assert.strictEqual(protectedFileMessage('foo.architecture/members.yml'), '');
+      assert.strictEqual(protectedFileMessage(undefined), '');
+    });
+
+    it('matches the same normalized forms isProtected does', () => {
+      const msg = protectedFileMessage('.architecture/decisions/../members.yml');
+      assert.match(msg, /members\.yml/);
+      assert.match(msg, /generate-subagents/);
     });
   });
 });

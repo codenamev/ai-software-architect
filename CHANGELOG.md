@@ -14,6 +14,9 @@ The entrypoint guard added in 1.6.0 compared `process.argv[1]` against `__filena
 
 Scope, precisely: this affected every POSIX launch through the bin in 1.6.0, which is how `.mcp.json` starts the server (`npx -y ai-software-architect`) and how the `npm install -g` + `"command": "mcp"` configurations in `README.md` start it. Windows was unaffected — npm writes `cmd`/`ps1` shims there that hand Node the real path. Launching `node mcp/index.js` by path was also unaffected, which is why it went unnoticed. No released version shipped the bug: npm `latest` is 1.3.0, which calls `server.run()` unconditionally. This is a fix to unreleased code, not a user-facing regression.
 
+#### `configure_pragmatic_mode` erased every comment in `config.yml` ([#26](https://github.com/codenamev/ai-software-architect/issues/26))
+The tool loaded `config.yml` with `yaml.parse()`, set two keys, and wrote it back with `yaml.stringify()`. That round-trip keeps values and drops everything else: the canonical `config.yml` carries over a hundred comment lines explaining intensity levels, exemptions, triggers and thresholds, and the tool's own success message tells users to hand-edit the file to customize them. The first configure call left bare keys with no documentation. The tool now edits the file as a YAML document (`yaml.parseDocument` + `setIn`), so only `pragmatic_mode.enabled` / `pragmatic_mode.intensity` change and every other line, comments included, is written back as it was. The template-seeding path (no `config.yml` yet) keeps the template's comments the same way, and a `config.yml` that fails to parse is now left untouched with an error instead of being overwritten. Regression tests in `tools/test/configure-pragmatic-mode.test.js`.
+
 ### Added
 
 #### Protocol-level smoke test for the MCP server (`mcp/test/protocol-smoke.test.js`)

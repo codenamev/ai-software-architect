@@ -66,9 +66,31 @@
 
 ---
 
+## Challenges
+
+[Every critical/high finding from the individual reviews was sent to one other member with instructions to refute it. Record each outcome here. Rebuttals are verbatim from the challenger, not paraphrased by the orchestrator.]
+
+| Finding | Author | Rated | Challenger | Outcome | Now rated |
+|---------|--------|-------|------------|---------|-----------|
+| [Finding title] | [Member] | Critical | [Member] | Survived | Critical |
+| [Finding title] | [Member] | High | [Member] | Downgraded | Medium |
+| [Finding title] | [Member] | Critical | [Member] | Refuted | — |
+
+### Rebuttals
+
+**[Finding title]** — challenged by [Member], **downgraded to Medium**
+> [Challenger's response verbatim, with the file:line evidence they cited]
+
+**[Finding title]** — challenged by [Member], **refuted**
+> [Challenger's response verbatim]
+
+[Unchallenged critical/high findings, if any, are listed here with the reason no counterweight member was available.]
+
+---
+
 ## Collaborative Discussion
 
-[Synthesize findings from all members. Show how different perspectives interact and what consensus emerges.]
+[Synthesize the post-challenge findings from all members. Show how different perspectives interact and what consensus emerges. Refuted findings do not appear below.]
 
 **Opening Context**:
 
@@ -275,7 +297,7 @@ This review was conducted using the AI Software Architect framework with the fol
 - **Maintainability Expert**: Code quality and technical debt
 - [Additional members as applicable]
 
-Each member reviewed independently, then collaborated to synthesize findings and prioritize recommendations.
+Each member reviewed independently. Every critical/high finding was then sent to one other member to refute (the challenge round); surviving severities drove the consolidated findings and prioritization.
 
 [If pragmatic mode was enabled, note:]
 **Pragmatic Mode**: [Strict | Balanced | Lenient]

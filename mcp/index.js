@@ -963,7 +963,9 @@ ${new Date().toISOString().split('T')[0]}
     // and the success message below tells users to hand-edit it. A
     // yaml.parse()/yaml.stringify() round-trip drops every comment on the first
     // configure call (#26); the Document API rewrites only the scalars this tool
-    // touches and leaves the rest of the file byte-for-byte as the user had it.
+    // touches and writes every other line back as it was. (Known limit: the
+    // serializer re-indents a comment block that dangles at the end of a nested
+    // map; the canonical config.yml has none, the 394-line template has a few.)
     let configSourcePath;
     if (await fs.pathExists(configPath)) {
       configSourcePath = configPath;

@@ -12,7 +12,8 @@ import { ArchitectureServer } from '../../mcp/index.js';
 // success message tells users to hand-edit). These tests pin the contract that
 // a configure call changes the scalars it was asked to change and nothing else.
 
-const commentLines = (text) => text.split('\n').filter((l) => /^\s*#/.test(l)).length;
+const comments = (text) => text.split('\n').filter((l) => /^\s*#/.test(l));
+const commentLines = (text) => comments(text).length;
 
 describe('configure_pragmatic_mode preserves config.yml comments (#26)', () => {
   let dir;
@@ -71,8 +72,11 @@ describe('configure_pragmatic_mode preserves config.yml comments (#26)', () => {
     const created = await readFile(configPath, 'utf8');
 
     assert.strictEqual(parseYaml(created).pragmatic_mode.enabled, false);
-    assert.strictEqual(commentLines(created), commentLines(template),
-      'template comments must survive the seeding path too');
+    // Compare comment text in order, not just the count. Trimmed on purpose:
+    // the yaml serializer re-indents a comment block that dangles at the end
+    // of a nested map (the template has a few), which changes whitespace only.
+    assert.deepStrictEqual(comments(created).map((l) => l.trim()), comments(template).map((l) => l.trim()),
+      'every template comment must survive the seeding path, in order');
   });
 
   it('adds a pragmatic_mode section to a config that lacks one, keeping existing content', async () => {

@@ -274,7 +274,7 @@ Gets current state of architecture documentation with counts and metrics.
 Enables and configures Pragmatic Mode (YAGNI Enforcement) to prevent over-engineering.
 
 **What it does:**
-1. **Configuration Management** - Creates or updates `.architecture/config.yml` with pragmatic mode settings
+1. **Configuration Management** - Creates or updates `.architecture/config.yml` with pragmatic mode settings. Edits are in place: comments and any hand-made customizations elsewhere in the file are preserved
 2. **Mode Activation** - Enables/disables the Pragmatic Enforcer in reviews
 3. **Intensity Control** - Sets how aggressively complexity is challenged
 4. **Deferrals Setup** - Creates deferrals tracking file if enabled

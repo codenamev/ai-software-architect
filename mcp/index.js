@@ -964,19 +964,19 @@ ${new Date().toISOString().split('T')[0]}
     // yaml.parse()/yaml.stringify() round-trip drops every comment on the first
     // configure call (#26); the Document API rewrites only the scalars this tool
     // touches and leaves the rest of the file byte-for-byte as the user had it.
-    let configSource;
+    let configSourcePath;
     if (await fs.pathExists(configPath)) {
-      configSource = await fs.readFile(configPath, 'utf8');
+      configSourcePath = configPath;
     } else if (await fs.pathExists(templatePath)) {
       // Seed from the template, comments included.
-      configSource = await fs.readFile(templatePath, 'utf8');
+      configSourcePath = templatePath;
     } else {
       throw new Error("Configuration template not found. Framework may be incomplete.");
     }
 
-    const doc = yaml.parseDocument(configSource);
+    const doc = yaml.parseDocument(await fs.readFile(configSourcePath, 'utf8'));
     if (doc.errors.length > 0) {
-      throw new Error(`Cannot parse ${configPath}: ${doc.errors[0].message}`);
+      throw new Error(`Cannot parse ${configSourcePath}: ${doc.errors[0].message}`);
     }
 
     // Update pragmatic mode settings. setIn creates the pragmatic_mode map if

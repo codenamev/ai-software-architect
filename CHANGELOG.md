@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+#### `setup_architecture` stranded `.architecture-temp` in the user's project on a mid-setup failure
+The framework is copied into `<project>/.architecture-temp` as a scratch clone (step 2) and removed at step 9. Any failure in between (a throw from `customizeMembers`, the `pragmatic_mode` fail-closed check, an unwritable `agents/` dir, ...) skipped the removal and left the full scratch copy in the target project. Cleanup now also runs in a `finally`, so the scratch dir is removed on every exit path. Covered by a new failure-path test in `tools/test/setup-fidelity.test.js`.
+
 #### MCP server exited silently when launched through its packaged `bin`
 The entrypoint guard added in 1.6.0 compared `process.argv[1]` against `__filename` as literal strings. Node resolves `import.meta.url` through symlinks but leaves `process.argv[1]` as the path it was handed, and npm installs the `mcp` bin as a symlink (`node_modules/.bin/mcp` → `../ai-software-architect/index.js`). The two never matched, so the guard did not fire: the process exited 0 with nothing on stderr and the transport was never started — a server that looks dead to its client, with no diagnostic anywhere. The comparison is now made between real paths.
 

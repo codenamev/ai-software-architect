@@ -75,6 +75,24 @@ describe('Setup fidelity (ADR-016) — setup_architecture end-to-end', () => {
       'node_modules must never land in the installed .architecture');
   });
 
+  it('removes .architecture-temp when setup fails partway through', async () => {
+    const failDir = await mkdtemp(path.join(os.tmpdir(), 'asa-setup-fail-'));
+    try {
+      await writeFile(path.join(failDir, 'package.json'), JSON.stringify({ name: 'demo' }));
+      const server = new ArchitectureServer();
+      // Fail after the framework copy (step 2) but before the cleanup step (9).
+      server.customizeMembers = async () => { throw new Error('simulated mid-setup failure'); };
+      await assert.rejects(
+        () => server.setupArchitecture({ projectPath: failDir }),
+        /simulated mid-setup failure/,
+      );
+      assert.ok(!existsSync(path.join(failDir, '.architecture-temp')),
+        'temp clone must be cleaned up even when setup fails');
+    } finally {
+      await rm(failDir, { recursive: true, force: true });
+    }
+  });
+
   it('createADR slugifies unsafe characters out of the filename', async () => {
     await new ArchitectureServer().createADR({
       title: 'Use REST/GraphQL: hybrid?',

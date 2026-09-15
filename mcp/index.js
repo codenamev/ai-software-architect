@@ -29,177 +29,107 @@ export class ArchitectureServer {
     });
   }
 
-  // Lazily initialise the MCP Server and register all tool handlers.
+  // Lazily initialise the MCP server and register all tools.
   // Safe to call multiple times (no-op after first call).
   async _initServer() {
     if (this.server) return;
-    const { Server } = await import("@modelcontextprotocol/sdk/server/index.js");
-    const { CallToolRequestSchema, ListToolsRequestSchema } = await import("@modelcontextprotocol/sdk/types.js");
+    const { McpServer } = await import("@modelcontextprotocol/sdk/server/mcp.js");
+    const { z } = await import("zod");
 
-    this.server = new Server(
+    this.server = new McpServer(
       { name: "ai-software-architect", version: "1.6.0" },
       { capabilities: { tools: {} } }
     );
-    this.server.onerror = (error) => console.error("[MCP Error]", error);
-    this._setupToolHandlers(CallToolRequestSchema, ListToolsRequestSchema);
+    this.server.server.onerror = (error) => console.error("[MCP Error]", error);
+    this._setupToolHandlers(z);
   }
 
   // Kept for API compatibility; no-op now that setup happens in _initServer.
   setupErrorHandling() {}
 
-  _setupToolHandlers(CallToolRequestSchema, ListToolsRequestSchema) {
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      return {
-        tools: [
-          {
-            name: "setup_architecture",
-            description: "Set up the AI Software Architect framework in the current project",
-            inputSchema: {
-              type: "object",
-              properties: {
-                projectPath: {
-                  type: "string",
-                  description: "Path to the project root directory",
-                },
-              },
-              required: ["projectPath"],
-            },
-          },
-          {
-            name: "create_adr",
-            description: "Create an Architectural Decision Record (ADR)",
-            inputSchema: {
-              type: "object",
-              properties: {
-                title: {
-                  type: "string",
-                  description: "Title of the ADR",
-                },
-                context: {
-                  type: "string",
-                  description: "Context and background for the decision",
-                },
-                decision: {
-                  type: "string",
-                  description: "The architectural decision being made",
-                },
-                consequences: {
-                  type: "string",
-                  description: "Consequences of this decision",
-                },
-                projectPath: {
-                  type: "string",
-                  description: "Path to the project root directory",
-                },
-              },
-              required: ["title", "context", "decision", "consequences", "projectPath"],
-            },
-          },
-          {
-            name: "list_architecture_members",
-            description: "List all available architecture team members and their specialties",
-            inputSchema: {
-              type: "object",
-              properties: {
-                projectPath: {
-                  type: "string",
-                  description: "Path to the project root directory",
-                },
-              },
-              required: ["projectPath"],
-            },
-          },
-          {
-            name: "get_architecture_status",
-            description: "Get the current status of architecture documentation and decisions",
-            inputSchema: {
-              type: "object",
-              properties: {
-                projectPath: {
-                  type: "string",
-                  description: "Path to the project root directory",
-                },
-              },
-              required: ["projectPath"],
-            },
-          },
-          {
-            name: "configure_pragmatic_mode",
-            description: "Enable and configure Pragmatic Mode (YAGNI Enforcement) to prevent over-engineering",
-            inputSchema: {
-              type: "object",
-              properties: {
-                projectPath: {
-                  type: "string",
-                  description: "Path to the project root directory",
-                },
-                enabled: {
-                  type: "boolean",
-                  description: "Enable or disable Pragmatic Mode",
-                },
-                intensity: {
-                  type: "string",
-                  description: "Intensity level: 'strict', 'balanced', or 'lenient'",
-                  enum: ["strict", "balanced", "lenient"],
-                },
-              },
-              required: ["projectPath"],
-            },
-          },
-          {
-            name: "get_implementation_guidance",
-            description: "Get implementation methodology, influences, and practices configuration for 'Implement as the architects' command. Returns configured methodology (TDD, BDD, etc.), influences (Kent Beck, Sandi Metz, etc.), language-specific practices, testing approach, refactoring guidelines, and quality standards.",
-            inputSchema: {
-              type: "object",
-              properties: {
-                projectPath: {
-                  type: "string",
-                  description: "Path to the project root directory",
-                },
-                featureDescription: {
-                  type: "string",
-                  description: "Optional: Description of the feature being implemented (for context-specific guidance)",
-                },
-              },
-              required: ["projectPath"],
-            },
-          },
-        ],
-      };
-    });
+  // Register the six Tier-1 tools. Each inputSchema is a zod shape: the SDK
+  // derives the advertised JSON Schema from it AND validates every tools/call
+  // against it before the handler runs, so the contract a client reads is the
+  // contract the server enforces. A missing required field is rejected with a
+  // message naming the field instead of surfacing as a Node internals error
+  // from path.join(undefined, ...).
+  _setupToolHandlers(z) {
+    const projectPath = z.string().describe("Path to the project root directory");
 
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      const { name, arguments: args } = request.params;
+    const tools = [
+      {
+        name: "setup_architecture",
+        description: "Set up the AI Software Architect framework in the current project",
+        inputSchema: { projectPath },
+        handler: (args) => this.setupArchitecture(args),
+      },
+      {
+        name: "create_adr",
+        description: "Create an Architectural Decision Record (ADR)",
+        inputSchema: {
+          title: z.string().describe("Title of the ADR"),
+          context: z.string().describe("Context and background for the decision"),
+          decision: z.string().describe("The architectural decision being made"),
+          consequences: z.string().describe("Consequences of this decision"),
+          projectPath,
+        },
+        handler: (args) => this.createADR(args),
+      },
+      {
+        name: "list_architecture_members",
+        description: "List all available architecture team members and their specialties",
+        inputSchema: { projectPath },
+        handler: (args) => this.listArchitectureMembers(args),
+      },
+      {
+        name: "get_architecture_status",
+        description: "Get the current status of architecture documentation and decisions",
+        inputSchema: { projectPath },
+        handler: (args) => this.getArchitectureStatus(args),
+      },
+      {
+        name: "configure_pragmatic_mode",
+        description: "Enable and configure Pragmatic Mode (YAGNI Enforcement) to prevent over-engineering",
+        inputSchema: {
+          projectPath,
+          enabled: z.boolean().optional().describe("Enable or disable Pragmatic Mode"),
+          intensity: z
+            .enum(["strict", "balanced", "lenient"])
+            .optional()
+            .describe("Intensity level: 'strict', 'balanced', or 'lenient'"),
+        },
+        handler: (args) => this.configurePragmaticMode(args),
+      },
+      {
+        name: "get_implementation_guidance",
+        description:
+          "Get implementation methodology, influences, and practices configuration for 'Implement as the architects' command. Returns configured methodology (TDD, BDD, etc.), influences (Kent Beck, Sandi Metz, etc.), language-specific practices, testing approach, refactoring guidelines, and quality standards.",
+        inputSchema: {
+          projectPath,
+          featureDescription: z
+            .string()
+            .optional()
+            .describe("Optional: Description of the feature being implemented (for context-specific guidance)"),
+        },
+        handler: (args) => this.getImplementationGuidance(args),
+      },
+    ];
 
-      try {
-        switch (name) {
-          case "setup_architecture":
-            return await this.setupArchitecture(args);
-          case "create_adr":
-            return await this.createADR(args);
-          case "list_architecture_members":
-            return await this.listArchitectureMembers(args);
-          case "get_architecture_status":
-            return await this.getArchitectureStatus(args);
-          case "configure_pragmatic_mode":
-            return await this.configurePragmaticMode(args);
-          case "get_implementation_guidance":
-            return await this.getImplementationGuidance(args);
-          default:
-            throw new Error(`Unknown tool: ${name}`);
+    for (const { name, description, inputSchema, handler } of tools) {
+      this.server.registerTool(name, { description, inputSchema }, async (args) => {
+        try {
+          return await handler(args);
+        } catch (error) {
+          // Tool ran and failed: report it as a tool-execution error. Schema
+          // violations and unknown tool names never reach here - the SDK
+          // rejects those before the handler is invoked.
+          return {
+            content: [{ type: "text", text: `Error: ${error.message}` }],
+            isError: true,
+          };
         }
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: "text",
-              text: `Error: ${error.message}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    });
+      });
+    }
   }
 
   async setupArchitecture(args) {

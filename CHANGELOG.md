@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Behavioral fields for reviewer personas (#35)
+`members.yml` members accept three optional fields — `silent_checklist`, `blocking_criteria`, and `signature_tradeoff` — that `tools/lib/subagent-generator.js` renders as `## Silent checklist`, `## Blocking criteria`, and `## Signature trade-off` sections in the generated agent. Checklist and criteria items may be plain strings or `{ text, motivated_by }` objects; the provenance renders inline so a question can be audited (and later retired) rather than accumulating on vibes. Members that set none of the fields generate byte-identical output, so existing `.architecture/members.yml` files keep working. The Security Specialist ships with a worked example; the other seven personas are unchanged pending the A/B comparison the issue describes.
+
 ### Fixed
 
 #### MCP server exited silently when launched through its packaged `bin`

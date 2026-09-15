@@ -15,6 +15,43 @@ const SAMPLE_MEMBER = {
 
 describe('Subagent Generator', () => {
   describe('generateSubagent', () => {
+    it('renders no behavioral sections when the behavioral fields are absent (backwards compatible)', () => {
+      const { content } = generateSubagent(SAMPLE_MEMBER);
+      assert.ok(!content.includes('## Silent checklist'));
+      assert.ok(!content.includes('## Blocking criteria'));
+      assert.ok(!content.includes('## Signature trade-off'));
+    });
+
+    it('renders silent_checklist, blocking_criteria and signature_tradeoff when present', () => {
+      const { content } = generateSubagent({
+        ...SAMPLE_MEMBER,
+        silent_checklist: ['What new trust boundary does this create?'],
+        blocking_criteria: ['Untrusted input reaching a shell'],
+        signature_tradeoff: 'security controls vs. onboarding friction',
+      });
+      const checklist = content.indexOf('## Silent checklist');
+      const blocking = content.indexOf('## Blocking criteria');
+      const tradeoff = content.indexOf('## Signature trade-off');
+      const source = content.indexOf('## Source of truth');
+      assert.ok(checklist > content.indexOf('## Domains'), 'checklist follows the noun sections');
+      assert.ok(checklist < blocking && blocking < tradeoff && tradeoff < source, 'sections keep a stable order');
+      assert.ok(content.includes('- What new trust boundary does this create?'));
+      assert.ok(content.includes('- Untrusted input reaching a shell'));
+      assert.ok(content.includes('security controls vs. onboarding friction'));
+    });
+
+    it('renders provenance for object items and ignores empty behavioral fields', () => {
+      const { content } = generateSubagent({
+        ...SAMPLE_MEMBER,
+        silent_checklist: [{ text: 'Where does user data first land?', motivated_by: 'ADR-010' }],
+        blocking_criteria: [],
+        signature_tradeoff: '   ',
+      });
+      assert.ok(content.includes('- Where does user data first land? _(motivated by: ADR-010)_'));
+      assert.ok(!content.includes('## Blocking criteria'), 'empty list renders nothing');
+      assert.ok(!content.includes('## Signature trade-off'), 'blank string renders nothing');
+    });
+
     it('returns an object with filename and content', () => {
       const result = generateSubagent(SAMPLE_MEMBER);
       assert.ok(typeof result.filename === 'string');

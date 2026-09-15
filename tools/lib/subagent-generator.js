@@ -70,6 +70,39 @@ export function generateSubagent(member) {
     bulletList(member.domains),
   ];
 
+  // Behavioral fields (#35). All optional: a member that sets none of them
+  // renders exactly as before, so existing user members.yml files keep working.
+  if (hasItems(member.silent_checklist)) {
+    sections.push(
+      '',
+      '## Silent checklist',
+      '',
+      'Questions this reviewer asks before reading any further. Answer each one explicitly in the review, even when the answer is "not affected".',
+      '',
+      bulletList(member.silent_checklist)
+    );
+  }
+
+  if (hasItems(member.blocking_criteria)) {
+    sections.push(
+      '',
+      '## Blocking criteria',
+      '',
+      'Any of these makes a finding **critical** and this reviewer will not sign off until it is resolved or explicitly accepted by the maintainer:',
+      '',
+      bulletList(member.blocking_criteria)
+    );
+  }
+
+  if (typeof member.signature_tradeoff === 'string' && member.signature_tradeoff.trim().length > 0) {
+    sections.push(
+      '',
+      '## Signature trade-off',
+      '',
+      `The axis this reviewer habitually trades against the others: ${member.signature_tradeoff.trim()}. Name it when it applies so the aggregated review can record the trade-off rather than an unexplained disagreement.`
+    );
+  }
+
   if (member.mode_specific?.active_when) {
     sections.push('', '## Activation', '', `This subagent is most relevant when \`${member.mode_specific.active_when}\` (see \`.architecture/config.yml\`). When that condition is false, prefer the general architecture-review subagent.`);
   }
@@ -128,5 +161,20 @@ function quoteIfNeeded(value) {
 
 function bulletList(items) {
   if (!Array.isArray(items) || items.length === 0) return '_(none specified)_';
-  return items.map(i => `- ${i}`).join('\n');
+  return items.map(i => `- ${bulletText(i)}`).join('\n');
+}
+
+// Behavioral items may carry provenance: `{ text: "...", motivated_by: "ADR-010" }`
+// renders as "text (motivated by: ADR-010)". Plain strings render unchanged.
+function bulletText(item) {
+  if (item && typeof item === 'object' && !Array.isArray(item)) {
+    const text = String(item.text ?? item.question ?? item.criterion ?? '').trim();
+    const why = typeof item.motivated_by === 'string' ? item.motivated_by.trim() : '';
+    return why ? `${text} _(motivated by: ${why})_` : text;
+  }
+  return String(item);
+}
+
+function hasItems(value) {
+  return Array.isArray(value) && value.length > 0;
 }

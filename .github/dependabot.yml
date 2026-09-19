@@ -1,3 +1,6 @@
+# Dependabot: one grouped PR per ecosystem per week. Security updates are grouped
+# too (they are NOT covered by a version-updates group and land one-PR-per-advisory
+# otherwise -- that is what produced #50/#51/#52 as three separate PRs).
 version: 2
 updates:
   - package-ecosystem: "npm"
@@ -7,6 +10,10 @@ updates:
     labels: ["loop:deps"]
     groups:
       mcp:
+        applies-to: version-updates
+        patterns: ["*"]
+      mcp-security:
+        applies-to: security-updates
         patterns: ["*"]
   - package-ecosystem: "npm"
     directory: "/tools"
@@ -15,6 +22,10 @@ updates:
     labels: ["loop:deps"]
     groups:
       tools:
+        applies-to: version-updates
+        patterns: ["*"]
+      tools-security:
+        applies-to: security-updates
         patterns: ["*"]
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -23,4 +34,8 @@ updates:
     labels: ["loop:deps"]
     groups:
       github-actions:
+        applies-to: version-updates
+        patterns: ["*"]
+      github-actions-security:
+        applies-to: security-updates
         patterns: ["*"]

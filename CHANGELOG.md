@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+#### MCP server enforces the `inputSchema` it advertises (#30)
+The six tool registrations in `mcp/index.js` moved from the low-level `Server` + `setRequestHandler` API to `McpServer.registerTool` with zod schemas. The advertised JSON Schema is now derived from the same zod shape the SDK validates every `tools/call` against, so the contract a client reads is the one the server enforces and the two can no longer drift. Before this, `required` was decoration: calling `get_architecture_status` without `projectPath` reached `path.join(undefined, ...)` and came back as a Node `ERR_INVALID_ARG_TYPE`. It now comes back as `Invalid arguments for tool get_architecture_status: Required at projectPath`; an `intensity` outside `strict|balanced|lenient` is rejected the same way. Unknown extra arguments are stripped rather than rejected, so callers passing a stray key keep working.
+
+Observable wire changes, for anyone driving the server by hand: schema violations and unknown tool names are still returned as `isError: true` text (the SDK wraps its own `McpError` that way), but the message is now the SDK's `MCP error -32602: ...` rather than `Error: Unknown tool: ...`, and the advertised schemas gain `additionalProperties: false` and a `$schema` key. Tool bodies are unchanged. `zod` becomes a direct dependency (it was already installed transitively by the SDK). Three enforcement tests added to `mcp/test/protocol-smoke.test.js`.
+
 ### Fixed
 
 #### MCP server exited silently when launched through its packaged `bin`

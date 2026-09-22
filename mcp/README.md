@@ -193,14 +193,14 @@ Sets up the AI Software Architect framework in your project with full customizat
 3. **Customization** - Tailors team members, principles, and templates to your stack
 4. **Integration Setup** - Configures CLAUDE.md for AI assistant collaboration
 5. **Initial Analysis** - Conducts multi-perspective architectural analysis
-6. **Documentation** - Creates customized templates and principles
+6. **Documentation** - Installs the canonical templates and customized principles
 
 **Parameters:**
 - `projectPath` (string, required): Path to your project root directory
 
 **Creates:**
-- `.architecture/` with subdirectories (decisions, reviews, recalibration, comparisons, templates)
-- `.coding-assistants/` configuration directories
+- `.architecture/` with subdirectories (decisions, reviews, recalibration, comparisons, templates — the canonical `adr-template.md`, `review-template.md`, `config.yml`, …)
+- `.coding-assistants/` with the canonical assistant configurations (Cursor `.mdc` rules, Codex setup instructions, Claude guidance)
 - `CLAUDE.md` integration (created or enhanced)
 - `.architecture/reviews/initial-system-analysis.md` - Comprehensive initial assessment
 
@@ -223,7 +223,7 @@ Creates a new Architectural Decision Record with automatic numbering.
 
 **Creates:**
 - `.architecture/decisions/adrs/ADR-XXX-title.md` with sequential numbering
-- Formatted ADR with status, context, decision, and consequences
+- An ADR rendered from `.architecture/templates/adr-template.md` (the installed copy, so your customizations apply): Status is set to `Proposed` with the date, and your context, decision, and consequences become the opening paragraph of their sections. Every other `[bracketed]` prompt in the template stays — including the sub-lists inside Decision and Consequences (Positive/Negative/Neutral) and whole sections like Decision Drivers and Alternatives Considered — for you to complete or delete. The tool gives you a scaffold that passes `validate-adr`, not a finished record.
 
 **Example:**
 ```javascript

@@ -14,6 +14,9 @@ The entrypoint guard added in 1.6.0 compared `process.argv[1]` against `__filena
 
 Scope, precisely: this affected every POSIX launch through the bin in 1.6.0, which is how `.mcp.json` starts the server (`npx -y ai-software-architect`) and how the `npm install -g` + `"command": "mcp"` configurations in `README.md` start it. Windows was unaffected — npm writes `cmd`/`ps1` shims there that hand Node the real path. Launching `node mcp/index.js` by path was also unaffected, which is why it went unnoticed. No released version shipped the bug: npm `latest` is 1.3.0, which calls `server.run()` unconditionally. This is a fix to unreleased code, not a user-facing regression.
 
+#### `protect-files` hook matched paths by raw suffix, with no normalization
+`isProtected` compared the incoming `file_path` against `.architecture/<name>` with a bare `endsWith`. Any path that spells the same file differently slipped through: `.architecture/./config.yml`, `.architecture/decisions/../config.yml`, `.architecture//members.yml`, or a forward-slash path on a Windows host (where the expected suffix is built with `\`). The same check also fired on files that are *not* protected — a directory named `foo.architecture/` containing a `members.yml`. Paths are now run through `path.normalize`, split on either separator, and matched on their last two segments (`.architecture` + a protected name). The hook is a guardrail against accidental edits, not a sandbox: matching stays exact-case, so a case-variant path on a case-insensitive filesystem is still not caught, and `CLAUDE_ALLOW_PROTECTED=1` remains the intended override.
+
 ### Added
 
 #### Protocol-level smoke test for the MCP server (`mcp/test/protocol-smoke.test.js`)

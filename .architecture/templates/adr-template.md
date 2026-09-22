@@ -48,6 +48,16 @@ If superseded, link to the new ADR: [New ADR Link]
 * [Neutral consequence 2]
 * [...]
 
+## Confirmation
+
+> **Note**: Optional. Borrowed from MADR 4.0. Where *Validation* (below) says how the implementation will be tested, this says how you'll check, later, that the codebase still follows the decision.
+
+**How compliance is verified:** [Review checkpoint, lint rule, ADR recalibration pass, or "by inspection" — name the mechanism]
+
+**Who checks and when:** [Role / specialist and the trigger: each release, each recalibration, when the affected component changes]
+
+**Signals of drift:** [What would show up in code, reviews, or metrics if this decision were quietly abandoned]
+
 ## Implementation Strategy
 
 > **Note**: This section externalizes the "senior thinking" about HOW and WHEN to implement this decision, not just WHAT to implement.

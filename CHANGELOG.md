@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optional `## Confirmation` section in `.architecture/templates/adr-template.md` (MADR 4.0 parity): how compliance with the decision is verified, by whom, and what drift would look like. Additive; no validator or existing-ADR changes. Refs #38 (C1).
+
 ### Fixed
 
 #### MCP server exited silently when launched through its packaged `bin`

@@ -957,34 +957,47 @@ ${new Date().toISOString().split('T')[0]}
     const configPath = path.join(architecturePath, "config.yml");
     const templatePath = path.join(architecturePath, "templates", "config.yml");
 
-    // Load or create config
-    let config;
+    // Load or seed the config source text. It is edited as a YAML Document, not
+    // a parsed object: config.yml is deliberately self-documenting (100+ comment
+    // lines explaining intensity levels, exemptions, triggers and thresholds),
+    // and the success message below tells users to hand-edit it. A
+    // yaml.parse()/yaml.stringify() round-trip drops every comment on the first
+    // configure call (#26); the Document API rewrites only the scalars this tool
+    // touches and writes every other line back as it was. (Known limit: the
+    // serializer re-indents a comment block that dangles at the end of a nested
+    // map; the canonical config.yml has none, the 394-line template has a few.)
+    let configSourcePath;
     if (await fs.pathExists(configPath)) {
-      const configContent = await fs.readFile(configPath, 'utf8');
-      config = yaml.parse(configContent);
+      configSourcePath = configPath;
     } else if (await fs.pathExists(templatePath)) {
-      // Copy from template
-      const templateContent = await fs.readFile(templatePath, 'utf8');
-      config = yaml.parse(templateContent);
+      // Seed from the template, comments included.
+      configSourcePath = templatePath;
     } else {
       throw new Error("Configuration template not found. Framework may be incomplete.");
     }
 
-    // Update pragmatic mode settings
-    if (!config.pragmatic_mode) {
-      config.pragmatic_mode = {};
+    const doc = yaml.parseDocument(await fs.readFile(configSourcePath, 'utf8'));
+    if (doc.errors.length > 0) {
+      throw new Error(`Cannot parse ${configSourcePath}: ${doc.errors[0].message}`);
     }
 
+    // Update pragmatic mode settings. setIn creates the pragmatic_mode map if
+    // the file lacks one, so a bare config still gets a valid section.
     if (enabled !== undefined) {
-      config.pragmatic_mode.enabled = enabled;
+      doc.setIn(["pragmatic_mode", "enabled"], enabled);
     }
 
     if (intensity !== undefined) {
-      config.pragmatic_mode.intensity = intensity;
+      doc.setIn(["pragmatic_mode", "intensity"], intensity);
     }
 
+    // Plain-object view of the (now updated) document for the read-only checks
+    // and the status message below.
+    const config = doc.toJS() ?? {};
+    const pragmaticMode = config.pragmatic_mode ?? {};
+
     // Ensure deferrals.md exists if tracking is enabled
-    if (config.pragmatic_mode.enabled && config.pragmatic_mode.behavior?.track_deferrals) {
+    if (pragmaticMode.enabled && pragmaticMode.behavior?.track_deferrals) {
       const deferralsPath = path.join(architecturePath, "deferrals.md");
       const deferralsTemplatePath = path.join(architecturePath, "templates", "deferrals.md");
 
@@ -994,18 +1007,18 @@ ${new Date().toISOString().split('T')[0]}
     }
 
     // Write updated config
-    await fs.writeFile(configPath, yaml.stringify(config));
+    await fs.writeFile(configPath, doc.toString());
 
     // Build status message
-    const statusEnabled = config.pragmatic_mode.enabled ? "✅ Enabled" : "❌ Disabled";
-    const statusIntensity = config.pragmatic_mode.intensity || "balanced";
-    const deferralsTracking = config.pragmatic_mode.behavior?.track_deferrals ? "Enabled" : "Disabled";
+    const statusEnabled = pragmaticMode.enabled ? "✅ Enabled" : "❌ Disabled";
+    const statusIntensity = pragmaticMode.intensity || "balanced";
+    const deferralsTracking = pragmaticMode.behavior?.track_deferrals ? "Enabled" : "Disabled";
 
     return {
       content: [
         {
           type: "text",
-          text: `## Pragmatic Mode Configuration Updated\n\n**Status**: ${statusEnabled}\n**Intensity**: ${statusIntensity}\n**Deferrals Tracking**: ${deferralsTracking}\n\n### How Pragmatic Mode Works\n\nWhen enabled, the Pragmatic Enforcer will:\n- Challenge complexity and abstractions\n- Question "best practices" that may not apply\n- Propose simpler alternatives that meet current requirements\n- Score necessity vs. complexity (target ratio <1.5)\n- ${deferralsTracking === "Enabled" ? "Track deferred decisions in .architecture/deferrals.md" : "Not track deferrals"}\n\n### Intensity Levels\n\n**Strict**: Challenges aggressively, requires strong justification\n**Balanced**: Thoughtful challenges, accepts justified complexity (recommended)\n**Lenient**: Raises concerns without blocking\n\n### Configuration\n\nFull configuration saved to: \`.architecture/config.yml\`\n\nYou can manually edit this file to customize:\n- Exemptions (security, compliance, etc.)\n- Triggers (when to challenge)\n- Thresholds (complexity scores)\n- Review phases where Pragmatic Mode applies\n\n### Next Steps\n\n${config.pragmatic_mode.enabled ? "The Pragmatic Enforcer will now participate in:\n- Architecture reviews (the architecture-review skill)\n- Specialist reviews (the specialist-review skill)\n- ADR creation (create_adr)\n\nUse these tools and the Pragmatic Enforcer will challenge over-engineering." : "Pragmatic Mode is disabled. Set enabled=true to activate YAGNI enforcement."}`,
+          text: `## Pragmatic Mode Configuration Updated\n\n**Status**: ${statusEnabled}\n**Intensity**: ${statusIntensity}\n**Deferrals Tracking**: ${deferralsTracking}\n\n### How Pragmatic Mode Works\n\nWhen enabled, the Pragmatic Enforcer will:\n- Challenge complexity and abstractions\n- Question "best practices" that may not apply\n- Propose simpler alternatives that meet current requirements\n- Score necessity vs. complexity (target ratio <1.5)\n- ${deferralsTracking === "Enabled" ? "Track deferred decisions in .architecture/deferrals.md" : "Not track deferrals"}\n\n### Intensity Levels\n\n**Strict**: Challenges aggressively, requires strong justification\n**Balanced**: Thoughtful challenges, accepts justified complexity (recommended)\n**Lenient**: Raises concerns without blocking\n\n### Configuration\n\nFull configuration saved to: \`.architecture/config.yml\`\n\nYou can manually edit this file to customize:\n- Exemptions (security, compliance, etc.)\n- Triggers (when to challenge)\n- Thresholds (complexity scores)\n- Review phases where Pragmatic Mode applies\n\n### Next Steps\n\n${pragmaticMode.enabled ? "The Pragmatic Enforcer will now participate in:\n- Architecture reviews (the architecture-review skill)\n- Specialist reviews (the specialist-review skill)\n- ADR creation (create_adr)\n\nUse these tools and the Pragmatic Enforcer will challenge over-engineering." : "Pragmatic Mode is disabled. Set enabled=true to activate YAGNI enforcement."}`,
         },
       ],
     };

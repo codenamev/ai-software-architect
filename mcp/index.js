@@ -207,6 +207,11 @@ export class ArchitectureServer {
     const architecturePath = path.join(projectPath, ".architecture");
     const codingAssistantsPath = path.join(projectPath, ".coding-assistants");
     const claudeMdPath = path.join(projectPath, "CLAUDE.md");
+    // Scratch copy of the framework. Declared outside the try so the finally
+    // block can always reach it — a failure anywhere between the copy and the
+    // cleanup step must not strand .architecture-temp in the user's project.
+    const tempClonePath = path.join(projectPath, '.architecture-temp');
+    let tempCloneStarted = false;
     
     try {
       // Check if .architecture already exists
@@ -233,11 +238,11 @@ export class ArchitectureServer {
 
       // Step 2: Clone framework if needed (simulate by copying from parent directory)
       const frameworkSourcePath = path.resolve(__dirname, '..');
-      const tempClonePath = path.join(projectPath, '.architecture-temp');
       
       results.push("\n📦 Installing framework templates...");
       
       // Copy framework files to temp location
+      tempCloneStarted = true;
       await fs.copy(frameworkSourcePath, tempClonePath, {
         filter: (src) => {
           const relativePath = path.relative(frameworkSourcePath, src);
@@ -302,7 +307,8 @@ export class ArchitectureServer {
       results.push("\n📝 Configuring CLAUDE.md integration...");
       await this.setupClaudeIntegration(claudeMdPath);
       
-      // Step 9: Cleanup temporary files
+      // Step 9: Cleanup temporary files (also guaranteed by the finally below;
+      // done here too so the analysis step never sees the scratch dir).
       await fs.remove(tempClonePath);
       
       // Step 10: Conduct initial architectural analysis
@@ -326,6 +332,12 @@ export class ArchitectureServer {
       };
     } catch (error) {
       throw new Error(`Failed to set up architecture: ${error.message}`);
+    } finally {
+      // Never leave the scratch clone behind, whichever step failed. fs.remove
+      // is a no-op when the path is already gone (the success path removed it).
+      if (tempCloneStarted) {
+        await fs.remove(tempClonePath).catch(() => {});
+      }
     }
   }
 

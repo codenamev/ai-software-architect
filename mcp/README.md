@@ -524,7 +524,7 @@ See [main README](../README.md#integration-method-comparison) for detailed featu
 **Tools not appearing**:
 - Ensure MCP server is running: Check assistant's MCP status
 - Verify configuration points to correct command/path
-- Check Node.js version: Requires Node.js ≥18
+- Check Node.js version: Requires Node.js ≥22
 
 **Permission errors**:
 - Ensure project path is accessible

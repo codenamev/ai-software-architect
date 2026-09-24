@@ -101,7 +101,7 @@ Each member from `.architecture/members.yml` should review from their unique per
 
 ## Collaborative Discussion Process
 
-After individual reviews, simulate a discussion between members to synthesize findings.
+After individual reviews, the orchestrator runs the **challenge round** (SKILL.md step 5): every critical/high finding is sent to the member best positioned to refute it, and the outcome (survived / downgraded / refuted, rebuttal verbatim) is recorded under a Challenges section. The discussion below is then synthesized from the post-challenge findings; refuted findings do not enter it.
 
 ### Discussion Structure
 
@@ -150,7 +150,7 @@ The team agrees on these priorities:
 ### Discussion Best Practices
 
 1. **Cross-Reference Findings**: Members should reference and build on each other's observations
-2. **Resolve Conflicts**: When members disagree, discuss trade-offs and reach consensus
+2. **Resolve Conflicts**: When members disagree on something the challenge round did not settle, discuss trade-offs and reach consensus
 3. **Prioritize Together**: Collaborate to rank recommendations by urgency and impact
 4. **Be Realistic**: Consider project constraints, deadlines, and team capacity
 5. **Stay Constructive**: Frame concerns as improvement opportunities

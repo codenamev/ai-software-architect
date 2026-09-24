@@ -32,6 +32,12 @@ Collect from `.architecture/`:
 - **Comparisons**: List files in `comparisons/`
 - **Team**: Count members in `members.yml`
 - **Last Activity**: Most recent date from any document
+- **Framework version**: read `version.framework_version` from `.architecture/config.yml` (the *installed* version). When `$CLAUDE_PLUGIN_ROOT` is set, also read `version` from `$CLAUDE_PLUGIN_ROOT/.claude-plugin/plugin.json` (the *plugin* version). The plugin auto-updates; the installed `.architecture/` copy does not, so these drift apart silently.
+  - Same version → `Framework: 1.6.0 (installed matches plugin)`
+  - Behind → `Framework: installed 1.4.0, plugin 1.6.0 - 2 releases behind; see CHANGELOG 1.5.0…1.6.0 and UPGRADE.md`
+  - No stamp → `Framework: installed unknown (pre-1.2 install), plugin 1.6.0 - see UPGRADE.md`
+  - No `$CLAUDE_PLUGIN_ROOT` → report the installed version only.
+  - Report only. Never upgrade, rewrite, or restamp `.architecture/` from this skill; the upgrade is the user's explicit action.
 
 ### 3. Generate Status Report
 ```markdown
@@ -39,6 +45,7 @@ Collect from `.architecture/`:
 
 **Report Date**: [Date]
 **Project**: [Project name if known]
+**Framework**: [installed X.Y.Z / plugin X.Y.Z drift line from step 2]
 
 ## Summary
 

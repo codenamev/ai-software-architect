@@ -936,14 +936,63 @@ ${new Date().toISOString().split('T')[0]}
       status.members = (membersData.members || []).length;
     }
 
+    // Framework drift: the plugin/MCP server auto-updates, the installed
+    // .architecture/ copy does not. Report both versions; never restamp.
+    const frameworkLine = await this.frameworkDriftLine(architecturePath);
+
     return {
       content: [
         {
           type: "text",
-          text: `## Architecture Framework Status\n\n✅ **Framework Setup**: Complete\n📋 **ADRs Created**: ${status.adrs}\n🔍 **Reviews Conducted**: ${status.reviews}\n👥 **Team Members**: ${status.members}\n\n### Available Actions\n- Use \`create_adr\` to document architectural decisions\n- Use \`the architecture-review skill\` for comprehensive reviews\n- Use \`the specialist-review skill\` for focused specialist input\n- Use \`list_architecture_members\` to see team composition`,
+          text: `## Architecture Framework Status\n\n✅ **Framework Setup**: Complete\n${frameworkLine}\n📋 **ADRs Created**: ${status.adrs}\n🔍 **Reviews Conducted**: ${status.reviews}\n👥 **Team Members**: ${status.members}\n\n### Available Actions\n- Use \`create_adr\` to document architectural decisions\n- Use \`the architecture-review skill\` for comprehensive reviews\n- Use \`the specialist-review skill\` for focused specialist input\n- Use \`list_architecture_members\` to see team composition`,
         },
       ],
     };
+  }
+
+  async frameworkDriftLine(architecturePath) {
+    let installed = null;
+    const configPath = path.join(architecturePath, "config.yml");
+    if (await fs.pathExists(configPath)) {
+      try {
+        const config = yaml.parse(await fs.readFile(configPath, 'utf8')) || {};
+        installed = config.version?.framework_version || null;
+      } catch {
+        installed = null;
+      }
+    }
+
+    // Current version: the plugin manifest when running as a plugin, else this
+    // server's own package.json (kept in lockstep by tools/cli.js version-check).
+    let current = null;
+    const candidates = [];
+    if (process.env.CLAUDE_PLUGIN_ROOT) {
+      candidates.push(path.join(process.env.CLAUDE_PLUGIN_ROOT, ".claude-plugin", "plugin.json"));
+    }
+    candidates.push(path.join(__dirname, "package.json"));
+    for (const file of candidates) {
+      try {
+        const data = await fs.readJson(file);
+        if (data.version) { current = data.version; break; }
+      } catch {
+        // try the next candidate
+      }
+    }
+
+    if (!current) {
+      return `🧭 **Framework**: installed ${installed || "unknown (pre-1.2 install)"}`;
+    }
+    if (!installed) {
+      return `🧭 **Framework**: installed unknown (pre-1.2 install), current ${current} - see UPGRADE.md`;
+    }
+    const { sign, count, unit } = releasesBehind(current, installed);
+    if (sign > 0) {
+      return `🧭 **Framework**: installed ${installed}, current ${current} - ${count} ${unit}${count === 1 ? "" : "s"} behind; see CHANGELOG ${installed}…${current} and UPGRADE.md`;
+    }
+    if (sign < 0) {
+      return `🧭 **Framework**: installed ${installed}, current ${current} - installed copy is newer than this server`;
+    }
+    return `🧭 **Framework**: ${installed} (installed matches current)`;
   }
 
   async configurePragmaticMode(args) {
@@ -1273,6 +1322,19 @@ ${new Date().toISOString().split('T')[0]}
 // `mcp` bin hands over the node_modules/.bin symlink, so a raw string compare
 // fails and the server exits 0 without ever starting the transport - which is
 // exactly how .mcp.json invokes it (`npx -y ai-software-architect`).
+// How far `installed` trails `current`. Same major: count minor releases
+// (1.4.0 -> 1.6.0 is "2 releases behind"). Different major: count majors.
+// Patch-only drift counts as one release. Non-semver input compares as 0.
+function releasesBehind(current, installed) {
+  const parse = v => String(v).split(".").map(n => parseInt(n, 10) || 0);
+  const [cM, cm, cp] = parse(current);
+  const [iM, im, ip] = parse(installed);
+  if (cM !== iM) return { sign: Math.sign(cM - iM), count: Math.abs(cM - iM), unit: "major release" };
+  if (cm !== im) return { sign: Math.sign(cm - im), count: Math.abs(cm - im), unit: "release" };
+  if (cp !== ip) return { sign: Math.sign(cp - ip), count: 1, unit: "patch release" };
+  return { sign: 0, count: 0, unit: "release" };
+}
+
 function isProcessEntrypoint(argvPath, moduleFile) {
   if (!argvPath) return false;
   const resolved = path.resolve(argvPath);

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+#### `claude-smoke` replaced by a plugin eval suite with a no-plugin baseline (#60)
+
+The plugin path had one behavioral test: a single "list every skill" prompt that proved the
+plugin loads and nothing else. It is replaced by four `claude plugin eval` cases under `evals/`
+(`setup-fixture`, `create-adr`, `specialist-dispatch`, `status-drift`) that exercise the setup
+skill, ADR creation, single-specialist dispatch and the status report on scaffolded fixtures.
+The runner also executes every case without the plugin and reports the delta, so the suite
+measures what the plugin contributes rather than whether it is present. The `plugin-eval` job
+keeps the old gating: `workflow_dispatch` only, secret-gated, under a `--max-cost-usd 3`
+ceiling with both models pinned. It is a release-checklist step (`AGENTS.md`), not a merge
+gate, until it has been stable across two releases. `evals/results/` is gitignored.
+
+
 ### Fixed
 
 #### MCP server exited silently when launched through its packaged `bin`

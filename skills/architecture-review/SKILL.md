@@ -66,8 +66,12 @@ Return a markdown review with:
 - Perspective statement (1-2 sentences from your unique vantage)
 - Key observations (3-5)
 - Strengths within your domain (3-5)
-- Concerns with severity (critical / high / medium / low), each with
-  location (file:line where applicable), why-it-matters, concrete fix
+- Concerns, each with severity (critical / high / medium / low),
+  confidence (0.0-1.0), location (file:line where applicable),
+  why-it-matters, concrete fix. Confidence is your own estimate that
+  the concern is real: 0.9+ means you opened the code and confirmed
+  it; 0.5 or below means you are inferring from names, patterns, or
+  files you did not read. Never omit it and never round it up.
 - Recommendations, ordered: immediate / short-term / long-term, with
   rough effort estimates (S/M/L)
 - Risks if unaddressed
@@ -81,7 +85,12 @@ For `pragmatic_enforcer` (when included), append: `Apply the Pragmatic Enforcer 
 
 ### 5. Aggregate
 
-When all subagent calls return, build the consolidated review:
+When all subagent calls return, first normalize and filter the raw returns (Claude Code 2.1.277+ wraps each return under a "subagent output" header; strip that framing before parsing):
+
+- **Dedup by location.** Concerns from different members that point at the same `file:line` (or the same file when no line is given) and describe the same problem merge into one finding that lists every member who raised it, keeps the highest severity, and takes the highest confidence. Different problems at the same location stay separate.
+- **Low-confidence appendix.** A concern with confidence below 0.7 that only one member raised goes to the "Low-confidence findings" appendix of the review, not into the sections below. A concern two or more members raised stays in whatever its confidence: independent agreement is evidence. Nothing is deleted; each member's verbatim review (5.4) still carries every concern it returned.
+
+Steps 1-3 run on the filtered set. A merged finding counts once in the cross-cut analysis, with the number of members who raised it noted. That number is the signal, not eight copies of the same line.
 
 1. **Cross-cut analysis** — identify themes that appear in 3+ subagent reviews (these are the high-leverage findings).
 2. **Conflict resolution** — when two subagents disagree (e.g., security wants strict validation, performance wants minimal overhead), surface the disagreement explicitly under "Trade-offs" rather than picking a winner. Naming the trade-off is the value.

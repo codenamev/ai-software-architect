@@ -137,11 +137,13 @@ jobs:
           test -d .coding-assistants/cursor
           test -d .coding-assistants/codex
 
-  claude-smoke:
-    name: Real Claude CLI smoke test (manual)
-    # Real-CLI tests cost API credits and require a secret; gated to
+  plugin-eval:
+    name: Plugin eval suite (manual)
+    # Real-CLI runs cost API credits and require a secret; gated to
     # workflow_dispatch so push/PR runs stay free. ADR-012 Phase 5 documents
-    # this gating decision.
+    # this gating decision. This job replaced the one-prompt claude-smoke
+    # job (#60): it runs evals/ with and without the plugin and reports the
+    # delta. It is a release-checklist step, not a merge gate - see AGENTS.md.
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
@@ -154,26 +156,40 @@ jobs:
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Verify plugin loads and exposes skills
+      # The suite grants Bash/Write/Edit (setup and create-adr write files),
+      # so every run needs Claude Code's OS sandbox backend. On Linux that is
+      # bubblewrap + socat; without them the run is refused, not unconfined.
+      - name: Install sandbox backend
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq bubblewrap socat
+
+      - name: Run plugin evals with a no-plugin baseline
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           if [ -z "$ANTHROPIC_API_KEY" ]; then
-            echo "ANTHROPIC_API_KEY secret is not configured; skipping live smoke test."
+            echo "ANTHROPIC_API_KEY secret is not configured; skipping plugin evals."
             exit 0
           fi
-          OUTPUT=$(claude --plugin-dir ./ -p \
-            "List the names of every skill loaded from this plugin, one per line." \
-            --max-turns 1 || true)
-          echo "$OUTPUT"
-          # The skills with disable-model-invocation: true (setup-architect,
-          # create-adr, pragmatic-guard) deliberately do not appear in
-          # "list loaded skills" output - they are user-invoked only. SKILL.md
-          # presence for all seven is verified by validate-plugin's "required
-          # plugin layout" step. This smoke asserts only on the auto-invocable
-          # subset so the assertion stays consistent with documented behavior.
-          for skill in architecture-review architecture-status \
-                       list-members specialist-review; do
-            echo "$OUTPUT" | grep -q "$skill" \
-              || { echo "Skill '$skill' not present in CLI output"; exit 1; }
-          done
+          # Both models pinned so scores stay comparable across runs. The cost
+          # ceiling is a hard stop (exit 2, partial results still written).
+          # --threshold 0.8: a case passes when its with-plugin score is >= 0.8.
+          claude plugin eval . \
+            --trust-plugin \
+            --scaffold \
+            --allow-tools Write Edit Bash \
+            --ablation with-without \
+            --model claude-sonnet-5 \
+            --judge-model claude-haiku-4-5 \
+            --threshold 0.8 \
+            --max-cost-usd 3 \
+            --json evals/results/last.json \
+            --report evals/results/report.html \
+            --no-publish
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin-eval-results
+          path: evals/results/
+          if-no-files-found: ignore

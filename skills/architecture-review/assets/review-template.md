@@ -49,7 +49,7 @@
 1. **[Strength]**: [Description]
 
 #### Concerns
-1. **[Concern]** (Impact: High/Medium/Low)
+1. **[Concern]** (Impact: High/Medium/Low, Confidence: 0.0-1.0)
    - **Issue**: [What's wrong]
    - **Why it matters**: [Impact]
    - **Recommendation**: [What to do]
@@ -126,6 +126,7 @@ The team agrees on:
    - **Gap**: [What's missing]
    - **Priority**: High | Medium | Low
    - **Impact**: [Why this matters]
+   - **Raised by**: [Member(s)], confidence [highest stated]
 
 2. **[Area Title]**: [Details]
 
@@ -281,6 +282,14 @@ Each member reviewed independently, then collaborated to synthesize findings and
 **Pragmatic Mode**: [Strict | Balanced | Lenient]
 - Complexity ratio target: [<1.0 | <1.5 | <2.0]
 - All recommendations evaluated through YAGNI lens
+
+### Low-confidence findings
+
+[Concerns a single member raised at confidence below 0.7. They were kept out of the consolidated findings and prioritization above so the prioritized list stays short, but nothing was dropped: each one is here, with the member's own stated confidence, for the maintainer to promote or dismiss. Concerns raised by two or more members never land here, whatever their confidence.]
+
+| Finding | Member | Severity | Confidence | Location |
+|---------|--------|----------|------------|----------|
+| [Finding title] | [Member] | Medium | 0.5 | `path/to/file.rb:42` |
 
 ### Glossary
 

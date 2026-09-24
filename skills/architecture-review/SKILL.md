@@ -32,6 +32,8 @@ Each member's `id` (e.g., `security_specialist`) maps to `agents/<kebab-id>.md` 
 
 **Active set**: every member in `members.yml`, **excluding** `pragmatic_enforcer` if `config.yml.pragmatic_mode.enabled == false`.
 
+Also read `.architecture/principles.md`. It is the project's recorded constitution, and every review is checked against it: step 4 hands it to each member, step 6.5 collects what they found. If the file is missing, write "no principles recorded" in the review's Principle Conflicts section and skip the gate. Never block a review on it.
+
 ### 3. Optional pre-analysis (orchestrator-side)
 
 For broad reviews, an initial scan helps the orchestrator give every subagent a shared starting context. Use `Glob`, `Grep`, and `Bash(git:*)` (e.g., `git log --oneline -20`, `git diff main...HEAD --stat`) to assemble a short brief: target description, recent activity, key files. Keep this brief under ~500 tokens — it's a shared header, not a review.
@@ -50,12 +52,16 @@ Agent({
 })
 ```
 
-**Prompt template** (used for every subagent — vary only the `<target>` and the optional shared brief):
+**Prompt template** (used for every subagent — vary only the `<target>`, the optional shared brief, and the principles block):
 
 ```
 Conduct a focused review of: <target>.
 
 <optional shared brief from step 3>
+
+Recorded principles (.architecture/principles.md, the "Core Principles"
+section verbatim; drop the quotations above it):
+<principles>
 
 Apply your perspective (your subagent file lists your specialty,
 disciplines, skillsets, and domains). Stay within your specialty —
@@ -71,6 +77,11 @@ Return a markdown review with:
 - Recommendations, ordered: immediate / short-term / long-term, with
   rough effort estimates (S/M/L)
 - Risks if unaddressed
+- Principle conflicts: every concern above that violates a recorded
+  principle, restated as "<principle name>: <one line>". Every
+  recommendation that would change or retire a recorded principle,
+  labeled PRINCIPLE CHANGE with the principle named. Write "none"
+  when there are none. Do not omit the section.
 
 Read code, configs, and ADRs as needed via your scoped tools. Cite
 exact file paths and line numbers. Do not range outside your
@@ -131,6 +142,7 @@ When the challenge round returns, build the consolidated review from the post-ch
 2. **Conflict resolution** — when two subagents disagree on something the challenge round did not settle (e.g., security wants strict validation, performance wants minimal overhead), surface the disagreement explicitly under "Trade-offs" rather than picking a winner. Naming the trade-off is the value.
 3. **Prioritization** — bucket every concern into Critical (0-2 weeks) / Important (2-8 weeks) / Nice-to-Have (2-6 months) based on the post-challenge severity ratings and the cross-cut analysis. Refuted findings are excluded here; they appear only under Challenges.
 4. **Verbatim per-perspective sections** — preserve each subagent's full review under a per-member section. This is the source data; aggregation summarizes but does not replace it.
+5. **Principle gate** — collect every member's Principle conflicts section into the review's Principle Conflicts table, one row per conflict, principle named. Two rules follow. A concern tied to a recorded principle is never bucketed below Important, whatever its severity rating: the principle already settled that it matters. A PRINCIPLE CHANGE recommendation never enters the prioritized lists at all; it goes under Proposed Principle Changes with a pointer to `create-adr`, because changing the constitution is a decision to record, not a finding to schedule. Findings refuted in step 5 drop out of the gate with everything else.
 
 ### 7. Write the consolidated review
 
@@ -139,6 +151,7 @@ Use [the review template](assets/review-template.md). Key sections:
 - Executive summary (3-5 sentences, overall assessment + top concerns)
 - Individual member reviews (verbatim from step 6.4)
 - Challenges (from step 5: every critical/high finding with its challenger and outcome, rebuttals verbatim)
+- Principle conflicts and proposed principle changes (from step 6.5)
 - Cross-cutting themes (from step 6.1)
 - Trade-offs and disagreements (from step 6.2)
 - Prioritized recommendations (from step 6.3)
@@ -158,6 +171,7 @@ Location: .architecture/reviews/<filename>
 Overall Assessment: <Strong | Adequate | Needs Improvement>
 
 Challenge round: <n> findings challenged, <s> survived, <d> downgraded, <r> refuted
+Principle gate: <c> findings conflict with recorded principles, <p> principle changes proposed
 
 Top 3 priorities:
 1. <Critical priority>

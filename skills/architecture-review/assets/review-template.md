@@ -88,6 +88,22 @@
 
 ---
 
+## Principle Conflicts
+
+[Every member checked their findings against `.architecture/principles.md`. One row per conflict. A finding listed here is never bucketed below Important in Consolidated Findings, whatever its severity. If the project has no principles file, write "no principles recorded" and leave both lists empty.]
+
+| Principle | Finding | Raised by | Rated | Where |
+|-----------|---------|-----------|-------|-------|
+| [Principle name] | [Finding title] | [Member] | High | [file:line] |
+
+### Proposed Principle Changes
+
+[Recommendations that would change or retire a recorded principle. They do not appear under Recommendations below: each is a decision to record with `create-adr`, not a fix to schedule.]
+
+- **[Principle name]** — [what the member proposed and why, verbatim]. Proposed by [Member]. Next: `create-adr`.
+
+---
+
 ## Collaborative Discussion
 
 [Synthesize the post-challenge findings from all members. Show how different perspectives interact and what consensus emerges. Refuted findings do not appear below.]

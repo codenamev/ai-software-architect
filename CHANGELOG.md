@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### `architecture-status` reports framework drift (#59)
+The plugin auto-updates skills, agents, hooks and the MCP server; the project's installed `.architecture/` copy is written once at setup and never touched again. Nothing measured the gap. The status skill and the `get_architecture_status` MCP tool now report a `Framework:` line comparing the installed `framework_version` (from `.architecture/config.yml`) with the current plugin/server version, e.g. `installed 1.4.0, current 1.6.0 - 2 releases behind; see CHANGELOG 1.4.0…1.6.0 and UPGRADE.md`. Missing stamp reports `unknown (pre-1.2 install)`. Report only: the upgrade stays an explicit user action, and `UPGRADE.md` now opens with that deterministic check.
+
 ### Fixed
+
+#### `.architecture/templates/config.yml` was stamped 1.2.0
+The template copied by `installation-procedures.md` has carried `framework_version: "1.2.0"` since 1.3.0 because it was not in `FRAMEWORK_VERSION_SOURCES`. It is now stamped with the current version and checked by `version-check`.
+
 
 #### MCP server exited silently when launched through its packaged `bin`
 The entrypoint guard added in 1.6.0 compared `process.argv[1]` against `__filename` as literal strings. Node resolves `import.meta.url` through symlinks but leaves `process.argv[1]` as the path it was handed, and npm installs the `mcp` bin as a symlink (`node_modules/.bin/mcp` → `../ai-software-architect/index.js`). The two never matched, so the guard did not fire: the process exited 0 with nothing on stderr and the transport was never started — a server that looks dead to its client, with no diagnostic anywhere. The comparison is now made between real paths.

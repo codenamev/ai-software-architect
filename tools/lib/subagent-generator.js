@@ -1,6 +1,9 @@
 import { parse as parseYaml } from 'yaml';
 
 const DEFAULT_TOOLS = ['Read', 'Grep', 'Glob', 'Bash'];
+// The `effort` values Claude Code accepts in subagent frontmatter. A typo here
+// would render an agent Claude Code refuses to load, so it fails at generation.
+const EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max'];
 const GENERATED_BANNER =
   '<!-- Generated from .architecture/members.yml by tools/lib/subagent-generator.js. Do not edit by hand. -->';
 
@@ -41,6 +44,7 @@ export function generateSubagent(member) {
     `name: ${slug}`,
     `description: ${quoteIfNeeded(description)}`,
     `tools: ${tools}`,
+    ...runtimeFrontmatter(member),
     '---',
   ].join('\n');
 
@@ -119,6 +123,41 @@ function idToSlug(id) {
 function formatDescription(title, triggerKeywords) {
   const keywordHint = triggerKeywords ? ` (keywords: ${triggerKeywords})` : '';
   return `${title} architecture reviewer. Use when the user asks for a ${title.toLowerCase()} review or raises topics in this specialist's domain${keywordHint}.`;
+}
+
+// Runtime fields (#67): Claude Code's own `model`, `effort` and `color`
+// subagent frontmatter keys, exposed per member. All optional — a member that
+// sets none of them renders exactly as before, so which model a persona runs
+// on (and what it costs) stays the user's choice rather than the framework's.
+function runtimeFrontmatter(member) {
+  const lines = [];
+
+  const model = optionalString(member, 'model');
+  if (model) lines.push(`model: ${quoteIfNeeded(model)}`);
+
+  const effort = optionalString(member, 'effort');
+  if (effort) {
+    if (!EFFORT_LEVELS.includes(effort)) {
+      throw new Error(
+        `Member "${member.id}" has effort "${effort}"; Claude Code accepts ${EFFORT_LEVELS.join(', ')}.`
+      );
+    }
+    lines.push(`effort: ${effort}`);
+  }
+
+  const color = optionalString(member, 'color');
+  if (color) lines.push(`color: ${quoteIfNeeded(color)}`);
+
+  return lines;
+}
+
+function optionalString(member, key) {
+  const value = member[key];
+  if (value === undefined || value === null) return '';
+  if (typeof value !== 'string') {
+    throw new Error(`Member "${member.id}" has a non-string ${key} (${JSON.stringify(value)}); use a plain string.`);
+  }
+  return value.trim();
 }
 
 function quoteIfNeeded(value) {

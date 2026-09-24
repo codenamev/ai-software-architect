@@ -16,6 +16,9 @@ Scope, precisely: this affected every POSIX launch through the bin in 1.6.0, whi
 
 ### Added
 
+#### Per-member `model`, `effort` and `color` in `members.yml` (#67)
+`tools/lib/subagent-generator.js` renders three optional member fields into the generated agent frontmatter: `model`, `effort` and `color`, Claude Code's own subagent keys. Before this, every generated reviewer inherited the session model and effort with no supported way to give one persona a deeper (or cheaper) pass, since the generator overwrites hand edits. The fields are validated at generation time (`effort` must be one of `low`, `medium`, `high`, `xhigh`, `max`) and render only when set: every shipped persona leaves them unset, so `agents/*.md` are byte-identical and cost stays the user's choice. Documented in the setup-architect customization guide.
+
 #### Protocol-level smoke test for the MCP server (`mcp/test/protocol-smoke.test.js`)
 The existing suite reaches `ArchitectureServer` by importing the class, which never resolves `@modelcontextprotocol/sdk` — `mcp/index.js` loads it through dynamic `import()` inside `_initServer()`/`run()`. The SDK, the request handlers, the advertised tool schemas, the stdio transport and the entrypoint therefore had no coverage. The new tests spawn the server over a real stdio transport and assert the handshake, the exact tool set, schema well-formedness, a `tools/call` round-trip, and startup through a symlinked bin. Wired into the `validate-plugin` CI job.
 

@@ -58,6 +58,20 @@
 #
 # perspective One or two sentences describing the unique lens this member
 #             brings to reviews. Surfaces verbatim in the subagent body.
+#
+# OPTIONAL — runtime fields (Claude Code subagent frontmatter, passed through;
+# absent fields render nothing, so leave them out unless you want them):
+#
+# model       Model this persona runs on: sonnet, opus, haiku, inherit, or a
+#             full model id. Unset = the session's model.
+# effort      One of low, medium, high, xhigh, max. Overrides the session
+#             effort for this persona only. Anything else fails generation.
+# color       Colour Claude Code shows for this persona's output.
+#
+# Example: a deeper security pass without paying for it everywhere —
+#   - id: security_specialist
+#     effort: high
+#     ... (the seven required fields)
 
 # ----------------------------------------------------------------------------
 # ADDITIONAL EXAMPLES BY STACK (copy + customize as needed)

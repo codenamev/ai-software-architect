@@ -29,6 +29,13 @@ Each member includes:
 - `domains`: Array of domain areas
 - `perspective`: Description of unique viewpoint
 
+Optional runtime fields (any member; absent fields render nothing, so existing files keep working). These are Claude Code's own subagent frontmatter keys, passed through to the generated agent:
+- `model`: The model this persona runs on (`sonnet`, `opus`, `haiku`, `inherit`, or a full model id)
+- `effort`: One of `low`, `medium`, `high`, `xhigh`, `max`; overrides the session effort for this persona only
+- `color`: The colour Claude Code shows for this persona's output
+
+The framework ships every persona with these unset, so all reviewers inherit the session's model and effort and cost stays your choice. A team that wants a deeper security pass and a cheaper maintainability pass sets, for example, `effort: high` on `security_specialist` and `model: haiku` on `maintainability_expert`, then re-runs `node tools/cli.js generate-subagents`. Other assistants ignore the fields.
+
 ### Technology Stack-Specific Members
 
 Add specialists based on your detected technology stack:

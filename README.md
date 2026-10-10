@@ -313,14 +313,7 @@ npm update -g ai-software-architect
 npm install -g ai-software-architect
 ```
 
-**If using Traditional Setup:**
-```bash
-# From your project root
-cd .architecture
-git fetch origin main
-git reset --hard origin/main
-cd ..
-```
+**If using Traditional Setup:** follow [UPGRADE.md](UPGRADE.md). Do not run `git fetch` / `git reset --hard` inside `.architecture/` — setup removes that directory's `.git`, so those commands resolve to your own project repository and `reset --hard` discards your uncommitted work.
 
 **Note**: Updates preserve your project's custom architecture artifacts (ADRs, reviews, member customizations) while updating framework files (templates, base configuration, scripts).
 

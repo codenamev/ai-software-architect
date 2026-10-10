@@ -243,11 +243,15 @@ export class ArchitectureServer {
           const relativePath = path.relative(frameworkSourcePath, src);
           // Skip git and any node_modules (root, mcp/, tools/, …) — a nested
           // node_modules must never be copied into the target project.
-          return !relativePath.match(/^\.git(\/|$)/)
-            && !relativePath.split(path.sep).includes("node_modules")
-            && !relativePath.includes('README.md')
-            && !relativePath.includes('USAGE')
-            && !relativePath.includes('INSTALL.md');
+          if (relativePath.match(/^\.git(\/|$)/)) return false;
+          if (relativePath.split(path.sep).includes("node_modules")) return false;
+          // Skip the repo's own top-level docs (README, USAGE-*, INSTALL) — they
+          // describe this framework, not the target project. Only the ROOT copies
+          // are excluded: nested READMEs (.coding-assistants/cursor/README.md,
+          // .architecture/agent_docs/README.md) are canonical content that the
+          // installed docs link to, and a substring match used to drop them all.
+          const isRootLevel = !relativePath.includes(path.sep);
+          return !(isRootLevel && /^(README\.md|USAGE.*|INSTALL\.md)$/.test(relativePath));
         }
       });
 
@@ -260,10 +264,18 @@ export class ArchitectureServer {
         await this.createArchitectureStructure(architecturePath);
       }
 
-      // Step 4: Create .coding-assistants structure 
-      await fs.ensureDir(path.join(codingAssistantsPath, "claude"));
-      await fs.ensureDir(path.join(codingAssistantsPath, "cursor"));
-      await fs.ensureDir(path.join(codingAssistantsPath, "codex"));
+      // Step 4: Install the canonical .coding-assistants tree (ADR-016). The
+      // temp clone already carries it; copying is additive (never overwrites a
+      // file the project already has). Only when the source tree lacks it do we
+      // fall back to the bare per-assistant directories.
+      const canonicalAssistants = path.join(tempClonePath, '.coding-assistants');
+      if (await fs.pathExists(canonicalAssistants)) {
+        await fs.copy(canonicalAssistants, codingAssistantsPath, { overwrite: false, errorOnExist: false });
+      } else {
+        await fs.ensureDir(path.join(codingAssistantsPath, "claude"));
+        await fs.ensureDir(path.join(codingAssistantsPath, "cursor"));
+        await fs.ensureDir(path.join(codingAssistantsPath, "codex"));
+      }
       
       // Step 5: Customize members.yml based on project analysis
       results.push("\n👥 Customizing architecture team...");
@@ -294,9 +306,13 @@ export class ArchitectureServer {
         throw new Error("Seeded config.yml is missing or lacks pragmatic_mode; aborting (canonical copy incomplete).");
       }
 
-      // Step 7: Set up templates
-      results.push("\n📄 Setting up templates...");
-      await this.setupTemplates(architecturePath, projectAnalysis);
+      // Step 7: Templates. The canonical set (adr-template.md, review-template.md,
+      // config.yml, …) arrived with the .architecture copy in step 3; nothing is
+      // generated here. A hardcoded adr.md/review.md pair used to be written
+      // alongside them with a different structure — two ADR templates and no
+      // signal which one was real (ADR-016 single-source-of-truth).
+      const installedTemplates = await fs.readdir(path.join(architecturePath, "templates")).catch(() => []);
+      results.push(`\n📄 Installed canonical templates: ${installedTemplates.join(', ')}`);
       
       // Step 8: Update CLAUDE.md if it exists
       results.push("\n📝 Configuring CLAUDE.md integration...");
@@ -485,160 +501,6 @@ export class ArchitectureServer {
     }
   }
   
-  async setupTemplates(architecturePath, analysis) {
-    const templatesPath = path.join(architecturePath, "templates");
-    
-    // ADR Template
-    const adrTemplate = `# ADR [NUMBER]: [TITLE]
-
-## Status
-
-Proposed | Accepted | Superseded | Deprecated
-
-## Context
-
-[Describe the context and problem statement]
-
-## Decision Drivers
-
-- [Driver 1]
-- [Driver 2]
-- [Driver 3]
-
-## Considered Options
-
-- [Option 1]
-- [Option 2]
-- [Option 3]
-
-## Decision Outcome
-
-[Chosen option and justification]
-
-### Positive Consequences
-
-- [Positive consequence 1]
-- [Positive consequence 2]
-
-### Negative Consequences
-
-- [Negative consequence 1]
-- [Negative consequence 2]
-
-## Implementation
-
-[Implementation approach and timeline]
-
-## Validation
-
-[How to validate this decision]
-
-## References
-
-- [Reference 1]
-- [Reference 2]
-`;
-    
-    await fs.writeFile(path.join(templatesPath, "adr.md"), adrTemplate);
-    
-    // Review Template
-    const reviewTemplate = `# Architecture Review: [TARGET]
-
-## Review Overview
-
-**Target**: [Version/Feature/Component]
-**Date**: [Date]
-**Participants**: [List of participants]
-**Review Type**: [Version/Feature/Component]
-
-## Executive Summary
-
-[High-level findings and recommendations]
-
-## Individual Member Reviews
-
-[Individual perspective sections will be added here]
-
-## Collaborative Discussion
-
-### Key Findings
-- [Finding 1]
-- [Finding 2]
-
-### Consensus Points
-- [Point 1]
-- [Point 2]
-
-### Areas of Disagreement
-- [Disagreement 1 and resolution]
-
-## Technical Debt Assessment
-
-### Current Technical Debt
-- [Debt item 1]
-- [Debt item 2]
-
-### Proposed Debt Resolution
-- [Resolution approach 1]
-- [Resolution approach 2]
-
-## Risk Analysis
-
-### High Risk Areas
-- [Risk 1]
-- [Risk 2]
-
-### Medium Risk Areas
-- [Risk 1]
-- [Risk 2]
-
-### Risk Mitigation Strategies
-- [Strategy 1]
-- [Strategy 2]
-
-## Recommendations
-
-### High Priority (Immediate)
-- [Recommendation 1]
-- [Recommendation 2]
-
-### Medium Priority (Next Release)
-- [Recommendation 1]
-- [Recommendation 2]
-
-### Low Priority (Future)
-- [Recommendation 1]
-- [Recommendation 2]
-
-## Architecture Metrics
-
-[Relevant metrics and measurements]
-
-## Next Steps
-
-1. [Step 1]
-2. [Step 2]
-3. [Step 3]
-
-## Appendices
-
-### Architecture Diagrams
-[Include relevant diagrams]
-
-### Reference Materials
-- [Reference 1]
-- [Reference 2]
-
-## Sign-off
-
-- [ ] Systems Architect
-- [ ] Security Architect
-- [ ] [Other team members]
-`;
-    
-    await fs.writeFile(path.join(templatesPath, "review.md"), reviewTemplate);
-  }
-  
   async setupClaudeIntegration(claudeMdPath) {
     const frameworkInstructions = `
 
@@ -796,9 +658,13 @@ The AI Software Architect framework has been configured with:
     
     // Get next ADR number
     const existingADRs = await fs.readdir(adrsPath).catch(() => []);
+    // Both filename styles count toward the sequence: the documented
+    // ADR-XXX-slug.md (mcp/README.md, create-adr skill, tools/lib/adr-validator.js)
+    // and the bare 0001-slug.md this tool emitted before it followed its own docs.
     const adrNumbers = existingADRs
-      .filter(file => file.match(/^\d+/))
-      .map(file => parseInt(file.match(/^(\d+)/)[1]))
+      .map(file => file.match(/^(?:ADR-)?(\d+)/i))
+      .filter(Boolean)
+      .map(match => parseInt(match[1], 10))
       .sort((a, b) => a - b);
     
     const nextNumber = adrNumbers.length > 0 ? Math.max(...adrNumbers) + 1 : 1;
@@ -808,30 +674,17 @@ The AI Software Architect framework has been configured with:
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       || 'untitled';
-    const adrFilename = `${nextNumber.toString().padStart(4, '0')}-${titleSlug}.md`;
+    const adrFilename = `ADR-${nextNumber.toString().padStart(3, '0')}-${titleSlug}.md`;
     
-    const adrContent = `# ADR ${nextNumber}: ${title}
-
-## Status
-
-Proposed
-
-## Context
-
-${context}
-
-## Decision
-
-${decision}
-
-## Consequences
-
-${consequences}
-
-## Date
-
-${new Date().toISOString().split('T')[0]}
-`;
+    const template = await this.loadAdrTemplate(architecturePath);
+    const adrContent = renderAdrFromTemplate(template, {
+      number: nextNumber,
+      title,
+      context,
+      decision,
+      consequences,
+      date: new Date().toISOString().split('T')[0],
+    });
 
     await fs.writeFile(path.join(adrsPath, adrFilename), adrContent);
 
@@ -839,10 +692,23 @@ ${new Date().toISOString().split('T')[0]}
       content: [
         {
           type: "text",
-          text: `✅ ADR created successfully!\n\nFile: .architecture/decisions/adrs/${adrFilename}\nNumber: ${nextNumber}\nTitle: ${title}`,
+          text: `✅ ADR created successfully!\n\nFile: .architecture/decisions/adrs/${adrFilename}\nNumber: ${nextNumber}\nTitle: ${title}\n\nRendered from .architecture/templates/adr-template.md: Status, Context, Decision and Consequences carry your input; the remaining [bracketed] prompts (Decision Drivers, the Consequences sub-lists, Alternatives Considered, …) are left for you to complete or delete.`,
         },
       ],
     };
+  }
+
+  // The installed copy is authoritative (users may customize it); the framework's
+  // own template is the fallback for installs that predate the templates/ dir.
+  async loadAdrTemplate(architecturePath) {
+    const candidates = [
+      path.join(architecturePath, "templates", "adr-template.md"),
+      path.join(__dirname, "..", ".architecture", "templates", "adr-template.md"),
+    ];
+    for (const candidate of candidates) {
+      if (await fs.pathExists(candidate)) return fs.readFile(candidate, "utf8");
+    }
+    throw new Error("ADR template not found (.architecture/templates/adr-template.md). Framework may be incomplete.");
   }
 
   async listArchitectureMembers(args) {
@@ -1267,6 +1133,67 @@ ${new Date().toISOString().split('T')[0]}
 }
 
 // True when this file is the process entrypoint rather than an imported module.
+// Render an ADR from the canonical template (.architecture/templates/adr-template.md)
+// so create_adr emits the same structure the create-adr skill and the validator
+// expect, instead of a third hand-rolled shape. Known fields fill the template's
+// leading "[...]" placeholder in their section; every other section keeps its
+// placeholders as prompts for the author. The installed template may be
+// customized: if it lacks one of the four sections a field targets (or the
+// canonical H1), that section is appended so the caller's text is never dropped
+// silently — validate-adr requires all four anyway. Exported for tests.
+export function renderAdrFromTemplate(template, { number, title, context, decision, consequences, date }) {
+  const paddedNumber = String(number).padStart(3, '0');
+  const heading = `# ADR-${paddedNumber}: ${title}`;
+  let out = /^# ADR-XXX: \[Title\][ \t]*$/m.test(template)
+    ? template.replace(/^# ADR-XXX: \[Title\][ \t]*$/m, heading)
+    : `${heading}\n\n${template}`;
+  out = replaceSectionBody(out, 'Status', `Proposed\n\n**Date**: ${date}`);
+  out = fillSectionPlaceholder(out, 'Context', context);
+  out = fillSectionPlaceholder(out, 'Decision', decision);
+  out = fillSectionPlaceholder(out, 'Consequences', consequences);
+  return out;
+}
+
+function appendSection(text, name, body) {
+  return `${text.replace(/\s*$/, '')}\n\n## ${name}\n\n${body}\n`;
+}
+
+// Locate "## Name" and return [bodyStart, bodyEnd) — bodyEnd is the next "## "
+// heading (level-2 only; "### " sub-sections stay inside the body) or EOF.
+function sectionBounds(text, name) {
+  const heading = new RegExp(`^## ${name}[ \\t]*$`, 'm');
+  const match = heading.exec(text);
+  if (!match) return null;
+  const bodyStart = match.index + match[0].length;
+  const next = /^## /m.exec(text.slice(bodyStart));
+  const bodyEnd = next ? bodyStart + next.index : text.length;
+  return [bodyStart, bodyEnd];
+}
+
+function replaceSectionBody(text, name, body) {
+  const bounds = sectionBounds(text, name);
+  if (!bounds) return appendSection(text, name, body);
+  const [bodyStart, bodyEnd] = bounds;
+  return `${text.slice(0, bodyStart)}\n\n${body}\n\n${text.slice(bodyEnd)}`;
+}
+
+// Replace the first "[placeholder]" paragraph directly under the section heading
+// with `value`. If the section opens with structure instead (e.g. Consequences
+// starts at "### Positive"), insert `value` as the opening paragraph.
+function fillSectionPlaceholder(text, name, value) {
+  const bounds = sectionBounds(text, name);
+  if (!bounds) return appendSection(text, name, value);
+  const [bodyStart, bodyEnd] = bounds;
+  const body = text.slice(bodyStart, bodyEnd);
+  const placeholder = /^\[[^\]]*\][ \t]*$/m.exec(body);
+  const openingLength = body.length - body.trimStart().length;
+  const placeholderLeads = placeholder && placeholder.index === openingLength;
+  const newBody = placeholderLeads
+    ? `${body.slice(0, placeholder.index)}${value}${body.slice(placeholder.index + placeholder[0].length)}`
+    : `\n\n${value}${body}`;
+  return `${text.slice(0, bodyStart)}${newBody}${text.slice(bodyEnd)}`;
+}
+
 // Both sides must be compared as real paths: __filename comes from
 // import.meta.url, which Node has already resolved through symlinks, while
 // process.argv[1] is whatever the shell was handed. Launching the package's

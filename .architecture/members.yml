@@ -205,8 +205,8 @@ review_process:
     deliverable: "Individual member review section in the review document."
   
   collaborative_phase:
-    description: "Members confer to discuss findings, resolve conflicting perspectives, and prioritize recommendations."
-    deliverable: "Consolidated findings and balanced recommendations."
+    description: "Structured challenge round: each critical/high finding is sent to the member best positioned to refute it, who returns no-objection, downgrade, or refute with cited evidence. The orchestrator then cross-cuts the surviving findings, surfaces unresolved trade-offs, and prioritizes."
+    deliverable: "Challenges section (outcomes and verbatim rebuttals), consolidated findings, and prioritized recommendations."
   
   final_report_phase:
     description: "Produce a comprehensive architectural review that balances all perspectives."

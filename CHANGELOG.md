@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+#### Challenge round in `architecture-review` (#36)
+`members.yml` promised a `collaborative_phase` in which members "confer to discuss findings", but the orchestrator never ran one: members reviewed in isolation and the skill aggregated solo. The phase now exists as a structured challenge round (new step 5 in `skills/architecture-review/SKILL.md`). After the parallel individual reviews, every critical/high finding is dispatched to the one member best positioned to refute it, never its author, with a forced-choice response: no objection, downgrade with cited evidence, or refute. Survivors keep their severity with a "challenged by X, survived" note; downgrades take the challenger's level; refuted findings leave the prioritized lists and appear only under a new **Challenges** section of `assets/review-template.md`, rebuttal verbatim. The `collaborative_phase` wording in `members.yml` now describes this. Cost is one subagent call per critical/high finding, typically 3-6 per review. Markdown only, no runtime change.
 - Optional `## Confirmation` section in `.architecture/templates/adr-template.md` (MADR 4.0 parity): how compliance with the decision is verified, by whom, and what drift would look like. Additive; no validator or existing-ADR changes. Refs #38 (C1).
 
 ### Changed

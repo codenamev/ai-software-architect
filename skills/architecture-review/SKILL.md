@@ -79,24 +79,69 @@ specialty.
 
 For `pragmatic_enforcer` (when included), append: `Apply the Pragmatic Enforcer Analysis structure from .architecture/templates/adr-template.md (Necessity, Complexity, Ratio, Recommendation).`
 
-### 5. Aggregate
+### 5. Challenge round
 
-When all subagent calls return, build the consolidated review:
+The individual reviews are monologues: no member has seen another's findings. Before aggregating, run one adversarial pass over the findings that carry the most weight. This is the `collaborative_phase` from `members.yml`, made concrete.
+
+1. **Select** every concern rated **critical** or **high** across all returned reviews. Medium and low findings skip this round.
+2. **Assign a challenger** per finding: the active member best positioned to refute it, never its author. Use the members' `perspective` and `domains` fields — a security critical demanding mandatory validation goes to `performance_specialist`; an architectural rewrite goes to `pragmatic_enforcer` (when active) or `maintainability_expert`; a domain-model concern goes to `systems_architect`. When no member is an obvious counterweight, use `pragmatic_enforcer` if active, otherwise skip the finding and note it as unchallenged.
+3. **Dispatch** one Agent call per finding, all in the same response:
+
+```
+Agent({
+  subagent_type: "<challenger kebab-id>",
+  description: "Challenge: <finding title>",
+  prompt: <see template below>
+})
+```
+
+**Challenge prompt template**:
+
+```
+Another reviewer (<author title>) rated this finding <critical|high>
+in a review of: <target>.
+
+<finding verbatim: issue, location, why-it-matters, recommended fix>
+
+Your job is to attack it from your specialty, not to agree with it.
+Check the cited location. Look for evidence that the finding is
+overstated, already mitigated, out of scope for this target, or that
+its fix costs more than the problem. Return exactly one of:
+
+- NO OBJECTION — one sentence on why it holds.
+- DOWNGRADE to <high|medium|low> — the specific evidence, with
+  file:line, and what the author missed.
+- REFUTE — the specific evidence that the finding is wrong.
+
+Two hundred words maximum. Cite what you read.
+```
+
+4. **Record the outcome** on each finding and carry it into aggregation:
+   - `NO OBJECTION` → severity unchanged, annotated *challenged by <member>, survived*.
+   - `DOWNGRADE` → severity set to the challenger's level, rebuttal recorded verbatim under the finding.
+   - `REFUTE` → finding moved out of the prioritized lists into the Challenges section with the rebuttal verbatim. The author's original text stays in their per-member section untouched.
+
+The orchestrator does not adjudicate. A challenge either produces cited evidence or it does not; the response format forces that choice. Cost is one subagent call per critical/high finding, typically 3-6 per review.
+
+### 6. Aggregate
+
+When the challenge round returns, build the consolidated review from the post-challenge severities:
 
 1. **Cross-cut analysis** — identify themes that appear in 3+ subagent reviews (these are the high-leverage findings).
-2. **Conflict resolution** — when two subagents disagree (e.g., security wants strict validation, performance wants minimal overhead), surface the disagreement explicitly under "Trade-offs" rather than picking a winner. Naming the trade-off is the value.
-3. **Prioritization** — bucket every concern into Critical (0-2 weeks) / Important (2-8 weeks) / Nice-to-Have (2-6 months) based on the subagents' severity ratings and the cross-cut analysis.
+2. **Conflict resolution** — when two subagents disagree on something the challenge round did not settle (e.g., security wants strict validation, performance wants minimal overhead), surface the disagreement explicitly under "Trade-offs" rather than picking a winner. Naming the trade-off is the value.
+3. **Prioritization** — bucket every concern into Critical (0-2 weeks) / Important (2-8 weeks) / Nice-to-Have (2-6 months) based on the post-challenge severity ratings and the cross-cut analysis. Refuted findings are excluded here; they appear only under Challenges.
 4. **Verbatim per-perspective sections** — preserve each subagent's full review under a per-member section. This is the source data; aggregation summarizes but does not replace it.
 
-### 6. Write the consolidated review
+### 7. Write the consolidated review
 
 Use [the review template](assets/review-template.md). Key sections:
 
 - Executive summary (3-5 sentences, overall assessment + top concerns)
-- Individual member reviews (verbatim from step 5.4)
-- Cross-cutting themes (from step 5.1)
-- Trade-offs and disagreements (from step 5.2)
-- Prioritized recommendations (from step 5.3)
+- Individual member reviews (verbatim from step 6.4)
+- Challenges (from step 5: every critical/high finding with its challenger and outcome, rebuttals verbatim)
+- Cross-cutting themes (from step 6.1)
+- Trade-offs and disagreements (from step 6.2)
+- Prioritized recommendations (from step 6.3)
 - Risks if unaddressed (highest-severity items)
 - Success metrics and follow-up plan
 
@@ -104,13 +149,15 @@ Save to `.architecture/reviews/<filename>` (filename from step 1).
 
 If pragmatic mode is enabled, ensure the `pragmatic_enforcer` review's Necessity / Complexity / Ratio analysis is surfaced in the executive summary, not buried in the member section. See [`references/pragmatic-integration.md`](references/pragmatic-integration.md).
 
-### 7. Report to the user
+### 8. Report to the user
 
 ```
 Architecture Review Complete: <target>
 
 Location: .architecture/reviews/<filename>
 Overall Assessment: <Strong | Adequate | Needs Improvement>
+
+Challenge round: <n> findings challenged, <s> survived, <d> downgraded, <r> refuted
 
 Top 3 priorities:
 1. <Critical priority>
@@ -132,7 +179,7 @@ Next steps:
 
 ## Why this skill is small
 
-The previous version (~130 lines) inlined the review process for each persona. With subagents, persona and per-perspective review structure live in `agents/<id>.md` (generated from `members.yml`). This skill's job is the orchestration layer: scope, dispatch, aggregate, write, report.
+The previous version (~130 lines) inlined the review process for each persona. With subagents, persona and per-perspective review structure live in `agents/<id>.md` (generated from `members.yml`). This skill's job is the orchestration layer: scope, dispatch, challenge, aggregate, write, report.
 
 **One source of truth per concept** — the framework principle holds. Specialist behavior lives in the subagent files, not duplicated here.
 

@@ -93,7 +93,7 @@ cd mcp && npm install && npm test
 
 **Option 3: MCP Server (For MCP-compatible assistants)**
 - Install: `npm install -g ai-software-architect`
-- Configure in `claude_desktop_config.json`
+- Configure: `claude mcp add` or `~/.claude.json` for Claude Code; `claude_desktop_config.json` for Claude Desktop
 
 **See [.architecture/agent_docs/workflows.md § Setup Procedures](.architecture/agent_docs/workflows.md#setup-procedures) for complete installation instructions.**
 

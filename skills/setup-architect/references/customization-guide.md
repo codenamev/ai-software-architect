@@ -36,6 +36,13 @@ Optional behavioral fields (any member; absent fields render nothing, so existin
 
 Checklist and criteria items may be plain strings or `{ text: "...", motivated_by: "..." }` objects. Record the incident, ADR, or observed failure behind a question so it can be audited and retired later instead of accumulating. See `security_specialist` in the framework's `members.yml` for a worked example.
 
+Optional runtime fields (any member; absent fields render nothing, so existing files keep working). These are Claude Code's own subagent frontmatter keys, passed through to the generated agent:
+- `model`: The model this persona runs on (`sonnet`, `opus`, `haiku`, `inherit`, or a full model id)
+- `effort`: One of `low`, `medium`, `high`, `xhigh`, `max`; overrides the session effort for this persona only
+- `color`: The colour Claude Code shows for this persona's output
+
+The framework ships every persona with these unset, so all reviewers inherit the session's model and effort and cost stays your choice. A team that wants a deeper security pass and a cheaper maintainability pass sets, for example, `effort: high` on `security_specialist` and `model: haiku` on `maintainability_expert`, then re-runs `node tools/cli.js generate-subagents`. Other assistants ignore the fields.
+
 ### Technology Stack-Specific Members
 
 Add specialists based on your detected technology stack:

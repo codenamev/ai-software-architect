@@ -57,7 +57,7 @@ See [USAGE-WITH-CLAUDE-PLUGIN.md](USAGE-WITH-CLAUDE-PLUGIN.md) for detailed inst
 npm install -g ai-software-architect
 ```
 
-Then configure in `~/.claude/config.json`:
+Then register it with Claude Code (`claude mcp add ai-software-architect -- mcp`), or add it to `~/.claude.json` (user scope) or your project's `.mcp.json`:
 ```json
 {
   "mcpServers": {

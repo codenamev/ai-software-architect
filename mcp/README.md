@@ -70,7 +70,7 @@ npm install
 
 ### Claude Code Configuration
 
-Add this to your Claude Code configuration file (`~/.claude/config.json`):
+Register it with `claude mcp add ai-software-architect -- mcp`, or add this to `~/.claude.json` (user scope) or your project's `.mcp.json`:
 
 **For npm global install:**
 ```json

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Optional `## Confirmation` section in `.architecture/templates/adr-template.md` (MADR 4.0 parity): how compliance with the decision is verified, by whom, and what drift would look like. Additive; no validator or existing-ADR changes. Refs #38 (C1).
+
 ### Changed
 
 #### `claude-smoke` replaced by a plugin eval suite with a no-plugin baseline (#60)
@@ -21,15 +25,29 @@ keeps the old gating: `workflow_dispatch` only, secret-gated, under a `--max-cos
 ceiling with both models pinned. It is a release-checklist step (`AGENTS.md`), not a merge
 gate, until it has been stable across two releases. `evals/results/` is gitignored.
 
+#### CI runs on supported Node versions, and `engines` publishes a supported floor (#29)
+Every runtime CI pinned was past end-of-life: `validate-plugin` ran Node 20 (EOL 2026-04-30), `codex-tests` ran Node 18 (EOL 2025-04-30) and installed Python 3.9 (EOL 2025-10-31) for a matrix leg that never invokes `python`. `validate-plugin` now runs a `[22, 24]` matrix so the supported range is verified rather than asserted; `codex-tests` runs Node 24; the unused `setup-python` step is gone. `mcp/package.json` `engines.node` is now `>=22.0.0` (README updated to match). Users on Node 18 or 20 will see an `EBADENGINE` warning from npm; the 1.5.3 `tools/` test fix already relied on Node 22+ test-file discovery, so this makes the floor honest rather than narrower.
 
 ### Fixed
+
+#### `setup_architecture` no longer ships two ADR templates, and `create_adr` renders the real one (#25)
+Setup used to write a hardcoded `templates/adr.md` / `templates/review.md` pair alongside the canonical `adr-template.md` / `review-template.md` copied from the framework — two ADR templates with different status vocabularies and sections, and no signal which was real. Those hardcoded bodies are gone; the canonical files are the only templates installed (ADR-016 single source of truth). `create_adr` used to emit a third hand-rolled shape (`Status/Context/Decision/Consequences/Date`) that neither template matched and that `validate-adr` rejected; it now renders the installed `adr-template.md`, filling Status (`Proposed` + date), Context, Decision and Consequences and leaving the remaining sections as prompts. Its filename now follows the contract this README, the `create-adr` skill and the validator already documented (`ADR-XXX-slug.md` instead of `0001-slug.md`); numbering counts both styles, so existing projects continue their sequence. Setup also installs the canonical `.coding-assistants/` tree (Cursor rules, Codex instructions, Claude guidance) instead of three empty directories, and the copy filter now excludes only the framework's own top-level `README.md`/`USAGE-*`/`INSTALL.md` — nested READMEs that the installed docs link to are no longer dropped. Existing installs are untouched: setup never runs on an existing `.architecture/`, and files named `templates/adr.md` stay where they are.
 
 #### MCP server exited silently when launched through its packaged `bin`
 The entrypoint guard added in 1.6.0 compared `process.argv[1]` against `__filename` as literal strings. Node resolves `import.meta.url` through symlinks but leaves `process.argv[1]` as the path it was handed, and npm installs the `mcp` bin as a symlink (`node_modules/.bin/mcp` → `../ai-software-architect/index.js`). The two never matched, so the guard did not fire: the process exited 0 with nothing on stderr and the transport was never started — a server that looks dead to its client, with no diagnostic anywhere. The comparison is now made between real paths.
 
 Scope, precisely: this affected every POSIX launch through the bin in 1.6.0, which is how `.mcp.json` starts the server (`npx -y ai-software-architect`) and how the `npm install -g` + `"command": "mcp"` configurations in `README.md` start it. Windows was unaffected — npm writes `cmd`/`ps1` shims there that hand Node the real path. Launching `node mcp/index.js` by path was also unaffected, which is why it went unnoticed. No released version shipped the bug: npm `latest` is 1.3.0, which calls `server.run()` unconditionally. This is a fix to unreleased code, not a user-facing regression.
 
+#### `configure_pragmatic_mode` erased every comment in `config.yml` ([#26](https://github.com/codenamev/ai-software-architect/issues/26))
+The tool loaded `config.yml` with `yaml.parse()`, set two keys, and wrote it back with `yaml.stringify()`. That round-trip keeps values and drops everything else: the canonical `config.yml` carries over a hundred comment lines explaining intensity levels, exemptions, triggers and thresholds, and the tool's own success message tells users to hand-edit the file to customize them. The first configure call left bare keys with no documentation. The tool now edits the file as a YAML document (`yaml.parseDocument` + `setIn`), so only `pragmatic_mode.enabled` / `pragmatic_mode.intensity` change and every other line, comments included, is written back as it was: the canonical `config.yml` round-trips with zero unrelated changes. The template-seeding path (no `config.yml` yet) keeps every template comment too, with one cosmetic limit: the serializer re-indents a comment block that dangles at the end of a nested map, which affects 7 lines of the 394-line template and no semantics. A `config.yml` that fails to parse is now left untouched with an error instead of being overwritten. Regression tests in `tools/test/configure-pragmatic-mode.test.js`.
+
+#### `protect-files` hook matched paths by raw suffix, with no normalization
+`isProtected` compared the incoming `file_path` against `.architecture/<name>` with a bare `endsWith`. Any path that spells the same file differently slipped through: `.architecture/./config.yml`, `.architecture/decisions/../config.yml`, `.architecture//members.yml`, or a forward-slash path on a Windows host (where the expected suffix is built with `\`). The same check also fired on files that are *not* protected — a directory named `foo.architecture/` containing a `members.yml`. Paths are now run through `path.normalize`, split on either separator, and matched on their last two segments (`.architecture` + a protected name). The hook is a guardrail against accidental edits, not a sandbox: matching stays exact-case, so a case-variant path on a case-insensitive filesystem is still not caught, and `CLAUDE_ALLOW_PROTECTED=1` remains the intended override.
+
 ### Added
+
+#### Per-member `model`, `effort` and `color` in `members.yml` (#67)
+`tools/lib/subagent-generator.js` renders three optional member fields into the generated agent frontmatter: `model`, `effort` and `color`, Claude Code's own subagent keys. Before this, every generated reviewer inherited the session model and effort with no supported way to give one persona a deeper (or cheaper) pass, since the generator overwrites hand edits. The fields are validated at generation time (`effort` must be one of `low`, `medium`, `high`, `xhigh`, `max`) and render only when set: every shipped persona leaves them unset, so `agents/*.md` are byte-identical and cost stays the user's choice. Documented in the setup-architect customization guide.
 
 #### Protocol-level smoke test for the MCP server (`mcp/test/protocol-smoke.test.js`)
 The existing suite reaches `ArchitectureServer` by importing the class, which never resolves `@modelcontextprotocol/sdk` — `mcp/index.js` loads it through dynamic `import()` inside `_initServer()`/`run()`. The SDK, the request handlers, the advertised tool schemas, the stdio transport and the entrypoint therefore had no coverage. The new tests spawn the server over a real stdio transport and assert the handshake, the exact tool set, schema well-formedness, a `tools/call` round-trip, and startup through a symlinked bin. Wired into the `validate-plugin` CI job.
@@ -41,7 +59,7 @@ The existing suite reaches `ArchitectureServer` by importing the class, which ne
 #### Three Tier-2 MCP tools removed ([ADR-015](.architecture/decisions/adrs/ADR-015-mcp-skills-parity-reconciliation.md))
 `start_architecture_review`, `specialist_review`, and `pragmatic_enforcer` are removed from the MCP server (~520 lines of `mcp/index.js`). These tools only ever emitted blank templates/frameworks for manual completion — an MCP server has no agent loop and cannot dispatch the host subagents that make a real review (ADR-013); they shared a name with the Skills that *do* run real reviews, which misled users. **Orchestrated reviews and pragmatic enforcement are now plugin/Skills-only** (`architecture-review`, `specialist-review`, and the `pragmatic-enforcer` subagent). The MCP server retains its deterministic Tier-1 tools (`setup_architecture`, `create_adr`, `list_architecture_members`, `get_architecture_status`, `configure_pragmatic_mode`, `get_implementation_guidance`). The same template structures remain available as static files in `.architecture/templates/`. The two removed allow-list entries were dropped from `.claude/settings.json`.
 
-**Migration:** use the `architecture-review` / `specialist-review` skills (Claude Code plugin) for reviews. MCP-only clients can read `.architecture/templates/review.md` directly for the template.
+**Migration:** use the `architecture-review` / `specialist-review` skills (Claude Code plugin) for reviews. MCP-only clients can read `.architecture/templates/review-template.md` directly for the template.
 
 ### Changed
 

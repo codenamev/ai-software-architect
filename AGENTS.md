@@ -97,8 +97,8 @@ Releases and version tags are the maintainer's alone (see `WORLD.md`). Before ta
 
 ### Installation Options (Quick Reference)
 
-**Option 1: Claude Skills (Recommended for Claude Code)**
-- Install skills to `~/.claude/skills/`
+**Option 1: Claude Code Plugin (Recommended for Claude Code)**
+- Install: `/plugin marketplace add codenamev/ai-software-architect` then `/plugin install ai-software-architect@ai-software-architect`
 - Run: `Setup ai-software-architect`
 
 **Option 2: Direct Clone (For any AI assistant)**
@@ -107,7 +107,7 @@ Releases and version tags are the maintainer's alone (see `WORLD.md`). Before ta
 
 **Option 3: MCP Server (For MCP-compatible assistants)**
 - Install: `npm install -g ai-software-architect`
-- Configure in `claude_desktop_config.json`
+- Configure: `claude mcp add` or `~/.claude.json` for Claude Code; `claude_desktop_config.json` for Claude Desktop
 
 **See [.architecture/agent_docs/workflows.md § Setup Procedures](.architecture/agent_docs/workflows.md#setup-procedures) for complete installation instructions.**
 
@@ -392,7 +392,7 @@ The framework works with any AI assistant that can:
 - Reinstall MCP dependencies if needed
 
 **For Installed Projects:**
-- Claude Skills: Backup and reinstall skills from latest
+- Claude Code Plugin: `/plugin update ai-software-architect@ai-software-architect`
 - Direct Clone: Ask assistant or manually fetch/reset
 - Preserves your ADRs and reviews automatically
 

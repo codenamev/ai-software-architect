@@ -107,6 +107,45 @@ describe('Subagent Generator', () => {
     });
   });
 
+  describe('runtime frontmatter fields (model, effort, color)', () => {
+    it('renders none of them when the member sets none (backwards compatible)', () => {
+      const { content } = generateSubagent(SAMPLE_MEMBER);
+      const fm = parseFrontmatter(content);
+      assert.deepStrictEqual(Object.keys(fm), ['name', 'description', 'tools']);
+    });
+
+    it('renders model, effort and color after tools when set', () => {
+      const { content } = generateSubagent({ ...SAMPLE_MEMBER, model: 'opus', effort: 'high', color: 'red' });
+      const fm = parseFrontmatter(content);
+      assert.strictEqual(fm.model, 'opus');
+      assert.strictEqual(fm.effort, 'high');
+      assert.strictEqual(fm.color, 'red');
+      assert.deepStrictEqual(Object.keys(fm), ['name', 'description', 'tools', 'model', 'effort', 'color']);
+    });
+
+    it('renders each field independently and skips blank values', () => {
+      const { content } = generateSubagent({ ...SAMPLE_MEMBER, model: '  ', effort: 'max', color: '' });
+      const fm = parseFrontmatter(content);
+      assert.strictEqual(fm.model, undefined);
+      assert.strictEqual(fm.effort, 'max');
+      assert.strictEqual(fm.color, undefined);
+    });
+
+    it('rejects an effort level Claude Code does not accept', () => {
+      assert.throws(
+        () => generateSubagent({ ...SAMPLE_MEMBER, effort: 'ultra' }),
+        /effort "ultra"; Claude Code accepts low, medium, high, xhigh, max/
+      );
+    });
+
+    it('rejects non-string values instead of coercing them', () => {
+      assert.throws(
+        () => generateSubagent({ ...SAMPLE_MEMBER, model: ['opus'] }),
+        /non-string model/
+      );
+    });
+  });
+
   describe('pragmatic_enforcer special handling', () => {
     const PRAGMATIC = {
       id: 'pragmatic_enforcer',

@@ -64,6 +64,20 @@ members:
       - "data protection"
       - "access control"
     perspective: "Reviews the architecture from a security-first perspective, identifying potential vulnerabilities and security implications."
+    # Behavioral fields (optional, see ADR-010 "Silent Checklist"). Each item may be a
+    # plain string or { text: "...", motivated_by: "..." } to record why it exists.
+    silent_checklist:
+      - text: "What new trust boundary does this change create or move?"
+        motivated_by: "ADR-010; every boundary is a place authz can be forgotten"
+      - text: "Where does user-controlled data first touch this code path?"
+        motivated_by: "the MCP server's tool inputs reached path.join unvalidated before #30"
+      - "What happens when this component's secrets or config are wrong, missing, or leaked?"
+      - "Which existing control is the author assuming covers this, and does it actually?"
+    blocking_criteria:
+      - "Untrusted input reaching a filesystem path, shell, or query without validation"
+      - "An authorization decision made client-side, or repeated inconsistently server-side"
+      - "Secrets or credentials committed, logged, or rendered into generated files"
+    signature_tradeoff: "security controls vs. performance overhead and onboarding friction"
 
   - id: maintainability_expert
     name: "Maintainability Expert"

@@ -288,21 +288,13 @@ Your AI assistant will fetch the latest framework files from the main branch whi
 
 ### Manual Update Methods
 
-**If using Claude Skills:**
+**If using the Claude Code Plugin:**
 ```bash
-# Update skills to latest version - backup old versions first
-mkdir -p ~/.ai-architect-backups/skills-$(date +%Y%m%d-%H%M%S)
-cd ~/.claude/skills
-mv setup-architect architecture-review create-adr list-members architecture-status specialist-review ~/.ai-architect-backups/skills-$(date +%Y%m%d-%H%M%S)/ 2>/dev/null || true
-
-# Install from latest
-git clone https://github.com/codenamev/ai-software-architect /tmp/ai-architect-$$
-cp -r /tmp/ai-architect-$$/skills/* ./
-
-echo "Backup created at ~/.ai-architect-backups/skills-TIMESTAMP/"
-echo "You can safely remove this backup once you've verified the update works correctly."
-echo "Temporary files will be automatically cleaned up on system restart."
+# In Claude Code:
+/plugin update ai-software-architect@ai-software-architect
 ```
+
+This updates the plugin wrapper and everything it bundles (skills, MCP server, generated subagents, ADR-validation hook) as one unit. The standalone `~/.claude/skills/` copy was retired in 1.4.0 ([ADR-012](.architecture/decisions/adrs/ADR-012-claude-plugin-distribution-hardening.md)); if you still have one, remove it and install the plugin.
 
 **If using MCP Server:**
 ```bash
@@ -324,7 +316,7 @@ npm install -g ai-software-architect
 - `.architecture/principles.md` - Core architectural principles (if not customized)
 - Framework scripts and helper files
 - MCP server (if using MCP installation)
-- Claude Skills (if using Skills installation)
+- Plugin skills, subagents, and hook (if using the plugin installation)
 
 **✅ Preserved Files:**
 - `.architecture/decisions/adrs/` - Your architectural decision records
@@ -362,13 +354,14 @@ For general usage instructions, see [USAGE.md](USAGE.md).
 
 For Claude Code users, see [USAGE-WITH-CLAUDE-PLUGIN.md](USAGE-WITH-CLAUDE-PLUGIN.md) (recommended plugin-based install) or [USAGE-WITH-CLAUDE.md](USAGE-WITH-CLAUDE.md) (traditional clone-based path) for detailed instructions.
 
-**Available Skills** (when using Claude Skills installation):
+**Available Skills** (installed with the Claude Code plugin):
 - **setup-architect**: Automatically sets up and customizes the framework
 - **create-adr**: Creates Architectural Decision Records
 - **architecture-review**: Conducts comprehensive multi-perspective reviews
 - **specialist-review**: Gets focused reviews from specific experts
 - **list-members**: Shows your architecture team
 - **architecture-status**: Displays current documentation state
+- **pragmatic-guard**: Enables Pragmatic Guard Mode (YAGNI enforcement)
 
 **Standard Commands**:
 - **Setup**: "Setup ai-software-architect"

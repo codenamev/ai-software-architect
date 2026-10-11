@@ -6,7 +6,7 @@
 
 **👉 See [AGENTS.md](AGENTS.md) for complete framework documentation:**
 - Project overview and technology stack
-- Installation options (Skills, Direct Clone, MCP)
+- Installation options (Plugin, Direct Clone, MCP)
 - Core workflows (reviews, ADRs, pragmatic mode, implementation)
 - Architecture principles and team members
 - Framework configuration and customization

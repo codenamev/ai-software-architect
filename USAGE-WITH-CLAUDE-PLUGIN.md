@@ -101,7 +101,7 @@ In order, these are the smallest steps that demonstrate the framework end-to-end
 ```
 List architecture members
 ```
-You should see the seven core members plus any technology specialists the setup added for your stack.
+You should see the eight core members plus any technology specialists the setup added for your stack.
 
 **2. (~1 min) Read the initial analysis**
 

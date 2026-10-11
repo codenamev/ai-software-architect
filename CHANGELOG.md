@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optional `## Confirmation` section in `.architecture/templates/adr-template.md` (MADR 4.0 parity): how compliance with the decision is verified, by whom, and what drift would look like. Additive; no validator or existing-ADR changes. Refs #38 (C1).
 
+### Changed
+
+#### CI runs on supported Node versions, and `engines` publishes a supported floor (#29)
+Every runtime CI pinned was past end-of-life: `validate-plugin` ran Node 20 (EOL 2026-04-30), `codex-tests` ran Node 18 (EOL 2025-04-30) and installed Python 3.9 (EOL 2025-10-31) for a matrix leg that never invokes `python`. `validate-plugin` now runs a `[22, 24]` matrix so the supported range is verified rather than asserted; `codex-tests` runs Node 24; the unused `setup-python` step is gone. `mcp/package.json` `engines.node` is now `>=22.0.0` (README updated to match). Users on Node 18 or 20 will see an `EBADENGINE` warning from npm; the 1.5.3 `tools/` test fix already relied on Node 22+ test-file discovery, so this makes the floor honest rather than narrower.
+
 ### Fixed
 
 #### `setup_architecture` no longer ships two ADR templates, and `create_adr` renders the real one (#25)

@@ -1,3 +1,8 @@
+---
+description: AI Software Architect framework overview: what the framework is and how to work with it in this project
+alwaysApply: true
+---
+
 # AI Software Architect Framework - Overview
 
 This project uses the AI Software Architect framework for structured architecture management. The framework provides a systematic approach to documenting decisions, conducting reviews, and managing architectural evolution.

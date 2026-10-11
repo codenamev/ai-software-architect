@@ -70,7 +70,7 @@ npm install
 
 ### Claude Code Configuration
 
-Add this to your Claude Code configuration file (`~/.claude/config.json`):
+Register it with `claude mcp add ai-software-architect -- mcp`, or add this to `~/.claude.json` (user scope) or your project's `.mcp.json`:
 
 **For npm global install:**
 ```json
@@ -193,14 +193,14 @@ Sets up the AI Software Architect framework in your project with full customizat
 3. **Customization** - Tailors team members, principles, and templates to your stack
 4. **Integration Setup** - Configures CLAUDE.md for AI assistant collaboration
 5. **Initial Analysis** - Conducts multi-perspective architectural analysis
-6. **Documentation** - Creates customized templates and principles
+6. **Documentation** - Installs the canonical templates and customized principles
 
 **Parameters:**
 - `projectPath` (string, required): Path to your project root directory
 
 **Creates:**
-- `.architecture/` with subdirectories (decisions, reviews, recalibration, comparisons, templates)
-- `.coding-assistants/` configuration directories
+- `.architecture/` with subdirectories (decisions, reviews, recalibration, comparisons, templates — the canonical `adr-template.md`, `review-template.md`, `config.yml`, …)
+- `.coding-assistants/` with the canonical assistant configurations (Cursor `.mdc` rules, Codex setup instructions, Claude guidance)
 - `CLAUDE.md` integration (created or enhanced)
 - `.architecture/reviews/initial-system-analysis.md` - Comprehensive initial assessment
 
@@ -223,7 +223,7 @@ Creates a new Architectural Decision Record with automatic numbering.
 
 **Creates:**
 - `.architecture/decisions/adrs/ADR-XXX-title.md` with sequential numbering
-- Formatted ADR with status, context, decision, and consequences
+- An ADR rendered from `.architecture/templates/adr-template.md` (the installed copy, so your customizations apply): Status is set to `Proposed` with the date, and your context, decision, and consequences become the opening paragraph of their sections. Every other `[bracketed]` prompt in the template stays — including the sub-lists inside Decision and Consequences (Positive/Negative/Neutral) and whole sections like Decision Drivers and Alternatives Considered — for you to complete or delete. The tool gives you a scaffold that passes `validate-adr`, not a finished record.
 
 **Example:**
 ```javascript
@@ -274,7 +274,7 @@ Gets current state of architecture documentation with counts and metrics.
 Enables and configures Pragmatic Mode (YAGNI Enforcement) to prevent over-engineering.
 
 **What it does:**
-1. **Configuration Management** - Creates or updates `.architecture/config.yml` with pragmatic mode settings
+1. **Configuration Management** - Creates or updates `.architecture/config.yml` with pragmatic mode settings. Edits are in place: comments and any hand-made customizations elsewhere in the file are preserved
 2. **Mode Activation** - Enables/disables the Pragmatic Enforcer in reviews
 3. **Intensity Control** - Sets how aggressively complexity is challenged
 4. **Deferrals Setup** - Creates deferrals tracking file if enabled
@@ -524,7 +524,7 @@ See [main README](../README.md#integration-method-comparison) for detailed featu
 **Tools not appearing**:
 - Ensure MCP server is running: Check assistant's MCP status
 - Verify configuration points to correct command/path
-- Check Node.js version: Requires Node.js ≥18
+- Check Node.js version: Requires Node.js ≥22
 
 **Permission errors**:
 - Ensure project path is accessible

@@ -1,3 +1,10 @@
+---
+description: How to conduct AI Software Architect reviews: full, specialist, and implementation reviews and their output format
+globs:
+  - ".architecture/reviews/**/*"
+alwaysApply: false
+---
+
 # AI Software Architect Framework - Reviews
 
 ## Review Types

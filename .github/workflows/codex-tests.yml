@@ -21,13 +21,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v7
       with:
-        node-version: '18'
-        
-    - name: Setup Python (for Python tests)
-      if: matrix.project-type == 'python'
-      uses: actions/setup-python@v7
-      with:
-        python-version: '3.9'
+        node-version: '24'
         
     - name: Create test project fixtures
       run: |

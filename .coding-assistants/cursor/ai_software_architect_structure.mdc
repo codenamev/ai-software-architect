@@ -1,3 +1,10 @@
+---
+description: Directory layout and file conventions under .architecture/ (members, decisions, reviews, principles)
+globs:
+  - ".architecture/**/*"
+alwaysApply: false
+---
+
 # AI Software Architect Framework - Structure
 
 ## Directory Organization

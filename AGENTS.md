@@ -77,6 +77,20 @@ ls .architecture/templates/
 cd mcp && npm install && npm test
 ```
 
+### Release checklist
+
+Releases and version tags are the maintainer's alone (see `WORLD.md`). Before tagging:
+
+1. `validate-plugin`, `fixture-compatibility` and the Codex workflow are green on `main`.
+2. Trigger the **Plugin eval suite (manual)** job (`claude-code-tests.yml` → `workflow_dispatch`).
+   It runs `evals/` with and without the plugin under a `--max-cost-usd` ceiling and uploads
+   `plugin-eval-results`. Read the per-case `Δ` in the report, not just the exit code: a
+   near-zero `Δ` on `specialist-dispatch` means the persona layer is not changing Claude's
+   answer. The suite is a checklist step, not a merge gate, until it has been stable across
+   two releases. Case format and how to run it locally: `evals/README.md`.
+3. Bump `.claude-plugin/plugin.json`, `mcp/package.json` and `.architecture/config.yml`
+   together (`node tools/cli.js version-check`), then `cd mcp && npm publish`.
+
 ## Using the Framework in Your Project
 
 **👉 For detailed installation procedures, see [.architecture/agent_docs/workflows.md § Setup Procedures](.architecture/agent_docs/workflows.md#setup-procedures)**

@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: specialist-dispatch
+context:
+  scaffold_script: fixture.sh

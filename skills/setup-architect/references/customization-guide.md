@@ -29,6 +29,13 @@ Each member includes:
 - `domains`: Array of domain areas
 - `perspective`: Description of unique viewpoint
 
+Optional behavioral fields (any member; absent fields render nothing, so existing files keep working):
+- `silent_checklist`: Array of 3-5 questions this reviewer asks before reading anything else
+- `blocking_criteria`: Array of conditions that make a finding critical and block sign-off
+- `signature_tradeoff`: The axis this reviewer habitually trades against the others (a string)
+
+Checklist and criteria items may be plain strings or `{ text: "...", motivated_by: "..." }` objects. Record the incident, ADR, or observed failure behind a question so it can be audited and retired later instead of accumulating. See `security_specialist` in the framework's `members.yml` for a worked example.
+
 Optional runtime fields (any member; absent fields render nothing, so existing files keep working). These are Claude Code's own subagent frontmatter keys, passed through to the generated agent:
 - `model`: The model this persona runs on (`sonnet`, `opus`, `haiku`, `inherit`, or a full model id)
 - `effort`: One of `low`, `medium`, `high`, `xhigh`, `max`; overrides the session effort for this persona only

@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+#### mcp: zod 3 → 4 (#91)
+`mcp/package.json` moves `zod` from `^3.25.67` to `^4.6.7`. No source lines change: the six call sites in `index.js` use only `z.string()`, `z.boolean()`, `.optional()` and `.describe()`, which are identical across majors, and the MCP SDK already routes v4 schemas through `zod/v4-mini`'s `toJSONSchema`. The JSON Schema advertised on `tools/list` is now produced by that emitter instead of the vendored `zod-to-json-schema`: the six input schemas lose `additionalProperties: false` and reorder `type`/`description` keys; properties, `required` and descriptions are unchanged. Unknown arguments are still stripped at validation time, as they were on v3.
+
 #### `claude-smoke` replaced by a plugin eval suite with a no-plugin baseline (#60)
 
 The plugin path had one behavioral test: a single "list every skill" prompt that proved the

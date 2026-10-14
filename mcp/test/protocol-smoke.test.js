@@ -132,6 +132,42 @@ describe('MCP protocol smoke test', () => {
 
     assert.strictEqual(result.isError, true, 'unknown tool was not reported as an error');
   });
+
+  it('rejects a call missing a required argument and names the field', async () => {
+    // #30: the advertised `required` used to be decoration - a missing
+    // projectPath reached path.join(undefined, ...) and came back as a Node
+    // ERR_INVALID_ARG_TYPE. The SDK now validates against the same schema it
+    // advertises, so the caller is told which field they left out.
+    const result = await client.request({
+      method: 'tools/call',
+      params: { name: 'get_architecture_status', arguments: {} },
+    }, CallToolResultSchema);
+
+    assert.strictEqual(result.isError, true, 'missing required argument was accepted');
+    assert.match(result.content[0].text, /projectPath/, 'rejection does not name the missing field');
+    assert.doesNotMatch(result.content[0].text, /ERR_INVALID_ARG_TYPE|must be of type string/, 'Node internals leaked into the error');
+  });
+
+  it('rejects an argument outside its advertised enum', async () => {
+    const result = await client.request({
+      method: 'tools/call',
+      params: { name: 'configure_pragmatic_mode', arguments: { projectPath: projectDir, intensity: 'max' } },
+    }, CallToolResultSchema);
+
+    assert.strictEqual(result.isError, true, 'out-of-enum intensity was accepted');
+    assert.match(result.content[0].text, /intensity/, 'rejection does not name the offending field');
+  });
+
+  it('ignores an unknown extra argument rather than rejecting the call', async () => {
+    // Clients that pass a stray key (older prompt templates, a superset
+    // schema) keep working; the SDK strips unknown keys instead of failing.
+    const result = await client.request({
+      method: 'tools/call',
+      params: { name: 'list_architecture_members', arguments: { projectPath: projectDir, verbose: true } },
+    }, CallToolResultSchema);
+
+    assert.notStrictEqual(result.isError, true, `extra argument rejected: ${result.content?.[0]?.text}`);
+  });
 });
 
 describe('MCP server entrypoint', () => {

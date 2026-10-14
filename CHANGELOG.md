@@ -17,12 +17,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optional `## Confirmation` section in `.architecture/templates/adr-template.md` (MADR 4.0 parity): how compliance with the decision is verified, by whom, and what drift would look like. Additive; no validator or existing-ADR changes. Refs #38 (C1).
 
+#### Behavioral fields for reviewer personas (#35)
+`members.yml` members accept three optional fields — `silent_checklist`, `blocking_criteria`, and `signature_tradeoff` — that `tools/lib/subagent-generator.js` renders as `## Silent checklist`, `## Blocking criteria`, and `## Signature trade-off` sections in the generated agent. Checklist and criteria items may be plain strings or `{ text, motivated_by }` objects; the provenance renders inline so a question can be audited (and later retired) rather than accumulating on vibes. Members that set none of the fields generate byte-identical output, so existing `.architecture/members.yml` files keep working. All eight bundled personas now carry the fields: the Security Specialist's worked example landed first, and the other seven were authored in a separate PR so the content could be judged on its own. Each `motivated_by` names the ADR, issue, or log entry that earned the question its place (ADR-002, 003, 005, 006, 008, 009, 013, 014, 015, 016; #30; #41; the deferrals log), so a question with no such source is deliberately marked as one.
+
 ### Changed
+
+#### mcp: zod 3 → 4 (#91)
+`mcp/package.json` moves `zod` from `^3.25.67` to `^4.6.7`. No source lines change: the six call sites in `index.js` use only `z.string()`, `z.boolean()`, `.optional()` and `.describe()`, which are identical across majors, and the MCP SDK already routes v4 schemas through `zod/v4-mini`'s `toJSONSchema`. The JSON Schema advertised on `tools/list` is now produced by that emitter instead of the vendored `zod-to-json-schema`: the six input schemas lose `additionalProperties: false` and reorder `type`/`description` keys; properties, `required` and descriptions are unchanged. Unknown arguments are still stripped at validation time, as they were on v3.
+
+#### `claude-smoke` replaced by a plugin eval suite with a no-plugin baseline (#60)
+
+The plugin path had one behavioral test: a single "list every skill" prompt that proved the
+plugin loads and nothing else. It is replaced by four `claude plugin eval` cases under `evals/`
+(`setup-fixture`, `create-adr`, `specialist-dispatch`, `status-drift`) that exercise the setup
+skill, ADR creation, single-specialist dispatch and the status report on scaffolded fixtures.
+The runner also executes every case without the plugin and reports the delta, so the suite
+measures what the plugin contributes rather than whether it is present. The `plugin-eval` job
+keeps the old gating: `workflow_dispatch` only, secret-gated, under a `--max-cost-usd 3`
+ceiling with both models pinned. It is a release-checklist step (`AGENTS.md`), not a merge
+gate, until it has been stable across two releases. `evals/results/` is gitignored.
 
 #### CI runs on supported Node versions, and `engines` publishes a supported floor (#29)
 Every runtime CI pinned was past end-of-life: `validate-plugin` ran Node 20 (EOL 2026-04-30), `codex-tests` ran Node 18 (EOL 2025-04-30) and installed Python 3.9 (EOL 2025-10-31) for a matrix leg that never invokes `python`. `validate-plugin` now runs a `[22, 24]` matrix so the supported range is verified rather than asserted; `codex-tests` runs Node 24; the unused `setup-python` step is gone. `mcp/package.json` `engines.node` is now `>=22.0.0` (README updated to match). Users on Node 18 or 20 will see an `EBADENGINE` warning from npm; the 1.5.3 `tools/` test fix already relied on Node 22+ test-file discovery, so this makes the floor honest rather than narrower.
 
+#### MCP server enforces the `inputSchema` it advertises (#30)
+The six tool registrations in `mcp/index.js` moved from the low-level `Server` + `setRequestHandler` API to `McpServer.registerTool` with zod schemas. The advertised JSON Schema is now derived from the same zod shape the SDK validates every `tools/call` against, so the contract a client reads is the one the server enforces and the two can no longer drift. Before this, `required` was decoration: calling `get_architecture_status` without `projectPath` reached `path.join(undefined, ...)` and came back as a Node `ERR_INVALID_ARG_TYPE`. It now comes back as `Invalid arguments for tool get_architecture_status: Required at projectPath`; an `intensity` outside `strict|balanced|lenient` is rejected the same way. Unknown extra arguments are stripped rather than rejected, so callers passing a stray key keep working.
+
+Observable wire changes, for anyone driving the server by hand: schema violations and unknown tool names are still returned as `isError: true` text (the SDK wraps its own `McpError` that way), but the message is now the SDK's `MCP error -32602: ...` rather than `Error: Unknown tool: ...`, and the advertised schemas gain `additionalProperties: false` and a `$schema` key. Tool bodies are unchanged. `zod` becomes a direct dependency (it was already installed transitively by the SDK). Three enforcement tests added to `mcp/test/protocol-smoke.test.js`.
+
 ### Fixed
+
+#### `setup_architecture` stranded `.architecture-temp` in the user's project on a mid-setup failure
+The framework is copied into `<project>/.architecture-temp` as a scratch clone (step 2) and removed at step 9. Any failure in between (a throw from `customizeMembers`, the `pragmatic_mode` fail-closed check, an unwritable `agents/` dir, ...) skipped the removal and left the full scratch copy in the target project. Cleanup now also runs in a `finally`, so the scratch dir is removed on every exit path. Covered by a new failure-path test in `tools/test/setup-fidelity.test.js`.
 
 #### `setup_architecture` no longer ships two ADR templates, and `create_adr` renders the real one (#25)
 Setup used to write a hardcoded `templates/adr.md` / `templates/review.md` pair alongside the canonical `adr-template.md` / `review-template.md` copied from the framework — two ADR templates with different status vocabularies and sections, and no signal which was real. Those hardcoded bodies are gone; the canonical files are the only templates installed (ADR-016 single source of truth). `create_adr` used to emit a third hand-rolled shape (`Status/Context/Decision/Consequences/Date`) that neither template matched and that `validate-adr` rejected; it now renders the installed `adr-template.md`, filling Status (`Proposed` + date), Context, Decision and Consequences and leaving the remaining sections as prompts. Its filename now follows the contract this README, the `create-adr` skill and the validator already documented (`ADR-XXX-slug.md` instead of `0001-slug.md`); numbering counts both styles, so existing projects continue their sequence. Setup also installs the canonical `.coding-assistants/` tree (Cursor rules, Codex instructions, Claude guidance) instead of three empty directories, and the copy filter now excludes only the framework's own top-level `README.md`/`USAGE-*`/`INSTALL.md` — nested READMEs that the installed docs link to are no longer dropped. Existing installs are untouched: setup never runs on an existing `.architecture/`, and files named `templates/adr.md` stay where they are.

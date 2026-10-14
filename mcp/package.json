@@ -3,6 +3,10 @@
   "version": "1.6.0",
   "description": "MCP server for AI Software Architect framework",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "README.md"
+  ],
   "type": "module",
   "bin": {
     "mcp": "./index.js"
@@ -32,6 +36,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.6.7",
     "yaml": "^2.3.4",
     "fs-extra": "^11.2.0"
   },

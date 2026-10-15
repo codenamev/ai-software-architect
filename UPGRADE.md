@@ -4,6 +4,17 @@ This guide explains how to upgrade your existing AI Software Architect installat
 
 ## Quick Upgrade
 
+First, find out whether you need to. Ask:
+
+```
+Check architecture status
+```
+
+The status report includes a `Framework:` line with the installed version (from
+`.architecture/config.yml`) and the current plugin/framework version. The plugin
+auto-updates; your project's `.architecture/` copy does not, so the two drift
+apart silently. If the line says you are behind, upgrade.
+
 The simplest way to upgrade is to ask your AI assistant to handle it:
 
 ```

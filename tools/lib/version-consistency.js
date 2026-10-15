@@ -79,6 +79,7 @@ export const FRAMEWORK_VERSION_SOURCES = [
   { label: 'mcp/package.json', file: 'mcp/package.json', read: c => extractVersion(c) },
   { label: 'mcp/index.js', file: 'mcp/index.js', read: c => extractVersion(c) },
   { label: '.architecture/config.yml (framework_version)', file: '.architecture/config.yml', read: c => extractVersion(c, 'framework_version') },
+  { label: '.architecture/templates/config.yml (framework_version)', file: '.architecture/templates/config.yml', read: c => extractVersion(c, 'framework_version') },
   { label: 'CLAUDE.md (Framework Version)', file: 'CLAUDE.md', read: c => extractLabeledVersion(c, 'Framework Version') },
   { label: 'AGENTS.md (Framework Version)', file: 'AGENTS.md', read: c => extractLabeledVersion(c, 'Framework Version') },
   { label: 'AGENTS.md (MCP Server Version)', file: 'AGENTS.md', read: c => extractLabeledVersion(c, 'MCP Server Version') },

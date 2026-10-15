@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Optional `## Confirmation` section in `.architecture/templates/adr-template.md` (MADR 4.0 parity): how compliance with the decision is verified, by whom, and what drift would look like. Additive; no validator or existing-ADR changes. Refs #38 (C1).
 
+#### `architecture-status` reports framework drift (#59)
+The plugin auto-updates skills, agents, hooks and the MCP server; the project's installed `.architecture/` copy is written once at setup and never touched again. Nothing measured the gap. The status skill and the `get_architecture_status` MCP tool now report a `Framework:` line comparing the installed `framework_version` (from `.architecture/config.yml`) with the current plugin/server version, e.g. `installed 1.4.0, current 1.6.0 - 2 releases behind; see CHANGELOG 1.4.0…1.6.0 and UPGRADE.md`. Missing stamp reports `unknown (pre-1.2 install)`. Report only: the upgrade stays an explicit user action, and `UPGRADE.md` now opens with that deterministic check.
+
 #### Behavioral fields for reviewer personas (#35)
 `members.yml` members accept three optional fields — `silent_checklist`, `blocking_criteria`, and `signature_tradeoff` — that `tools/lib/subagent-generator.js` renders as `## Silent checklist`, `## Blocking criteria`, and `## Signature trade-off` sections in the generated agent. Checklist and criteria items may be plain strings or `{ text, motivated_by }` objects; the provenance renders inline so a question can be audited (and later retired) rather than accumulating on vibes. Members that set none of the fields generate byte-identical output, so existing `.architecture/members.yml` files keep working. All eight bundled personas now carry the fields: the Security Specialist's worked example landed first, and the other seven were authored in a separate PR so the content could be judged on its own. Each `motivated_by` names the ADR, issue, or log entry that earned the question its place (ADR-002, 003, 005, 006, 008, 009, 013, 014, 015, 016; #30; #41; the deferrals log), so a question with no such source is deliberately marked as one.
 
@@ -46,6 +49,9 @@ The six tool registrations in `mcp/index.js` moved from the low-level `Server` +
 Observable wire changes, for anyone driving the server by hand: schema violations and unknown tool names are still returned as `isError: true` text (the SDK wraps its own `McpError` that way), but the message is now the SDK's `MCP error -32602: ...` rather than `Error: Unknown tool: ...`, and the advertised schemas gain `additionalProperties: false` and a `$schema` key. Tool bodies are unchanged. `zod` becomes a direct dependency (it was already installed transitively by the SDK). Three enforcement tests added to `mcp/test/protocol-smoke.test.js`.
 
 ### Fixed
+
+#### `.architecture/templates/config.yml` was stamped 1.2.0
+The template copied by `installation-procedures.md` has carried `framework_version: "1.2.0"` since 1.3.0 because it was not in `FRAMEWORK_VERSION_SOURCES`. It is now stamped with the current version and checked by `version-check`.
 
 #### `setup_architecture` stranded `.architecture-temp` in the user's project on a mid-setup failure
 The framework is copied into `<project>/.architecture-temp` as a scratch clone (step 2) and removed at step 9. Any failure in between (a throw from `customizeMembers`, the `pragmatic_mode` fail-closed check, an unwritable `agents/` dir, ...) skipped the removal and left the full scratch copy in the target project. Cleanup now also runs in a `finally`, so the scratch dir is removed on every exit path. Covered by a new failure-path test in `tools/test/setup-fidelity.test.js`.

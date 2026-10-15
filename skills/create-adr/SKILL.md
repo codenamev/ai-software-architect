@@ -18,6 +18,8 @@ Ask if needed:
 - What alternatives were considered?
 - What are the trade-offs?
 
+Then read `.architecture/principles.md` if it exists. The decision is written against it in step 6.
+
 ### 2. Generate ADR Number
 ```bash
 # Find highest ADR number
@@ -52,6 +54,8 @@ Use the template from `.architecture/templates/adr-template.md`:
 **Core sections**:
 - Status, Context, Decision Drivers, Decision, Consequences
 - Implementation, Alternatives Considered, Validation, References
+
+**Principles check** (when `.architecture/principles.md` exists): name each recorded principle the decision upholds under Decision Drivers, and each one it conflicts with under Consequences → Negative. A decision that conflicts with a principle is still recordable; an unacknowledged conflict is not. If the point of the decision is to change or retire a principle, say so in the first sentence of Context and edit `.architecture/principles.md` in the same change, citing the ADR number next to the edited principle. The two files move together or not at all.
 
 **If pragmatic_mode is enabled**: Add Pragmatic Enforcer Analysis section:
 - Necessity Assessment (0-10): Current need, future need, cost of waiting, evidence

@@ -66,6 +66,9 @@ The tool loaded `config.yml` with `yaml.parse()`, set two keys, and wrote it bac
 
 ### Added
 
+#### Per-finding confidence, location dedup, and a low-confidence appendix in `architecture-review` (#66)
+Every concern a reviewer subagent returns now carries a `confidence` (0.0-1.0) next to its severity, with the prompt spelling out what the number means (0.9+ is verified in the code, 0.5 or below is inferred). Before the cross-cut analysis, the orchestrator merges concerns from different members that point at the same location and describe the same problem into one finding (highest severity, highest confidence, every raiser listed), and moves anything below 0.7 that only one member raised into a "Low-confidence findings" appendix. Nothing is deleted: each member's verbatim section keeps every concern, and the appendix keeps the rest for the maintainer to promote or dismiss. The executive summary, cross-cutting themes, and prioritized list are built from the filtered set, so a finding eight personas raised counts once, with the count as the signal. Both review templates gain the appendix; the skill's template also gains the confidence field on concerns and a "Raised by" line on consolidated areas.
+
 #### Per-member `model`, `effort` and `color` in `members.yml` (#67)
 `tools/lib/subagent-generator.js` renders three optional member fields into the generated agent frontmatter: `model`, `effort` and `color`, Claude Code's own subagent keys. Before this, every generated reviewer inherited the session model and effort with no supported way to give one persona a deeper (or cheaper) pass, since the generator overwrites hand edits. The fields are validated at generation time (`effort` must be one of `low`, `medium`, `high`, `xhigh`, `max`) and render only when set: every shipped persona leaves them unset, so `agents/*.md` are byte-identical and cost stays the user's choice. Documented in the setup-architect customization guide.
 

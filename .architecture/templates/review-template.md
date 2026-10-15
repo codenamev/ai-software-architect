@@ -372,3 +372,11 @@ This section reflects the consensus reached after cross-functional discussion of
 ### D. Referenced Documents
 
 [List of documents referenced during the review.]
+
+### E. Low-confidence Findings
+
+[Concerns a single reviewer raised at confidence below 0.7, kept out of the consolidated findings and prioritization but not dropped: the maintainer decides whether to promote or dismiss each one. Concerns raised by two or more reviewers never land here.]
+
+| Finding | Reviewer | Severity | Confidence | Location |
+|---------|----------|----------|------------|----------|
+| [Finding title] | [Reviewer] | Medium | 0.5 | `path/to/file:line` |

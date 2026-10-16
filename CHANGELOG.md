@@ -25,6 +25,9 @@ The plugin auto-updates skills, agents, hooks and the MCP server; the project's 
 
 ### Changed
 
+#### CI validates the plugin with the Claude Code CLI (#61)
+The `validate-plugin` job checked the plugin with hand-rolled steps (`JSON.parse` on four manifests, a `test -f` loop over skills and agents) that know nothing about what the current Claude Code release accepts. The job now also installs the CLI and runs `claude plugin validate` on `plugin.json`, `marketplace.json` (strict), `skills` (strict) and `agents` (strict), offline and with no credentials, so a spec change in Claude Code goes red on the next push instead of in a user's session. `plugin.json` is validated non-strict on purpose: the root `CLAUDE.md` is repo context for the clone-based install path, and strict mode flags it as plugin context that is never loaded. A final step records `claude plugin details` (the plugin's projected always-on and on-invoke token cost) in the job summary so a PR that fattens a skill description is visible at review time. No runtime change for users.
+
 #### mcp: zod 3 → 4 (#91)
 `mcp/package.json` moves `zod` from `^3.25.67` to `^4.6.7`. No source lines change: the six call sites in `index.js` use only `z.string()`, `z.boolean()`, `.optional()` and `.describe()`, which are identical across majors, and the MCP SDK already routes v4 schemas through `zod/v4-mini`'s `toJSONSchema`. The JSON Schema advertised on `tools/list` is now produced by that emitter instead of the vendored `zod-to-json-schema`: the six input schemas lose `additionalProperties: false` and reorder `type`/`description` keys; properties, `required` and descriptions are unchanged. Unknown arguments are still stripped at validation time, as they were on v3.
 

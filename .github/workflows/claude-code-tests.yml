@@ -56,6 +56,35 @@ jobs:
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))"
           done
 
+      # The checks above know only what this repo hand-rolled. The CLI ships
+      # the current plugin spec and validates offline with no credentials, so
+      # a schema change in Claude Code goes red here before a user hits it.
+      # plugin.json is validated non-strict on purpose: the root CLAUDE.md is
+      # repo context for the clone-based install path, and --strict flags it
+      # as unloaded plugin context (#61).
+      - name: Install Claude Code CLI (offline validation only, no credentials)
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Validate plugin manifests, skills and agents against the current CLI
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-config
+        run: |
+          claude plugin validate .claude-plugin/plugin.json
+          claude plugin validate .claude-plugin/marketplace.json --strict
+          claude plugin validate skills --strict
+          claude plugin validate agents --strict
+
+      - name: Record projected plugin token cost
+        env:
+          CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-config
+        run: |
+          {
+            echo '## Plugin token cost (Node ${{ matrix.node-version }})'
+            echo '```'
+            claude --plugin-dir . plugin details ai-software-architect
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
       - name: Run tools unit tests
         working-directory: tools
         run: npm test

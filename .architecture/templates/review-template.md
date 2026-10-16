@@ -318,7 +318,7 @@ This section reflects the consensus reached after cross-functional discussion of
 
 ### Prioritized Improvements
 
-[Every improvement carries the reviewer who raised it and a disposition. The review writes `Disposition: pending`; the maintainer, or the recalibration step that consumes the finding, replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by `(motivated_by: ADR-XXX)`, the same key `members.yml` uses for provenance. A rejection must carry its reason. Reviews written before this convention stay valid.]
+[Every improvement carries the reviewer who raised it and a disposition. The review writes `Disposition: pending`; the maintainer, or the recalibration step that consumes the finding, replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by a third field `motivated_by: ADR-XXX`, the same key `members.yml` uses for provenance; fields inside the parentheses are separated by semicolons. A rejection must carry its reason. Filled in, an item reads: `1. Split the billing module (Raised by: Systems Architect; Disposition: rejected: the coupling is deliberate, see ADR-004; motivated_by: ADR-004)`. Reviews written before this convention stay valid.]
 
 **Critical (Address in next release)**:
 1. [Improvement 1] (Raised by: [Reviewer]; Disposition: pending)

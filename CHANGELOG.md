@@ -76,6 +76,11 @@ The tool loaded `config.yml` with `yaml.parse()`, set two keys, and wrote it bac
 #### `protect-files` hook matched paths by raw suffix, with no normalization
 `isProtected` compared the incoming `file_path` against `.architecture/<name>` with a bare `endsWith`. Any path that spells the same file differently slipped through: `.architecture/./config.yml`, `.architecture/decisions/../config.yml`, `.architecture//members.yml`, or a forward-slash path on a Windows host (where the expected suffix is built with `\`). The same check also fired on files that are *not* protected — a directory named `foo.architecture/` containing a `members.yml`. Paths are now run through `path.normalize`, split on either separator, and matched on their last two segments (`.architecture` + a protected name). The hook is a guardrail against accidental edits, not a sandbox: matching stays exact-case, so a case-variant path on a case-insensitive filesystem is still not caught, and `CLAUDE_ALLOW_PROTECTED=1` remains the intended override.
 
+### Removed
+
+#### `@types/node` devDependency in `mcp/` (#57)
+`mcp/package.json` carried `@types/node` as its only devDependency. Nothing consumed it: the package is one ESM file plus `node --test`, with no `.ts`, no `tsconfig.json`, no `// @ts-check`, and no type-check step in any script or workflow. What it did produce was a Dependabot PR on nearly every cycle (DefinitelyTyped republishes it roughly weekly). Editors still get Node IntelliSense through automatic type acquisition, which never needed the package.json entry. Removed from `package.json` and `package-lock.json`; shipped code and the protocol smoke suite are unaffected.
+
 ### Added
 
 #### Per-finding confidence, location dedup, and a low-confidence appendix in `architecture-review` (#66)

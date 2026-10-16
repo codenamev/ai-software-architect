@@ -40,9 +40,6 @@
     "yaml": "^2.3.4",
     "fs-extra": "^11.2.0"
   },
-  "devDependencies": {
-    "@types/node": "^26.2.0"
-  },
   "engines": {
     "node": ">=22.0.0"
   },

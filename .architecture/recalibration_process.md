@@ -26,9 +26,11 @@ The architectural recalibration process consists of the following steps, to be p
   - Process adjustments
 - Assign priority levels (Critical, High, Medium, Low) to each item
 - Assign ownership for each item to a specific team member or working group
+- Stamp a disposition on every review finding you consume, in the review document itself: `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, with `(motivated-by: ADR-XXX)` when a decision or incident drove the call. The reason on a rejection is mandatory; it is the record that keeps the next review from re-raising a settled point. A deferral whose trigger can no longer fire is stale: reject it with that reason rather than carrying it forward
+- Tally dispositions per reviewer in the Recalibration Plan. A member whose critical findings keep getting rejected has a `blocking_criteria` or `silent_checklist` entry in `members.yml` that should be rewritten or retired; a member whose findings are consistently accepted has earned the questions it asks. Reviews written before dispositions existed carry none; do not backfill them
 - Document decisions in a "Recalibration Plan" file in `.architecture/recalibration/[version].md`
 
-**Output**: Prioritized action item list with owners and target versions
+**Output**: Prioritized action item list with owners and target versions; every consumed finding stamped with a disposition in the review document; a disposition tally per reviewer in the plan
 
 ## 2. Architectural Plan Update
 

@@ -318,9 +318,11 @@ This section reflects the consensus reached after cross-functional discussion of
 
 ### Prioritized Improvements
 
+[Each improvement may carry a trailing disposition. The review writes `Disposition: pending`; the maintainer or the recalibration step replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by `(motivated-by: ADR-XXX)`. A rejection must carry its reason. Reviews written before this convention stay valid.]
+
 **Critical (Address in next release)**:
-1. [Improvement 1]
-2. [Improvement 2]
+1. [Improvement 1] (Disposition: pending)
+2. [Improvement 2] (Disposition: pending)
 
 **High (Address within next 2 releases)**:
 1. [Improvement 3]
@@ -375,8 +377,8 @@ This section reflects the consensus reached after cross-functional discussion of
 
 ### E. Low-confidence Findings
 
-[Concerns a single reviewer raised at confidence below 0.7, kept out of the consolidated findings and prioritization but not dropped: the maintainer decides whether to promote or dismiss each one. Concerns raised by two or more reviewers never land here.]
+[Concerns a single reviewer raised at confidence below 0.7, kept out of the consolidated findings and prioritization but not dropped: the maintainer decides whether to promote or dismiss each one. Concerns raised by two or more reviewers never land here. The Disposition column uses the same vocabulary as Prioritized Improvements: `pending`, then `accepted`, `rejected: <reason>`, or `deferred: <trigger>`.]
 
-| Finding | Reviewer | Severity | Confidence | Location |
-|---------|----------|----------|------------|----------|
-| [Finding title] | [Reviewer] | Medium | 0.5 | `path/to/file:line` |
+| Finding | Reviewer | Severity | Confidence | Location | Disposition |
+|---------|----------|----------|------------|----------|-------------|
+| [Finding title] | [Reviewer] | Medium | 0.5 | `path/to/file:line` | pending |

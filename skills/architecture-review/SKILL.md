@@ -166,6 +166,7 @@ Use [the review template](assets/review-template.md). Key sections:
 - Prioritized recommendations (from step 6.3)
 - Risks if unaddressed (highest-severity items)
 - Success metrics and follow-up plan
+- Dispositions: every Area for Improvement and every low-confidence row is written with `Disposition: pending`. The orchestrator never writes `accepted`, `rejected`, or `deferred`; those are the maintainer's calls, made directly or through `architecture-recalibration`, and a review that ships with them pre-filled has had its judgment made for it.
 
 Save to `.architecture/reviews/<filename>` (filename from step 1).
 
@@ -198,6 +199,7 @@ Next steps:
 - Review with team
 - `create-adr` for the priorities that need a decision recorded
 - `specialist-review` to deep-dive any concern that needs more work
+- Stamp each finding's Disposition as you rule on it (accepted / rejected: reason / deferred: trigger); recalibration does this for the findings it consumes
 ```
 
 ## Why this skill is small

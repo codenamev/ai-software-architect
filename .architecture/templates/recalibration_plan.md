@@ -10,6 +10,14 @@ This document outlines the action plan derived from the architectural review of 
 - Review Document: [LINK TO REVIEW]
 - Participants: [LIST OF PARTICIPANTS]
 
+## Finding Dispositions
+
+Per-finding dispositions live in the review document (one `Disposition:` line per finding). This table is the tally, not a second copy: it is what tells you whether a reviewer's questions in `members.yml` are earning their place.
+
+| Reviewer | Accepted | Rejected | Deferred | Follow-up in members.yml |
+|----------|----------|----------|----------|--------------------------|
+| [Member] | [n] | [n] | [n] | [none / rewrite or retire the checklist item or blocking criterion that produced the rejections, citing the review as `motivated_by`] |
+
 ## Action Items
 
 ### Architectural Changes

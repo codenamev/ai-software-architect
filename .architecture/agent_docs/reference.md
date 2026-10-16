@@ -212,6 +212,7 @@ Recalibrate architecture for [component]
 - Prioritize by impact and urgency
 - Identify dependencies
 - Assign owners
+- Stamp a disposition on each consumed finding in the review document (`accepted`, `rejected: <reason>`, `deferred: <trigger>`)
 
 **Phase 2: Architectural Plan Update**
 - Create or update ADRs
@@ -241,6 +242,7 @@ Recalibrate architecture for [component]
 
 Recalibration produces:
 - Prioritized action items table
+- Disposition tally per reviewer (feeds `members.yml` tuning)
 - ADR creation schedule
 - Implementation roadmap
 - Timeline with phases

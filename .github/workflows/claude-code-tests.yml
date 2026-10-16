@@ -69,21 +69,28 @@ jobs:
         env:
           CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-config
         run: |
+          claude --version
           claude plugin validate .claude-plugin/plugin.json
           claude plugin validate .claude-plugin/marketplace.json --strict
           claude plugin validate skills --strict
           claude plugin validate agents --strict
 
+      # Informational, but not allowed to fail quietly: the CLI call runs on
+      # its own line so a non-zero exit fails the step instead of being
+      # masked by a pipe. One block per matrix leg lands in the job summary.
       - name: Record projected plugin token cost
         env:
           CLAUDE_CONFIG_DIR: ${{ runner.temp }}/claude-config
         run: |
+          claude --version
+          claude --plugin-dir . plugin details ai-software-architect > "$RUNNER_TEMP/plugin-cost.txt"
+          cat "$RUNNER_TEMP/plugin-cost.txt"
           {
-            echo '## Plugin token cost (Node ${{ matrix.node-version }})'
+            echo '## Plugin token cost (Node ${{ matrix.node-version }}, `claude plugin details`)'
             echo '```'
-            claude --plugin-dir . plugin details ai-software-architect
+            cat "$RUNNER_TEMP/plugin-cost.txt"
             echo '```'
-          } | tee -a "$GITHUB_STEP_SUMMARY"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run tools unit tests
         working-directory: tools

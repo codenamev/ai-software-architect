@@ -318,21 +318,23 @@ This section reflects the consensus reached after cross-functional discussion of
 
 ### Prioritized Improvements
 
+[Every improvement carries the reviewer who raised it and a disposition. The review writes `Disposition: pending`; the maintainer, or the recalibration step that consumes the finding, replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by a third field `motivated_by: ADR-XXX`, the same key `members.yml` uses for provenance; fields inside the parentheses are separated by semicolons. A rejection must carry its reason. Filled in, an item reads: `1. Split the billing module (Raised by: Systems Architect; Disposition: rejected: the coupling is deliberate, see ADR-004; motivated_by: ADR-004)`. Reviews written before this convention stay valid.]
+
 **Critical (Address in next release)**:
-1. [Improvement 1]
-2. [Improvement 2]
+1. [Improvement 1] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 2] (Raised by: [Reviewer]; Disposition: pending)
 
 **High (Address within next 2 releases)**:
-1. [Improvement 3]
-2. [Improvement 4]
+1. [Improvement 3] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 4] (Raised by: [Reviewer]; Disposition: pending)
 
 **Medium (Address within next 3-4 releases)**:
-1. [Improvement 5]
-2. [Improvement 6]
+1. [Improvement 5] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 6] (Raised by: [Reviewer]; Disposition: pending)
 
 **Low (Address as resources permit)**:
-1. [Improvement 7]
-2. [Improvement 8]
+1. [Improvement 7] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 8] (Raised by: [Reviewer]; Disposition: pending)
 
 ## Technical Debt Assessment
 
@@ -375,8 +377,8 @@ This section reflects the consensus reached after cross-functional discussion of
 
 ### E. Low-confidence Findings
 
-[Concerns a single reviewer raised at confidence below 0.7, kept out of the consolidated findings and prioritization but not dropped: the maintainer decides whether to promote or dismiss each one. Concerns raised by two or more reviewers never land here.]
+[Concerns a single reviewer raised at confidence below 0.7, kept out of the consolidated findings and prioritization but not dropped: the maintainer decides whether to promote or dismiss each one. Concerns raised by two or more reviewers never land here. The Disposition column uses the same vocabulary as Prioritized Improvements: `pending`, then `accepted`, `rejected: <reason>`, or `deferred: <trigger>`.]
 
-| Finding | Reviewer | Severity | Confidence | Location |
-|---------|----------|----------|------------|----------|
-| [Finding title] | [Reviewer] | Medium | 0.5 | `path/to/file:line` |
+| Finding | Reviewer | Severity | Confidence | Location | Disposition |
+|---------|----------|----------|------------|----------|-------------|
+| [Finding title] | [Reviewer] | Medium | 0.5 | `path/to/file:line` | pending |

@@ -158,6 +158,8 @@ The team agrees on:
 
 ### Areas for Improvement
 
+[Each area carries a **Disposition** line. The review writes `pending`; the maintainer, or the recalibration step that consumes the finding, replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by `(motivated_by: ADR-XXX)`, the same key `members.yml` uses for provenance, when a decision or incident drove the call. A rejection must carry its reason: that line is the maintainer's judgment kept where the next review will find it. Reviews written before this line existed stay valid.]
+
 1. **[Area Title]**:
    - **Current state**: [What exists now]
    - **Desired state**: [What it should be]
@@ -165,6 +167,7 @@ The team agrees on:
    - **Priority**: High | Medium | Low
    - **Impact**: [Why this matters]
    - **Raised by**: [Member(s)], confidence [highest stated]
+   - **Disposition**: pending
 
 2. **[Area Title]**: [Details]
 
@@ -280,6 +283,8 @@ After implementing recommendations, conduct architecture recalibration to assess
 "Start architecture recalibration for [target]"
 ```
 
+Recalibration stamps a disposition on every finding it consumes (see Areas for Improvement). The stamped review is the calibration record for `members.yml`: which member's criticals were rejected and why, which deferrals never triggered, which checklist questions earned their place.
+
 **Accountability**:
 - [Who is responsible for tracking implementation]
 - [How often to check progress - weekly, bi-weekly, etc.]
@@ -323,11 +328,11 @@ Each member reviewed independently. Every critical/high finding was then sent to
 
 ### Low-confidence findings
 
-[Concerns a single member raised at confidence below 0.7. They were kept out of the consolidated findings and prioritization above so the prioritized list stays short, but nothing was dropped: each one is here, with the member's own stated confidence, for the maintainer to promote or dismiss. Concerns raised by two or more members never land here, whatever their confidence.]
+[Concerns a single member raised at confidence below 0.7. They were kept out of the consolidated findings and prioritization above so the prioritized list stays short, but nothing was dropped: each one is here, with the member's own stated confidence, for the maintainer to promote or dismiss. Concerns raised by two or more members never land here, whatever their confidence. The Disposition column uses the same vocabulary as Areas for Improvement: `pending` until someone rules, then `accepted`, `rejected: <reason>`, or `deferred: <trigger>`.]
 
-| Finding | Member | Severity | Confidence | Location |
-|---------|--------|----------|------------|----------|
-| [Finding title] | [Member] | Medium | 0.5 | `path/to/file.rb:42` |
+| Finding | Member | Severity | Confidence | Location | Disposition |
+|---------|--------|----------|------------|----------|-------------|
+| [Finding title] | [Member] | Medium | 0.5 | `path/to/file.rb:42` | pending |
 
 ### Glossary
 

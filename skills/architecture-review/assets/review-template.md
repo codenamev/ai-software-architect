@@ -158,7 +158,7 @@ The team agrees on:
 
 ### Areas for Improvement
 
-[Each area carries a **Disposition** line. The review writes `pending`; the maintainer, or the recalibration step that consumes the finding, replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by `(motivated-by: ADR-XXX)` when a decision or incident drove the call. A rejection must carry its reason: that line is the maintainer's judgment kept where the next review will find it. Reviews written before this line existed stay valid.]
+[Each area carries a **Disposition** line. The review writes `pending`; the maintainer, or the recalibration step that consumes the finding, replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by `(motivated_by: ADR-XXX)`, the same key `members.yml` uses for provenance, when a decision or incident drove the call. A rejection must carry its reason: that line is the maintainer's judgment kept where the next review will find it. Reviews written before this line existed stay valid.]
 
 1. **[Area Title]**:
    - **Current state**: [What exists now]
@@ -282,6 +282,7 @@ After implementing recommendations, conduct architecture recalibration to assess
 ```
 "Start architecture recalibration for [target]"
 ```
+
 Recalibration stamps a disposition on every finding it consumes (see Areas for Improvement). The stamped review is the calibration record for `members.yml`: which member's criticals were rejected and why, which deferrals never triggered, which checklist questions earned their place.
 
 **Accountability**:

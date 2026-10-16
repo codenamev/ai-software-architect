@@ -318,23 +318,23 @@ This section reflects the consensus reached after cross-functional discussion of
 
 ### Prioritized Improvements
 
-[Each improvement may carry a trailing disposition. The review writes `Disposition: pending`; the maintainer or the recalibration step replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by `(motivated-by: ADR-XXX)`. A rejection must carry its reason. Reviews written before this convention stay valid.]
+[Every improvement carries the reviewer who raised it and a disposition. The review writes `Disposition: pending`; the maintainer, or the recalibration step that consumes the finding, replaces it with `accepted`, `rejected: <reason>`, or `deferred: <trigger>`, optionally followed by `(motivated_by: ADR-XXX)`, the same key `members.yml` uses for provenance. A rejection must carry its reason. Reviews written before this convention stay valid.]
 
 **Critical (Address in next release)**:
-1. [Improvement 1] (Disposition: pending)
-2. [Improvement 2] (Disposition: pending)
+1. [Improvement 1] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 2] (Raised by: [Reviewer]; Disposition: pending)
 
 **High (Address within next 2 releases)**:
-1. [Improvement 3]
-2. [Improvement 4]
+1. [Improvement 3] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 4] (Raised by: [Reviewer]; Disposition: pending)
 
 **Medium (Address within next 3-4 releases)**:
-1. [Improvement 5]
-2. [Improvement 6]
+1. [Improvement 5] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 6] (Raised by: [Reviewer]; Disposition: pending)
 
 **Low (Address as resources permit)**:
-1. [Improvement 7]
-2. [Improvement 8]
+1. [Improvement 7] (Raised by: [Reviewer]; Disposition: pending)
+2. [Improvement 8] (Raised by: [Reviewer]; Disposition: pending)
 
 ## Technical Debt Assessment
 

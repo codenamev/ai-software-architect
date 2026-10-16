@@ -166,7 +166,7 @@ Use [the review template](assets/review-template.md). Key sections:
 - Prioritized recommendations (from step 6.3)
 - Risks if unaddressed (highest-severity items)
 - Success metrics and follow-up plan
-- Dispositions: every Area for Improvement and every low-confidence row is written with `Disposition: pending`. The orchestrator never writes `accepted`, `rejected`, or `deferred`; those are the maintainer's calls, made directly or through `architecture-recalibration`, and a review that ships with them pre-filled has had its judgment made for it.
+- Dispositions: every Area for Improvement and every low-confidence row is written with `Disposition: pending`. The orchestrator never writes `accepted`, `rejected`, or `deferred`; those are the maintainer's calls, made directly or during recalibration (`.architecture/recalibration_process.md`, step 1), and a review that ships with them pre-filled has had its judgment made for it.
 
 Save to `.architecture/reviews/<filename>` (filename from step 1).
 

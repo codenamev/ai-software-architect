@@ -16,7 +16,7 @@ Per-finding dispositions live in the review document (one `Disposition:` line pe
 
 | Reviewer | Accepted | Rejected | Deferred | Follow-up in members.yml |
 |----------|----------|----------|----------|--------------------------|
-| [Member] | [n] | [n] | [n] | [none / rewrite or retire the checklist item or blocking criterion that produced the rejections, citing the review as `motivated_by`] |
+| [Member] | [n] | [n] | [n] | [none / rewrite or retire the `silent_checklist` item or `blocking_criteria` entry that produced the rejections, with this review's path as its `motivated_by`; both fields are optional, add them if the member has none] |
 
 ## Action Items
 

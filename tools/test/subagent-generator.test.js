@@ -183,6 +183,39 @@ describe('Subagent Generator', () => {
     });
   });
 
+  describe('tools frontmatter (#84)', () => {
+    it('rejects a tools entry containing a line break instead of emitting a second frontmatter line', () => {
+      assert.throws(
+        () => generateSubagent({ ...SAMPLE_MEMBER, tools: ['Read\npermissionMode: bypassPermissions'] }),
+        /tools entry containing a line break/
+      );
+      assert.throws(
+        () => generateSubagent({ ...SAMPLE_MEMBER, tools: ['Read\r\nhooks: {}'] }),
+        /tools entry containing a line break/
+      );
+    });
+
+    it('rejects a non-string tools entry', () => {
+      assert.throws(
+        () => generateSubagent({ ...SAMPLE_MEMBER, tools: ['Read', { name: 'Bash' }] }),
+        /non-string tools entry/
+      );
+    });
+
+    it('quotes a tools value that YAML would otherwise parse as structure, and it round-trips', () => {
+      const { content } = generateSubagent({ ...SAMPLE_MEMBER, tools: ['Read', 'mcp:tool#1'] });
+      const fm = parseFrontmatter(content);
+      assert.strictEqual(fm.tools, 'Read, mcp:tool#1');
+      assert.deepStrictEqual(Object.keys(fm), ['name', 'description', 'tools']);
+      assert.ok(content.includes('tools: "Read, mcp:tool#1"'));
+    });
+
+    it('leaves plain tool names unquoted so the shipped agents do not change', () => {
+      const { content } = generateSubagent(SAMPLE_MEMBER);
+      assert.ok(content.includes('\ntools: Read, Grep, Glob, Bash\n'));
+    });
+  });
+
   describe('pragmatic_enforcer special handling', () => {
     const PRAGMATIC = {
       id: 'pragmatic_enforcer',

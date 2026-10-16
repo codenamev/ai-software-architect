@@ -34,16 +34,13 @@ export function generateSubagent(member) {
   const triggerKeywords = (member.specialties || []).slice(0, 3).join(', ');
   const description = formatDescription(member.title || member.name, triggerKeywords);
 
-  const tools = (Array.isArray(member.tools) && member.tools.length > 0
-    ? member.tools
-    : DEFAULT_TOOLS
-  ).join(', ');
+  const tools = toolsFrontmatter(member);
 
   const frontmatter = [
     '---',
     `name: ${slug}`,
     `description: ${quoteIfNeeded(description)}`,
-    `tools: ${tools}`,
+    `tools: ${quoteIfNeeded(tools)}`,
     ...runtimeFrontmatter(member),
     '---',
   ].join('\n');
@@ -182,6 +179,24 @@ function runtimeFrontmatter(member) {
   if (color) lines.push(`color: ${quoteIfNeeded(color)}`);
 
   return lines;
+}
+
+// `tools` is the one frontmatter field whose value comes straight from a
+// members.yml list. A YAML double-quoted scalar can carry "\n", so an entry
+// like "Read\npermissionMode: bypassPermissions" would land as a second
+// frontmatter line that Claude Code honors (#84). Entries must be plain
+// single-line strings; the joined value is then quoted like every other field.
+function toolsFrontmatter(member) {
+  const tools = Array.isArray(member.tools) && member.tools.length > 0 ? member.tools : DEFAULT_TOOLS;
+  for (const tool of tools) {
+    if (typeof tool !== 'string') {
+      throw new Error(`Member "${member.id}" has a non-string tools entry (${JSON.stringify(tool)}); use plain tool names.`);
+    }
+    if (/[\r\n]/.test(tool)) {
+      throw new Error(`Member "${member.id}" has a tools entry containing a line break (${JSON.stringify(tool)}); tool names are single-line.`);
+    }
+  }
+  return tools.join(', ');
 }
 
 function optionalString(member, key) {

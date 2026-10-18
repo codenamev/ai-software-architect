@@ -133,7 +133,7 @@ Choose the right installation method for your workflow:
 | **Setup Complexity** | ⭐ Simplest | ⭐⭐ Medium | ⭐ Simple | Plugin easiest |
 | **AI Assistants** | Claude Code | Claude, Cursor | All assistants | Plugin: Claude only<br>MCP: Claude, Cursor<br>Traditional: Universal |
 | **Invocation** | Automatic (MCP + Skills) | Programmatic tools | Natural language | Plugin: Seamless<br>MCP: Precise<br>Traditional: Flexible |
-| **Dependencies** | Node.js ≥18 (auto) | Node.js ≥18 | None | Traditional: No deps<br>Plugin & MCP: Node auto-managed |
+| **Dependencies** | Node.js ≥22 (auto) | Node.js ≥22 | None | Traditional: No deps<br>Plugin & MCP: Node auto-managed |
 | **Auto-Updates** | ✅ `/plugin update` | ✅ `npm update` | ❌ Git pull | Plugin & MCP: Auto-update |
 | **Offline Use** | ⚠️ Needs npm | ⚠️ Needs npm | ✅ Full | Traditional: Offline ready |
 | **Tier-1 Deterministic Tools** | ✅ All 6 | ✅ All 6 | ✅ All 6 | All methods identical |

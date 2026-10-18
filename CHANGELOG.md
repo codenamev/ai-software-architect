@@ -79,6 +79,9 @@ The tool loaded `config.yml` with `yaml.parse()`, set two keys, and wrote it bac
 #### `protect-files` hook matched paths by raw suffix, with no normalization
 `isProtected` compared the incoming `file_path` against `.architecture/<name>` with a bare `endsWith`. Any path that spells the same file differently slipped through: `.architecture/./config.yml`, `.architecture/decisions/../config.yml`, `.architecture//members.yml`, or a forward-slash path on a Windows host (where the expected suffix is built with `\`). The same check also fired on files that are *not* protected — a directory named `foo.architecture/` containing a `members.yml`. Paths are now run through `path.normalize`, split on either separator, and matched on their last two segments (`.architecture` + a protected name). The hook is a guardrail against accidental edits, not a sandbox: matching stays exact-case, so a case-variant path on a case-insensitive filesystem is still not caught, and `CLAUDE_ALLOW_PROTECTED=1` remains the intended override.
 
+#### README and plugin troubleshooting still said Node ≥18 (#92)
+#44 raised `engines.node` to `>=22.0.0` and updated `mcp/README.md`, but the install-method comparison table in `README.md` and three lines of `USAGE-WITH-CLAUDE-PLUGIN.md` (the Prerequisites bullet and two troubleshooting steps) kept saying 18, so a reader on Node 18 or 20 (both past end-of-life) was told they were fine and then met npm's `EBADENGINE` warning on install. All four now say 22. The floor itself is unchanged.
+
 ### Removed
 
 #### `@types/node` devDependency in `mcp/` (#57)

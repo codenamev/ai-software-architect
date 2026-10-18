@@ -14,7 +14,7 @@ The Claude Code plugin installation method provides:
 ## Prerequisites
 
 - **Claude Code**: Version 1.0.33 or later
-- **Node.js**: Version 18 or later (usually pre-installed with Claude Code)
+- **Node.js**: Version 22 or later (usually pre-installed with Claude Code)
 - **Internet connection**: Required for installation and updates
 
 Check your Claude Code version:
@@ -250,7 +250,7 @@ This design means:
 
 **Error**: "npm package not found"
 - **Solution**: Verify npm registry is accessible
-- Check Node.js is installed: `node --version` (requires v18+)
+- Check Node.js is installed: `node --version` (requires v22+)
 - Try manual npm install: `npm install -g ai-software-architect`
 
 ### Plugin Works But Framework Commands Fail
@@ -269,7 +269,7 @@ This design means:
 
 3. Check Node.js version:
    ```bash
-   node --version  # Must be v18 or later
+   node --version  # Must be v22 or later
    ```
 
 4. Check for error messages:

@@ -165,33 +165,43 @@ function findSourceCommand(args) {
   process.exit(1);
 }
 
+function subdirectories(dir) {
+  try {
+    return readdirSync(dir, { withFileTypes: true })
+      .filter(entry => entry.isDirectory())
+      .map(entry => join(dir, entry.name));
+  } catch {
+    return [];
+  }
+}
+
+// Every directory under pluginsDir named after the plugin, plus each one's
+// immediate subdirectories: Claude Code installs under
+// cache/<marketplace>/<plugin>/<version>/, so the tree sits one level below
+// the plugin's name, and for this project the marketplace carries the same
+// name one level above that. The walk continues through a match for the same
+// reason. Mirrors listPluginCandidates in mcp/index.js; keep the two in step.
 function findPluginCandidates(pluginsDir, maxDepth = 5) {
-  const matches = [];
+  const matches = new Set();
   const stack = [{ path: pluginsDir, depth: 0 }];
+  // Claude Code marks the previous version `.orphaned_at` on update and keeps
+  // it around for a while; it is not the installed plugin, so it never counts.
+  const live = dir => !existsSync(join(dir, '.orphaned_at'));
 
   while (stack.length > 0) {
     const { path, depth } = stack.pop();
     if (depth > maxDepth) continue;
 
-    let entries;
-    try {
-      entries = readdirSync(path, { withFileTypes: true });
-    } catch {
-      continue;
-    }
-
-    for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
-      const child = join(path, entry.name);
-      if (entry.name === PLUGIN_NAME) {
-        matches.push(child);
-      } else {
-        stack.push({ path: child, depth: depth + 1 });
+    for (const child of subdirectories(path)) {
+      if (basename(child) === PLUGIN_NAME) {
+        if (live(child)) matches.add(child);
+        for (const version of subdirectories(child)) if (live(version)) matches.add(version);
       }
+      stack.push({ path: child, depth: depth + 1 });
     }
   }
 
-  return matches;
+  return [...matches].sort();
 }
 
 /**

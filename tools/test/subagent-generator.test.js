@@ -296,5 +296,16 @@ members:
       const results = generateAll(yamlWithBlank);
       assert.strictEqual(results.length, 2);
     });
+
+    it('uses a caller-supplied parser so the MCP server can run it from a plugin install (#85)', () => {
+      // The published server imports this module from the installed plugin,
+      // where no tools/node_modules exists to resolve `yaml` from; it passes
+      // its own parser instead and the default one is never touched.
+      let received;
+      const parse = (text) => { received = text; return { members: [{ id: 'solo', name: 'Solo', perspective: 'x' }] }; };
+      const results = generateAll('ignored by the stub', { parse });
+      assert.strictEqual(received, 'ignored by the stub');
+      assert.deepStrictEqual(results.map(r => r.filename), ['solo.md']);
+    });
   });
 });

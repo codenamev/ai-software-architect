@@ -68,6 +68,7 @@ Then register it with Claude Code (`claude mcp add ai-software-architect -- mcp`
   }
 }
 ```
+The npm package carries the server, not the framework tree: `setup_architecture` installs from the Claude Code plugin if present, otherwise from a clone named by `CLAUDE_PLUGIN_ROOT` in the server's `env` (see [mcp/README.md](mcp/README.md#configuration)). The other five tools read the project's own `.architecture/` and need no framework tree.
 
 **Benefits**: Programmatic automation, external tool integration, advanced project analysis
 
@@ -95,13 +96,14 @@ If you're using Cursor, you have two options:
 ```bash
 npm install -g ai-software-architect
 ```
-Then configure in Cursor settings (`settings.json`):
+Then configure in Cursor settings (`settings.json`), pointing `CLAUDE_PLUGIN_ROOT` at a clone so `setup_architecture` has a framework tree to install from (Cursor has no Claude Code plugin to fall back on; the other five tools read the project's own `.architecture/` once it exists and need no framework tree):
 ```json
 {
   "mcp.servers": {
     "ai-software-architect": {
       "command": "mcp",
-      "args": []
+      "args": [],
+      "env": { "CLAUDE_PLUGIN_ROOT": "/path/to/ai-software-architect" }
     }
   }
 }

@@ -85,6 +85,25 @@ Register it with `claude mcp add ai-software-architect -- mcp`, or add this to `
 }
 ```
 
+The npm package carries the server alone, not the framework tree, so
+`setup_architecture` installs from the Claude Code plugin if it is present. If
+you are not using the plugin, point the server at a clone of the repository and
+setup works from that:
+
+```json
+{
+  "mcpServers": {
+    "ai-software-architect": {
+      "command": "mcp",
+      "args": [],
+      "env": { "CLAUDE_PLUGIN_ROOT": "/path/to/ai-software-architect" }
+    }
+  }
+}
+```
+
+The other five tools read the project's own `.architecture/` once setup has created it and need no framework tree.
+
 **For source install:**
 ```json
 {
@@ -102,13 +121,16 @@ Register it with `claude mcp add ai-software-architect -- mcp`, or add this to `
 
 Add this to your Cursor settings (`settings.json`):
 
-**For npm global install:**
+**For npm global install** (add `"env": { "CLAUDE_PLUGIN_ROOT": "/path/to/ai-software-architect" }`
+pointing at a clone so `setup_architecture` has a framework tree to install
+from; Cursor has no Claude Code plugin to fall back on):
 ```json
 {
   "mcp.servers": {
     "ai-software-architect": {
       "command": "mcp",
-      "args": []
+      "args": [],
+      "env": { "CLAUDE_PLUGIN_ROOT": "/path/to/ai-software-architect" }
     }
   }
 }
@@ -141,6 +163,12 @@ Add this to your Cursor settings (`settings.json`):
    ```
    Use the setup_architecture tool to set up the AI Software Architect framework in my current project.
    ```
+   `setup_architecture` copies the framework from a clone named by
+   `CLAUDE_PLUGIN_ROOT` in the server's `env` if set, otherwise from the
+   installed Claude Code plugin (see Configuration; on the CLI route that is
+   `claude mcp add -e CLAUDE_PLUGIN_ROOT=/path/to/ai-software-architect ai-software-architect -- mcp`).
+   With neither, it returns those two options and writes nothing. The other
+   five tools read the project's `.architecture/` and need no framework tree.
 
 3. **Start using the framework**:
    - Create ADRs: "Use create_adr to document our database choice"
@@ -171,7 +199,9 @@ The framework splits capabilities into two tiers (see [ADR-015](../.architecture
   predictable output. Available on **all channels, including this MCP server**:
   `setup_architecture`, `create_adr`, `list_architecture_members`,
   `get_architecture_status`, `configure_pragmatic_mode`,
-  `get_implementation_guidance`.
+  `get_implementation_guidance`. (`setup_architecture` needs a framework tree
+  to copy from: the installed plugin or a `CLAUDE_PLUGIN_ROOT` clone, see
+  [Configuration](#configuration).)
 - **Tier 2 — LLM-orchestrated analysis**: Multi-perspective reviews and
   pragmatic enforcement that require an LLM to reason and generate content.
   These are **plugin/Skills only** and are **not** exposed as MCP tools. Use the
@@ -197,6 +227,8 @@ Sets up the AI Software Architect framework in your project with full customizat
 
 **Parameters:**
 - `projectPath` (string, required): Path to your project root directory
+
+**Where the framework comes from:** the server copies `.architecture/` and `.coding-assistants/` out of a framework tree it locates before writing anything, in this order: `CLAUDE_PLUGIN_ROOT` if set, the checkout the server itself runs from, then the installed plugin under `~/.claude/plugins` (versions Claude Code has marked orphaned after an update are skipped). A candidate must carry `.architecture/templates/adr-template.md` and its `tools/lib/subagent-generator.js` and `tools/lib/roster-seeding.js` must load; one that fails is skipped in favour of the next, and the tool reports which ones were incomplete only when no complete tree exists. When the server runs from the npm package (the plugin's `.mcp.json`, `npx -y ai-software-architect`) the package has no framework tree of its own, so the installed plugin is the source. If no tree is found, or none is complete, the tool returns an error with install instructions and leaves the project untouched. The report starts with a `Framework source:` line naming the tree that was used.
 
 **Creates:**
 - `.architecture/` with subdirectories (decisions, reviews, recalibration, comparisons, templates — the canonical `adr-template.md`, `review-template.md`, `config.yml`, …)
@@ -525,6 +557,25 @@ See [main README](../README.md#integration-method-comparison) for detailed featu
 - Ensure MCP server is running: Check assistant's MCP status
 - Verify configuration points to correct command/path
 - Check Node.js version: Requires Node.js ≥22
+
+**`setup_architecture` reports "Framework source ... not found"**:
+- The server found no framework tree to install from. Install the plugin
+  (`/plugin marketplace add codenamev/ai-software-architect`, then
+  `/plugin install ai-software-architect@ai-software-architect`), or set
+  `CLAUDE_PLUGIN_ROOT` in the server's `env` to a clone of the repository
+  (see [Configuration](#configuration))
+- Nothing was written to the project; rerun the tool once a source exists
+
+**`setup_architecture` reports "Every framework source found is incomplete"**:
+- Each tree it found lacks or cannot load `tools/lib/`; the message lists them.
+  Usually an old plugin version: run `/plugin update ai-software-architect`,
+  or point `CLAUDE_PLUGIN_ROOT` at a current clone
+
+**`setup_architecture` reports "`.architecture/` exists but has no members.yml"**:
+- A setup run on 1.6.0 or earlier created the skeleton before it failed. Move
+  out anything you created in it since (the message counts the files, ADRs for
+  instance), then remove `.architecture/`, `.architecture-temp/` and an empty
+  `.coding-assistants/` and run the tool again
 
 **Permission errors**:
 - Ensure project path is accessible

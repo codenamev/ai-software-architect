@@ -79,6 +79,9 @@ The tool loaded `config.yml` with `yaml.parse()`, set two keys, and wrote it bac
 #### `protect-files` hook matched paths by raw suffix, with no normalization
 `isProtected` compared the incoming `file_path` against `.architecture/<name>` with a bare `endsWith`. Any path that spells the same file differently slipped through: `.architecture/./config.yml`, `.architecture/decisions/../config.yml`, `.architecture//members.yml`, or a forward-slash path on a Windows host (where the expected suffix is built with `\`). The same check also fired on files that are *not* protected — a directory named `foo.architecture/` containing a `members.yml`. Paths are now run through `path.normalize`, split on either separator, and matched on their last two segments (`.architecture` + a protected name). The hook is a guardrail against accidental edits, not a sandbox: matching stays exact-case, so a case-variant path on a case-insensitive filesystem is still not caught, and `CLAUDE_ALLOW_PROTECTED=1` remains the intended override.
 
+#### `plugin-eval` job pinned to Node 24 (#96)
+The manual eval job's `setup-node` step referenced `matrix.node-version` in a job that declares no matrix, so the expression was empty, setup-node installed nothing, and the real-CLI eval ran on whatever Node the `ubuntu-latest` image shipped that week. It is now pinned to 24, the newest line in the `validate-plugin` matrix, so before/after eval comparisons run on one known runtime. CI only; no runtime change for users.
+
 ### Removed
 
 #### `@types/node` devDependency in `mcp/` (#57)

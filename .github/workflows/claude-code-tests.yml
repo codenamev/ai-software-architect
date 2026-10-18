@@ -189,9 +189,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # Pinned to the newest line in the validate-plugin matrix. This job has
+      # no matrix of its own, and a reference to matrix.node-version here
+      # resolved to an empty string, so setup-node installed nothing and the
+      # eval ran on whatever Node the runner image shipped that week (#96).
       - uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24
 
       - name: Install Claude Code CLI
         run: npm install -g @anthropic-ai/claude-code

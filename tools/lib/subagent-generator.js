@@ -1,4 +1,13 @@
-import { parse as parseYaml } from 'yaml';
+import { createRequire } from 'node:module';
+
+// `yaml` is resolved on first use rather than at module load, so this file can
+// be imported from a plugin install (no tools/node_modules) by a caller that
+// brings its own parser, as the MCP server does via `generateAll(..., { parse })`.
+let defaultParse;
+function parseYamlDefault(text) {
+  defaultParse ??= createRequire(import.meta.url)('yaml').parse;
+  return defaultParse(text);
+}
 
 const DEFAULT_TOOLS = ['Read', 'Grep', 'Glob', 'Bash'];
 // The `effort` values Claude Code accepts in subagent frontmatter. A typo here
@@ -7,8 +16,8 @@ const EFFORT_LEVELS = ['low', 'medium', 'high', 'xhigh', 'max'];
 const GENERATED_BANNER =
   '<!-- Generated from .architecture/members.yml by tools/lib/subagent-generator.js. Do not edit by hand. -->';
 
-export function generateAll(membersYaml) {
-  const doc = parseYaml(membersYaml);
+export function generateAll(membersYaml, { parse = parseYamlDefault } = {}) {
+  const doc = parse(membersYaml);
   const members = Array.isArray(doc?.members) ? doc.members : [];
   const seenSlugs = new Map();
   return members

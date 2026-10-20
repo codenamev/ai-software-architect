@@ -68,6 +68,7 @@ Then register it with Claude Code (`claude mcp add ai-software-architect -- mcp`
   }
 }
 ```
+The npm package carries the server, not the framework tree: `setup_architecture` installs from the Claude Code plugin if present, otherwise from a clone named by `CLAUDE_PLUGIN_ROOT` in the server's `env` (see [mcp/README.md](mcp/README.md#configuration)). The other five tools read the project's own `.architecture/` and need no framework tree.
 
 **Benefits**: Programmatic automation, external tool integration, advanced project analysis
 
@@ -95,13 +96,14 @@ If you're using Cursor, you have two options:
 ```bash
 npm install -g ai-software-architect
 ```
-Then configure in Cursor settings (`settings.json`):
+Then configure in Cursor settings (`settings.json`), pointing `CLAUDE_PLUGIN_ROOT` at a clone so `setup_architecture` has a framework tree to install from (Cursor has no Claude Code plugin to fall back on; the other five tools read the project's own `.architecture/` once it exists and need no framework tree):
 ```json
 {
   "mcp.servers": {
     "ai-software-architect": {
       "command": "mcp",
-      "args": []
+      "args": [],
+      "env": { "CLAUDE_PLUGIN_ROOT": "/path/to/ai-software-architect" }
     }
   }
 }
@@ -133,7 +135,7 @@ Choose the right installation method for your workflow:
 | **Setup Complexity** | ⭐ Simplest | ⭐⭐ Medium | ⭐ Simple | Plugin easiest |
 | **AI Assistants** | Claude Code | Claude, Cursor | All assistants | Plugin: Claude only<br>MCP: Claude, Cursor<br>Traditional: Universal |
 | **Invocation** | Automatic (MCP + Skills) | Programmatic tools | Natural language | Plugin: Seamless<br>MCP: Precise<br>Traditional: Flexible |
-| **Dependencies** | Node.js ≥18 (auto) | Node.js ≥18 | None | Traditional: No deps<br>Plugin & MCP: Node auto-managed |
+| **Dependencies** | Node.js ≥22 (auto) | Node.js ≥22 | None | Traditional: No deps<br>Plugin & MCP: Node auto-managed |
 | **Auto-Updates** | ✅ `/plugin update` | ✅ `npm update` | ❌ Git pull | Plugin & MCP: Auto-update |
 | **Offline Use** | ⚠️ Needs npm | ⚠️ Needs npm | ✅ Full | Traditional: Offline ready |
 | **Tier-1 Deterministic Tools** | ✅ All 6 | ✅ All 6 | ✅ All 6 | All methods identical |

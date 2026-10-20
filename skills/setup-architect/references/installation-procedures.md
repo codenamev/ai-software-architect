@@ -16,7 +16,7 @@ This document provides detailed step-by-step procedures for installing the AI So
 
 ## Prerequisites Verification
 
-> **Plugin path:** the skill discovers the plugin install location (typically `~/.claude/plugins/marketplaces/codenamev-ai-software-architect/plugins/ai-software-architect/`) and uses templates from there. No clone is needed. Skip to step "Customize Architecture Team" in the parent SKILL.md.
+> **Plugin path:** the skill discovers the plugin install location (typically `~/.claude/plugins/cache/<marketplace>/ai-software-architect/<version>/`, or the marketplace clone under `~/.claude/plugins/marketplaces/`) and uses templates from there. No clone is needed. Skip to step "Customize Architecture Team" in the parent SKILL.md.
 
 The remainder of this section describes the **traditional clone-based path**.
 

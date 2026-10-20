@@ -64,10 +64,10 @@ fi
 FRAMEWORK_ROOT=$(node "$TOOLS_CLI" find-source)
 ```
 
-Discovery order (encoded in `tools/lib/setup-source-discovery.js` and tested via `tools/test/setup-source-discovery.test.js`):
+Discovery order (the order and sentinel live in `tools/lib/setup-source-discovery.js`, tested via `tools/test/setup-source-discovery.test.js`; the `~/.claude/plugins` walk itself is `findPluginCandidates` in `tools/cli.js`, mirrored by the MCP server's `listPluginCandidates` and exercised by `mcp/test/setup-source.test.js`):
 
 1. `${CLAUDE_PLUGIN_ROOT}` env var (if set and contains `.architecture/templates/adr-template.md`).
-2. Recursive search of `~/.claude/plugins/` for any `ai-software-architect/` directory containing the sentinel.
+2. Recursive search of `~/.claude/plugins/` for any `ai-software-architect/` directory, or an immediate subdirectory of one (Claude Code installs under `cache/<marketplace>/<plugin>/<version>/`), containing the sentinel; versions marked `.orphaned_at` by a plugin update are skipped.
 3. `.architecture/.architecture/` in the target project (legacy clone path).
 
 If `find-source` exits non-zero, surface its error message verbatim — it tells the user exactly which install option to take.

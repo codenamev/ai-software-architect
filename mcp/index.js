@@ -10,14 +10,71 @@
 import fs from "fs-extra";
 import path from "path";
 import yaml from "yaml";
-import { fileURLToPath } from "url";
+import os from "os";
+import { fileURLToPath, pathToFileURL } from "url";
 // Note: setup-only helpers (subagent generator, roster validation) live in
-// ../tools/lib and are imported dynamically inside setupArchitecture so the MCP
-// server still loads when run outside the full framework tree (e.g. a thin npm
-// install where Tier-1 tools work but setup, which needs the framework tree, does not).
+// tools/lib of the framework tree and are imported dynamically inside
+// setupArchitecture from the discovered framework root (see
+// resolveFrameworkSource), so the MCP server still loads when run outside the
+// full framework tree (e.g. the published npm package, which ships index.js
+// alone: Tier-1 tools work, and setup finds the tree through the plugin).
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Framework source discovery (ADR-016, Decision 1). The same sentinel and the
+// same plugin walk as tools/lib/setup-source-discovery.js, inlined because the
+// npm tarball carries index.js alone and cannot import tools/. A candidate is a
+// framework root only if it carries the sentinel; setup also needs the two
+// tools/lib modules below, so they are checked before a single byte is written.
+const PLUGIN_NAME = "ai-software-architect";
+const SOURCE_SENTINEL = path.join(".architecture", "templates", "adr-template.md");
+const SETUP_LIBS = ["subagent-generator.js", "roster-seeding.js"];
+const PLUGIN_WALK_DEPTH = 5;
+
+function subdirectories(dir) {
+  try {
+    return fs.readdirSync(dir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => path.join(dir, entry.name));
+  } catch {
+    return [];
+  }
+}
+
+// Every directory under pluginsDir named after the plugin, plus each one's
+// immediate subdirectories: Claude Code installs under
+// cache/<marketplace>/<plugin>/<version>/, so the tree sits one level below
+// the plugin's name, and for this project the marketplace carries the same
+// name one level above that. The walk continues through a match for the same
+// reason. Sorted, so the pick is deterministic when several qualify.
+function listPluginCandidates(pluginsDir, maxDepth = PLUGIN_WALK_DEPTH) {
+  const matches = new Set();
+  const stack = [{ dir: pluginsDir, depth: 0 }];
+  // Claude Code marks the previous version `.orphaned_at` on update and keeps
+  // it around for a while; it is not the installed plugin, so it never counts.
+  const live = (dir) => !fs.existsSync(path.join(dir, ".orphaned_at"));
+  while (stack.length > 0) {
+    const { dir, depth } = stack.pop();
+    if (depth > maxDepth) continue;
+    for (const child of subdirectories(dir)) {
+      if (path.basename(child) === PLUGIN_NAME) {
+        if (live(child)) matches.add(child);
+        for (const version of subdirectories(child)) if (live(version)) matches.add(version);
+      }
+      stack.push({ dir: child, depth: depth + 1 });
+    }
+  }
+  return [...matches].sort();
+}
+
+const SOURCE_NOT_FOUND_GUIDANCE =
+  `Framework source for "${PLUGIN_NAME}" not found, so nothing was written. ` +
+  "The MCP server looks in CLAUDE_PLUGIN_ROOT, then its own checkout, then ~/.claude/plugins. Either:\n" +
+  "  1. Install the plugin (recommended):\n" +
+  "       /plugin marketplace add codenamev/ai-software-architect\n" +
+  "       /plugin install ai-software-architect@ai-software-architect\n" +
+  "  2. Point CLAUDE_PLUGIN_ROOT at a clone of https://github.com/codenamev/ai-software-architect";
 
 export class ArchitectureServer {
   constructor() {
@@ -132,6 +189,54 @@ export class ArchitectureServer {
     }
   }
 
+  // Where the framework tree lives. In a repo checkout it is the server's
+  // parent directory; when the server runs from the published package (the
+  // plugin's .mcp.json: `npx -y ai-software-architect`) that parent is the npx
+  // cache's node_modules, which is why the sentinel check is mandatory and why
+  // the installed plugin is searched. Order: an explicit CLAUDE_PLUGIN_ROOT,
+  // the checkout the server was loaded from, then the installed plugin.
+  //
+  // A candidate with the sentinel must also LOAD both setup libraries here, so
+  // a tree that would fail at step 5 (an older plugin whose generator still
+  // imports yaml at module load, or one predating roster-seeding.js) is skipped
+  // in favour of the next candidate and never gets to write half an install.
+  // Resolves to { root, libs }; libs are the loaded modules, so the setup steps
+  // use exactly what was checked.
+  async resolveFrameworkSource() {
+    const candidates = [];
+    if (process.env.CLAUDE_PLUGIN_ROOT) candidates.push(process.env.CLAUDE_PLUGIN_ROOT);
+    candidates.push(path.resolve(__dirname, ".."));
+    const pluginsDir = path.join(os.homedir(), ".claude", "plugins");
+    if (await fs.pathExists(pluginsDir)) candidates.push(...listPluginCandidates(pluginsDir));
+
+    const incomplete = [];
+    for (const candidate of candidates) {
+      if (!(await fs.pathExists(path.join(candidate, SOURCE_SENTINEL)))) continue;
+      try {
+        const [generator, roster] = await Promise.all(
+          SETUP_LIBS.map((lib) => this.importFrameworkLib(candidate, lib))
+        );
+        return { root: candidate, libs: { ...generator, ...roster } };
+      } catch (error) {
+        incomplete.push(`${candidate} (${error.code || error.name}: ${error.message.split("\n")[0]})`);
+      }
+    }
+    if (incomplete.length) {
+      throw new Error(
+        "Every framework source found is incomplete, so nothing was written:\n" +
+        incomplete.map((line) => `  - ${line}`).join("\n") + "\n" +
+        "Update the plugin (/plugin update ai-software-architect), or point CLAUDE_PLUGIN_ROOT at a complete checkout."
+      );
+    }
+    throw new Error(SOURCE_NOT_FOUND_GUIDANCE);
+  }
+
+  // Import one of the setup helpers from the framework root. A file URL so the
+  // absolute path imports on every platform.
+  async importFrameworkLib(frameworkRoot, lib) {
+    return import(pathToFileURL(path.join(frameworkRoot, "tools", "lib", lib)).href);
+  }
+
   async setupArchitecture(args) {
     const { projectPath } = args;
     const architecturePath = path.join(projectPath, ".architecture");
@@ -146,18 +251,39 @@ export class ArchitectureServer {
     try {
       // Check if .architecture already exists
       if (await fs.pathExists(architecturePath)) {
+        // A directory with no members.yml is the skeleton a failed setup left
+        // behind (1.6.0 created it before the framework source was checked),
+        // not an install, so lead with that diagnosis instead of calling it done.
+        // Removal is only suggested outright when the tree holds no files:
+        // create_adr writes into a skeleton, and ADRs are the user's history.
+        let text = "Architecture framework is already set up in this project. Use get_architecture_status to see current state.";
+        if (!(await fs.pathExists(path.join(architecturePath, "members.yml")))) {
+          const entries = await fs.readdir(architecturePath, { recursive: true, withFileTypes: true });
+          const files = entries.filter((entry) => entry.isFile()).length;
+          text = ".architecture/ exists but has no members.yml, so it is probably left over from a failed setup, not a working install. " +
+            (files === 0
+              ? "Remove .architecture/ (and .architecture-temp/ or an empty .coding-assistants/ if present) and run setup_architecture again."
+              : `It holds ${files} file(s), such as ADRs created since: move anything you want to keep out of .architecture/ first, then remove it (and .architecture-temp/ or an empty .coding-assistants/ if present) and run setup_architecture again.`);
+        }
         return {
           content: [
             {
               type: "text",
-              text: "Architecture framework is already set up in this project. Use get_architecture_status to see current state.",
+              text,
             },
           ],
         };
       }
 
+      // Step 0: Resolve the framework source before anything is written. A
+      // missing or incomplete source used to surface as a module-not-found
+      // throw after the .architecture skeleton existed, which then tripped the
+      // already-set-up guard above on every retry (#85).
+      const { root: frameworkSourcePath, libs } = await this.resolveFrameworkSource();
+
       const results = [];
       results.push("🚀 Setting up AI Software Architect framework...");
+      results.push(`- Framework source: ${frameworkSourcePath}`);
 
       // Step 1: Analyze target project
       results.push("\n📊 Analyzing project structure...");
@@ -166,9 +292,7 @@ export class ArchitectureServer {
       results.push(`- Frameworks: ${projectAnalysis.frameworks.length ? projectAnalysis.frameworks.join(', ') : 'None detected'}`);
       results.push(`- Package manager: ${projectAnalysis.packageManager || 'None detected'}`);
 
-      // Step 2: Clone framework if needed (simulate by copying from parent directory)
-      const frameworkSourcePath = path.resolve(__dirname, '..');
-      
+      // Step 2: Scratch-copy the resolved framework tree
       results.push("\n📦 Installing framework templates...");
       
       // Copy framework files to temp location
@@ -214,13 +338,15 @@ export class ArchitectureServer {
       
       // Step 5: Customize members.yml based on project analysis
       results.push("\n👥 Customizing architecture team...");
-      await this.customizeMembers(architecturePath, projectAnalysis);
+      await this.customizeMembers(architecturePath, projectAnalysis, libs);
 
       // Step 5b: Generate dispatchable subagents from the seeded roster (ADR-016).
       // Seeding members.yml is not enough — the team must exist as agents/*.md.
-      const { generateAll } = await import("../tools/lib/subagent-generator.js");
+      // The generator takes our yaml parser: a plugin install has no
+      // tools/node_modules for it to resolve one of its own.
+      const { generateAll } = libs;
       const seededMembersYaml = await fs.readFile(path.join(architecturePath, "members.yml"), "utf8");
-      const subagents = generateAll(seededMembersYaml);
+      const subagents = generateAll(seededMembersYaml, { parse: yaml.parse });
       const agentsDir = path.join(projectPath, "agents");
       await fs.ensureDir(agentsDir);
       for (const { filename, content } of subagents) {
@@ -391,14 +517,16 @@ export class ArchitectureServer {
     await fs.ensureDir(path.join(architecturePath, "templates"));
   }
   
-  async customizeMembers(architecturePath, analysis) {
+  // `libs` are the setup modules resolveFrameworkSource loaded from the
+  // framework source; there is no default, the parent-directory shortcut is gone.
+  async customizeMembers(architecturePath, analysis, libs) {
     // ADR-016: the canonical members.yml is copied into the target during setup.
     // Preserve it as the source of truth — do NOT overwrite it with a hardcoded
     // list (that dropped 4 of the 8 architects and used the wrong id
     // `security_architect`). Validate the copy against the framework source so a
     // failed/partial copy fails loudly rather than seeding a lossy team. No stack
     // advisors are appended initially (canonical team only).
-    const { assertContainsIds, CANONICAL_MEMBER_IDS } = await import("../tools/lib/roster-seeding.js");
+    const { assertContainsIds, CANONICAL_MEMBER_IDS } = libs;
     const targetMembersPath = path.join(architecturePath, "members.yml");
     const target = yaml.parse(await fs.readFile(targetMembersPath, "utf8"));
 

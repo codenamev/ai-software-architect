@@ -1277,7 +1277,7 @@ export function renderAdrFromTemplate(template, { number, title, context, decisi
   const paddedNumber = String(number).padStart(3, '0');
   const heading = `# ADR-${paddedNumber}: ${title}`;
   let out = /^# ADR-XXX: \[Title\][ \t]*$/m.test(template)
-    ? template.replace(/^# ADR-XXX: \[Title\][ \t]*$/m, heading)
+    ? template.replace(/^# ADR-XXX: \[Title\][ \t]*$/m, () => heading)
     : `${heading}\n\n${template}`;
   out = replaceSectionBody(out, 'Status', `Proposed\n\n**Date**: ${date}`);
   out = fillSectionPlaceholder(out, 'Context', context);

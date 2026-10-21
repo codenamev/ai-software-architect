@@ -85,6 +85,9 @@ The tool loaded `config.yml` with `yaml.parse()`, set two keys, and wrote it bac
 #### README and plugin troubleshooting still said Node ≥18 (#92)
 #44 raised `engines.node` to `>=22.0.0` and updated `mcp/README.md`, but the install-method comparison table in `README.md` and three lines of `USAGE-WITH-CLAUDE-PLUGIN.md` (the Prerequisites bullet and two troubleshooting steps) kept saying 18, so a reader on Node 18 or 20 (both past end-of-life) was told they were fine and then met npm's `EBADENGINE` warning on install. All four now say 22. The floor itself is unchanged.
 
+#### `plugin-eval` job pinned to Node 24 (#96)
+The manual eval job's `setup-node` step referenced `matrix.node-version` in a job that declares no matrix, so the expression was empty, setup-node installed nothing, and the real-CLI eval ran on whatever Node the `ubuntu-latest` image shipped that week. It is now pinned to 24, the newest line in the `validate-plugin` matrix, so before/after eval comparisons run on one known runtime. CI only; no runtime change for users.
+
 ### Removed
 
 #### `@types/node` devDependency in `mcp/` (#57)

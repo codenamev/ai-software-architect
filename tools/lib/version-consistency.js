@@ -34,6 +34,20 @@ export function extractVersion(content, key = 'version') {
 }
 
 /**
+ * Extract the version pinned on an npx package spec, e.g. the
+ * `"ai-software-architect@1.6.0"` arg in .mcp.json. An unpinned spec
+ * returns null, so the consistency check reports it as missing.
+ *
+ * @param {string} content - File content
+ * @param {string} pkg - npm package name
+ * @returns {string|null} The pinned semver string, or null if unpinned
+ */
+export function extractNpxPin(content, pkg) {
+  const m = content.match(new RegExp(`["']${pkg}@${SEMVER}["']`));
+  return m ? m[1] : null;
+}
+
+/**
  * Extract a markdown bold-labeled version, e.g.
  *   **Framework Version**: 1.5.4
  *
@@ -77,6 +91,7 @@ export const FRAMEWORK_VERSION_SOURCES = [
   { label: '.claude-plugin/plugin.json', file: '.claude-plugin/plugin.json', read: c => extractVersion(c) },
   { label: '.claude-plugin/marketplace.json', file: '.claude-plugin/marketplace.json', read: c => extractVersion(c) },
   { label: 'mcp/package.json', file: 'mcp/package.json', read: c => extractVersion(c) },
+  { label: '.mcp.json (npx pin)', file: '.mcp.json', read: c => extractNpxPin(c, 'ai-software-architect') },
   { label: 'mcp/index.js', file: 'mcp/index.js', read: c => extractVersion(c) },
   { label: '.architecture/config.yml (framework_version)', file: '.architecture/config.yml', read: c => extractVersion(c, 'framework_version') },
   { label: '.architecture/templates/config.yml (framework_version)', file: '.architecture/templates/config.yml', read: c => extractVersion(c, 'framework_version') },

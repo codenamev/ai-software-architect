@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import {
   extractVersion,
   extractLabeledVersion,
+  extractNpxPin,
   checkConsistency,
   FRAMEWORK_VERSION_SOURCES,
 } from '../lib/version-consistency.js';
@@ -14,6 +15,22 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, '..', '..');
 
 describe('Version Consistency', () => {
+  describe('extractNpxPin', () => {
+    it('reads the version pinned on an npx package arg', () => {
+      assert.strictEqual(
+        extractNpxPin('"args": ["-y", "ai-software-architect@1.6.0"]', 'ai-software-architect'),
+        '1.6.0'
+      );
+    });
+
+    it('returns null for an unpinned package arg', () => {
+      assert.strictEqual(
+        extractNpxPin('"args": ["-y", "ai-software-architect"]', 'ai-software-architect'),
+        null
+      );
+    });
+  });
+
   describe('extractVersion', () => {
     it('reads a JSON version field', () => {
       assert.strictEqual(extractVersion('{\n  "version": "1.5.4"\n}'), '1.5.4');

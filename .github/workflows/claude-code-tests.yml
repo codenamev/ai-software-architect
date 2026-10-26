@@ -7,6 +7,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   claude-setup-tests:
     runs-on: ubuntu-latest
@@ -464,6 +467,159 @@ jobs:
 
         test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1" || { echo "✗ expected exit 1, got $EXIT_CODE"; exit 1; }
         echo "=== relative path test: PASSED ==="
+
+    - name: "install-framework.sh: own checkout via symlink (no clone)"
+      run: |
+        echo "=== Testing install-framework.sh own-checkout install ==="
+        PROJ="$(mktemp -d)"
+        LINKS="$(mktemp -d)"
+        SCRIPT_TMP="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+
+        # Mimic ~/.claude/skills/setup-architect symlinked into this checkout
+        ln -s "$(pwd)/.claude/skills/setup-architect" "$LINKS/setup-architect"
+        OUTPUT=$(TMPDIR="$SCRIPT_TMP" bash "$LINKS/setup-architect/scripts/install-framework.sh" "$PROJ" 2>&1)
+
+        echo "$OUTPUT" | grep -q "CLONE_SKIPPED" && echo "✓ CLONE_SKIPPED" || { echo "✗ cloned instead of using own checkout"; exit 1; }
+        echo "$OUTPUT" | grep -q "VERIFY_OK" && echo "✓ VERIFY_OK" || { echo "✗ missing VERIFY_OK"; exit 1; }
+        ! echo "$OUTPUT" | grep -q "unpinned" && echo "✓ no unpinned warning" || { echo "✗ unexpected unpinned warning"; exit 1; }
+        test -f "$PROJ/.architecture/templates/adr-template.md" && echo "✓ adr template" || { echo "✗ adr template"; exit 1; }
+        test -f .install-manifest && echo "✓ own checkout not cleaned up" || { echo "✗ own checkout removed by cleanup"; exit 1; }
+        test -z "$(ls -A "$SCRIPT_TMP")" && echo "✓ no temp dir created" || { echo "✗ temp dir created"; exit 1; }
+
+        rm -rf "$PROJ" "$LINKS" "$SCRIPT_TMP"
+        echo "=== own-checkout test: PASSED ==="
+
+    - name: "install-framework.sh: explicit repo-url clones"
+      run: |
+        echo "=== Testing install-framework.sh explicit repo-url ==="
+        SCRIPT=".claude/skills/setup-architect/scripts/install-framework.sh"
+        PROJ="$(mktemp -d)"
+        SCRIPT_TMP="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+
+        OUTPUT=$(TMPDIR="$SCRIPT_TMP" bash "$SCRIPT" "$PROJ" "file://$(pwd)")
+
+        echo "$OUTPUT" | grep -q "CLONE_OK" && echo "✓ CLONE_OK" || { echo "✗ repo-url did not clone"; exit 1; }
+        echo "$OUTPUT" | grep -q "VERIFY_OK" && echo "✓ VERIFY_OK" || { echo "✗ missing VERIFY_OK"; exit 1; }
+        test -z "$(ls -A "$SCRIPT_TMP")" && echo "✓ temp clone removed" || { echo "✗ temp clone left behind"; exit 1; }
+
+        rm -rf "$PROJ" "$SCRIPT_TMP"
+        echo "=== explicit repo-url test: PASSED ==="
+
+    - name: "install-framework.sh: symlinked .architecture refused (exit 1)"
+      run: |
+        echo "=== Testing install-framework.sh symlinked .architecture ==="
+        SCRIPT=".claude/skills/setup-architect/scripts/install-framework.sh"
+        PROJ="$(mktemp -d)"
+        ELSEWHERE="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+        ln -s "$ELSEWHERE" "$PROJ/.architecture"
+
+        set +e
+        OUTPUT=$(bash "$SCRIPT" "$PROJ" 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1" || { echo "✗ expected exit 1, got $EXIT_CODE"; exit 1; }
+        echo "$OUTPUT" | grep -q "is a symlink" && echo "✓ symlink error" || { echo "✗ missing symlink error"; exit 1; }
+        test -z "$(ls -A "$ELSEWHERE")" && echo "✓ nothing written through the symlink" || { echo "✗ wrote through the symlink"; exit 1; }
+
+        rm -rf "$PROJ" "$ELSEWHERE"
+        echo "=== symlinked .architecture test: PASSED ==="
+
+    - name: "install-framework.sh: symlinks inside .architecture refused (exit 1)"
+      run: |
+        echo "=== Testing install-framework.sh symlinks inside .architecture ==="
+        SCRIPT=".claude/skills/setup-architect/scripts/install-framework.sh"
+        SCRATCH="$(mktemp -d)"
+        echo original > "$SCRATCH/target.txt"
+
+        # A template linked to a file outside the project
+        PROJ="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+        mkdir -p "$PROJ/.architecture/templates"
+        ln -s "$SCRATCH/target.txt" "$PROJ/.architecture/templates/adr-template.md"
+
+        set +e
+        OUTPUT=$(bash "$SCRIPT" "$PROJ" 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1" || { echo "✗ expected exit 1, got $EXIT_CODE"; exit 1; }
+        echo "$OUTPUT" | grep -q "templates/adr-template.md is a symlink" && echo "✓ error names the symlink" || { echo "✗ error doesn't name the symlink"; exit 1; }
+        test "$(cat "$SCRATCH/target.txt")" = original && echo "✓ link target unchanged" || { echo "✗ link target overwritten"; exit 1; }
+
+        # A dangling config.yml whose target the config step would create
+        PROJ2="$(mktemp -d)"
+        echo '{}' > "$PROJ2/package.json"
+        mkdir -p "$PROJ2/.architecture"
+        ln -s "$SCRATCH/created-by-install.yml" "$PROJ2/.architecture/config.yml"
+
+        set +e
+        OUTPUT=$(bash "$SCRIPT" "$PROJ2" 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1 (dangling)" || { echo "✗ expected exit 1, got $EXIT_CODE (dangling)"; exit 1; }
+        echo "$OUTPUT" | grep -q "config.yml is a symlink" && echo "✓ error names the dangling symlink" || { echo "✗ error doesn't name the dangling symlink"; exit 1; }
+        test ! -e "$SCRATCH/created-by-install.yml" && echo "✓ dangling target not created" || { echo "✗ dangling target created"; exit 1; }
+
+        rm -rf "$PROJ" "$PROJ2" "$SCRATCH"
+        echo "=== symlinks inside .architecture test: PASSED ==="
+
+    - name: "install-framework.sh: copied skill ignores the enclosing repo"
+      run: |
+        echo "=== Testing install-framework.sh copy outside a checkout ==="
+        PROJ="$(mktemp -d)"
+        OUTER="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+
+        # A git-tracked dotfiles-style directory carrying a manifest and a decoy
+        # template, with the skill copied (not symlinked) into it
+        git -C "$OUTER" init -q
+        cp .install-manifest "$OUTER/"
+        mkdir -p "$OUTER/.architecture/templates" "$OUTER/skills"
+        echo decoy > "$OUTER/.architecture/templates/decoy.md"
+        cp -R .claude/skills/setup-architect "$OUTER/skills/"
+
+        # Allow only file:// so the fallback clone of the https default is
+        # attempted and refused, without touching the network
+        set +e
+        OUTPUT=$(GIT_ALLOW_PROTOCOL=file bash "$OUTER/skills/setup-architect/scripts/install-framework.sh" "$PROJ" 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        ! echo "$OUTPUT" | grep -q "CLONE_SKIPPED" && echo "✓ enclosing repo not used as source" || { echo "✗ enclosing repo used as source"; exit 1; }
+        test ! -e "$PROJ/.architecture/templates/decoy.md" && echo "✓ no decoy installed" || { echo "✗ decoy installed"; exit 1; }
+        echo "$OUTPUT" | grep -q "unpinned" && echo "✓ unpinned warning" || { echo "✗ missing unpinned warning"; exit 1; }
+        echo "$OUTPUT" | grep -q "Failed to clone" && echo "✓ fell back to clone" || { echo "✗ did not attempt clone"; exit 1; }
+        test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1" || { echo "✗ expected exit 1, got $EXIT_CODE"; exit 1; }
+
+        rm -rf "$PROJ" "$OUTER"
+        echo "=== copied skill test: PASSED ==="
+
+    - name: "install-framework.sh: GIT_DIR in the environment doesn't redirect the source"
+      run: |
+        echo "=== Testing install-framework.sh with GIT_DIR set ==="
+        SCRIPT=".claude/skills/setup-architect/scripts/install-framework.sh"
+        PROJ="$(mktemp -d)"
+        DECOY="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+
+        git -C "$DECOY" init -q
+        cp .install-manifest "$DECOY/"
+        mkdir -p "$DECOY/.architecture/templates"
+        echo decoy > "$DECOY/.architecture/templates/decoy.md"
+
+        OUTPUT=$(GIT_DIR="$DECOY/.git" GIT_WORK_TREE="$DECOY" GIT_ALLOW_PROTOCOL=file bash "$SCRIPT" "$PROJ" 2>&1)
+
+        echo "$OUTPUT" | grep -q "CLONE_SKIPPED" && echo "✓ own checkout used" || { echo "✗ own checkout not used"; exit 1; }
+        test -f "$PROJ/.architecture/templates/adr-template.md" && echo "✓ adr template" || { echo "✗ adr template"; exit 1; }
+        test ! -e "$PROJ/.architecture/templates/decoy.md" && echo "✓ no decoy installed" || { echo "✗ decoy installed"; exit 1; }
+
+        rm -rf "$PROJ" "$DECOY"
+        echo "=== GIT_DIR test: PASSED ==="
 
     # --- next-adr-number.sh tests ---
 

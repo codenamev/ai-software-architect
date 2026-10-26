@@ -1,20 +1,37 @@
 #!/usr/bin/env bash
 # install-framework.sh - Deterministic installation of AI Software Architect framework
 #
-# Manifest-based installation: clones repo to /tmp, copies only files listed
-# in .install-manifest, creates empty directories, initialises config.
+# Manifest-based installation: copies only files listed in .install-manifest
+# from a source checkout, creates empty directories, initialises config.
 # Content generation (members.yml, principles.md, initial analysis) is handled
 # by the skill's interpretive steps, not this script.
+#
+# The source checkout is the first of:
+#   1. CLONE_DIR_OVERRIDE, when set
+#   2. the checkout this script lives in, when no repo-url is given, that
+#      checkout carries .install-manifest, and this script is its
+#      .claude/skills/setup-architect/scripts/install-framework.sh; a project
+#      then gets the same (possibly pinned) code the skill runs from rather
+#      than the repo's current head
+#   3. a shallow clone of repo-url into a fresh mktemp directory under
+#      ${TMPDIR:-/tmp}, removed on exit; without a repo-url this warns on
+#      stderr that it installs the default repo's current head, unpinned
 #
 # Usage: install-framework.sh <project-root> [repo-url]
 #
 # Arguments:
 #   project-root  Absolute path to the target project root directory
-#   repo-url      Git repo URL (default: https://github.com/codenamev/ai-software-architect)
+#   repo-url      Git repo URL to clone; giving one always clones (default:
+#                 bettison-org fork, which carries the .install-manifest that
+#                 upstream codenamev/ai-software-architect lacks)
+#
+# Environment:
+#   CLONE_DIR_OVERRIDE  Install from this directory; never cloned or removed
 #
 # Exit codes:
 #   0  Success - all steps completed
-#   1  Prerequisites failed (bad arguments, clone failed)
+#   1  Prerequisites failed (bad arguments, symlink at or under .architecture,
+#      clone failed)
 #   2  Copy failed
 #   3  Manifest error (missing or malformed)
 #   4  Verification failed (installation incomplete)
@@ -25,7 +42,7 @@
 set -euo pipefail
 
 PROJECT_ROOT="${1:?Usage: install-framework.sh <project-root> [repo-url]}"
-REPO_URL="${2:-https://github.com/codenamev/ai-software-architect}"
+REPO_URL="${2:-https://github.com/bettison-org/ai-software-architect}"
 
 # --- Validation ---
 
@@ -40,12 +57,55 @@ if [ ! -d "$PROJECT_ROOT" ]; then
 fi
 
 ARCH_DIR="$PROJECT_ROOT/.architecture"
-CLONE_DIR="${CLONE_DIR_OVERRIDE:-/tmp/ai-software-architect-$$}"
-MANIFEST_NAME=".install-manifest"
 
-# Clean up temp directory on exit (skip if using override)
+# The project is untrusted: a symlink at or under .architecture would let it
+# choose where the install writes, e.g. into the checkout this script runs
+# from, a template linked to ~/.zshrc, or a dangling config.yml whose target
+# the config step would create. find doesn't follow a symlinked start point,
+# so it reports .architecture itself when that is the link.
+if [ -e "$ARCH_DIR" ] || [ -L "$ARCH_DIR" ]; then
+  if ! first_symlink="$(find "$ARCH_DIR" -type l -print -quit)"; then
+    echo "ERROR: could not scan $ARCH_DIR for symlinks" >&2
+    exit 1
+  fi
+  if [ -n "$first_symlink" ]; then
+    echo "ERROR: $first_symlink is a symlink; refusing to install through it" >&2
+    exit 1
+  fi
+fi
+
+# The caller's environment must not choose which repository git discovers or
+# clones into.
+unset GIT_DIR GIT_WORK_TREE
+
+MANIFEST_NAME=".install-manifest"
+SCRIPT_PATH_IN_CHECKOUT=".claude/skills/setup-architect/scripts/install-framework.sh"
+
+own_checkout_with_manifest() {
+  local root
+  # The skills directory is usually a symlink into the checkout; git -C resolves
+  # the physical path, where a logical `cd ..` would walk the symlink's tree.
+  root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null)" || return 0
+  # A copy of the skill outside a checkout of its own resolves to whatever
+  # repository encloses it (e.g. a git-tracked ~/.claude); only accept a root
+  # that holds this very script.
+  [ "$root/$SCRIPT_PATH_IN_CHECKOUT" -ef "${BASH_SOURCE[0]}" ] || return 0
+  [ -f "$root/$MANIFEST_NAME" ] || return 0
+  echo "$root"
+}
+
+if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -z "${2:-}" ]; then
+  CLONE_DIR_OVERRIDE="$(own_checkout_with_manifest)"
+  if [ -z "$CLONE_DIR_OVERRIDE" ]; then
+    echo "WARNING: not running from a framework checkout with $MANIFEST_NAME; installing the current head of $REPO_URL, unpinned" >&2
+  fi
+fi
+
+CLONE_DIR="${CLONE_DIR_OVERRIDE:-}"
+
+# Clean up temp directory on exit (never the override or own checkout)
 cleanup() {
-  if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -d "$CLONE_DIR" ]; then
+  if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -n "$CLONE_DIR" ] && [ -d "$CLONE_DIR" ]; then
     rm -rf "$CLONE_DIR"
   fi
 }
@@ -67,13 +127,17 @@ clone_repo() {
     echo "WARNING: No project markers found in $PROJECT_ROOT" >&2
   fi
 
-  # Skip clone if CLONE_DIR_OVERRIDE is set (for testing)
   if [ -n "${CLONE_DIR_OVERRIDE:-}" ]; then
     echo "CLONE_SKIPPED"
     return 0
   fi
 
-  if ! git clone --depth 1 --quiet "$REPO_URL" "$CLONE_DIR" 2>&2; then
+  if ! CLONE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ai-software-architect-XXXXXX")"; then
+    echo "ERROR: Failed to create a temporary directory for the clone" >&2
+    exit 1
+  fi
+
+  if ! git clone --depth 1 --quiet -- "$REPO_URL" "$CLONE_DIR" 2>&2; then
     echo "ERROR: Failed to clone $REPO_URL" >&2
     exit 1
   fi

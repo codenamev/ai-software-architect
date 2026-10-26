@@ -10,7 +10,8 @@
 #
 # Arguments:
 #   project-root  Absolute path to the target project root directory
-#   repo-url      Git repo URL (default: https://github.com/codenamev/ai-software-architect)
+#   repo-url      Git repo URL (default: bettison-org fork, which carries the
+#                 .install-manifest that upstream codenamev/ai-software-architect lacks)
 #
 # Exit codes:
 #   0  Success - all steps completed
@@ -25,7 +26,7 @@
 set -euo pipefail
 
 PROJECT_ROOT="${1:?Usage: install-framework.sh <project-root> [repo-url]}"
-REPO_URL="${2:-https://github.com/codenamev/ai-software-architect}"
+REPO_URL="${2:-https://github.com/bettison-org/ai-software-architect}"
 
 # --- Validation ---
 

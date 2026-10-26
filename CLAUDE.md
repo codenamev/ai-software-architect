@@ -119,6 +119,10 @@ Claude Code optimizes for natural language commands:
 - Apply configured methodology, influences, and practices
 - See [AGENTS.md § Configuring Implementation Guidance](AGENTS.md#configuring-implementation-guidance) for details
 
+## Fork Status
+
+This is a fork of [codenamev/ai-software-architect](https://github.com/codenamev/ai-software-architect) (`upstream` remote). Our fork fixes installation (manifest-based selective install, deterministic shell script). Upstream has diverged toward a plugin marketplace model with Node.js tooling — we don't track their changes but keep the remote for reference. Periodically `git fetch upstream` to watch for substantive changes to review/ADR/implementation workflows.
+
 ## Version Information
 
 **Framework Version**: 1.2.0

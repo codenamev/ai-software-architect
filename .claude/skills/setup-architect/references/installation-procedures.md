@@ -19,7 +19,7 @@ This document provides troubleshooting, recovery, and reference information for 
 
 The `install-framework.sh` script at `scripts/install-framework.sh` performs all deterministic file operations:
 
-1. **Validate** — Refuses (exit 1) a relative or missing project root, and a project whose `.architecture` is a symlink, since every write would go wherever it points.
+1. **Validate** — Refuses (exit 1) a relative or missing project root, and a project with a symlink at or under `.architecture` (the directory itself or anything inside it, dangling or not), since the install would write wherever it points.
 2. **Choose the source** — Uses the first of:
    - `CLONE_DIR_OVERRIDE`, when set;
    - the checkout the script itself lives in, when no repo URL was given, that checkout carries `.install-manifest`, and the script is that checkout's own `.claude/skills/setup-architect/scripts/install-framework.sh`. A project then gets the same code the skill runs from, so a checkout pinned to a commit installs that commit rather than the repo's current head. The script resolves its checkout's physical path, so this works when the skills directory is a symlink into the checkout. A copy of the skills outside such a checkout (for example in a git-tracked `~/.claude`) never adopts the repository around it, and `GIT_DIR`/`GIT_WORK_TREE` in the environment are ignored;
@@ -80,7 +80,7 @@ Environment variables:
 
 Exit codes:
   0  Success
-  1  Clone failed, bad project path, or symlinked .architecture
+  1  Clone failed, bad project path, or a symlink at or under .architecture
   2  Copy failed
   3  Manifest not found or malformed
   4  Verification failed (installation incomplete)
@@ -107,9 +107,9 @@ Stdout tokens:
 - **Cause**: Network error or invalid repo URL
 - **Solution**: Check network connectivity. Verify the repo URL is accessible.
 
-**".architecture is a symlink; refusing to install through it" (exit 1)**
-- **Cause**: The project's `.architecture` is a symlink, so the install would write wherever it points
-- **Solution**: Replace the symlink with a real directory, after checking where it pointed and why
+**"<path> is a symlink; refusing to install through it" (exit 1)**
+- **Cause**: `.architecture`, or something anywhere under it, is a symlink (the error names the first one found). The install would write through it: an existing link's target would be overwritten with framework content, and a dangling one's target would be created
+- **Solution**: Check where each symlink points and why (`find .architecture -type l -exec ls -l {} +`), then replace it with a real file or directory and re-run
 
 **"installing the current head of … unpinned" (warning)**
 - **Cause**: The script isn't running from a framework checkout that carries `.install-manifest` (for example, the skills were copied rather than symlinked from a checkout), so it clones the default repository's current head

@@ -528,6 +528,46 @@ jobs:
         rm -rf "$PROJ" "$ELSEWHERE"
         echo "=== symlinked .architecture test: PASSED ==="
 
+    - name: "install-framework.sh: symlinks inside .architecture refused (exit 1)"
+      run: |
+        echo "=== Testing install-framework.sh symlinks inside .architecture ==="
+        SCRIPT=".claude/skills/setup-architect/scripts/install-framework.sh"
+        SCRATCH="$(mktemp -d)"
+        echo original > "$SCRATCH/target.txt"
+
+        # A template linked to a file outside the project
+        PROJ="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+        mkdir -p "$PROJ/.architecture/templates"
+        ln -s "$SCRATCH/target.txt" "$PROJ/.architecture/templates/adr-template.md"
+
+        set +e
+        OUTPUT=$(bash "$SCRIPT" "$PROJ" 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1" || { echo "✗ expected exit 1, got $EXIT_CODE"; exit 1; }
+        echo "$OUTPUT" | grep -q "templates/adr-template.md is a symlink" && echo "✓ error names the symlink" || { echo "✗ error doesn't name the symlink"; exit 1; }
+        test "$(cat "$SCRATCH/target.txt")" = original && echo "✓ link target unchanged" || { echo "✗ link target overwritten"; exit 1; }
+
+        # A dangling config.yml whose target the config step would create
+        PROJ2="$(mktemp -d)"
+        echo '{}' > "$PROJ2/package.json"
+        mkdir -p "$PROJ2/.architecture"
+        ln -s "$SCRATCH/created-by-install.yml" "$PROJ2/.architecture/config.yml"
+
+        set +e
+        OUTPUT=$(bash "$SCRIPT" "$PROJ2" 2>&1)
+        EXIT_CODE=$?
+        set -e
+
+        test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1 (dangling)" || { echo "✗ expected exit 1, got $EXIT_CODE (dangling)"; exit 1; }
+        echo "$OUTPUT" | grep -q "config.yml is a symlink" && echo "✓ error names the dangling symlink" || { echo "✗ error doesn't name the dangling symlink"; exit 1; }
+        test ! -e "$SCRATCH/created-by-install.yml" && echo "✓ dangling target not created" || { echo "✗ dangling target created"; exit 1; }
+
+        rm -rf "$PROJ" "$PROJ2" "$SCRATCH"
+        echo "=== symlinks inside .architecture test: PASSED ==="
+
     - name: "install-framework.sh: copied skill ignores the enclosing repo"
       run: |
         echo "=== Testing install-framework.sh copy outside a checkout ==="

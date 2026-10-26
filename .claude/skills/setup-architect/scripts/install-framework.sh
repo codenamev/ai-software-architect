@@ -30,7 +30,8 @@
 #
 # Exit codes:
 #   0  Success - all steps completed
-#   1  Prerequisites failed (bad arguments, symlinked .architecture, clone failed)
+#   1  Prerequisites failed (bad arguments, symlink at or under .architecture,
+#      clone failed)
 #   2  Copy failed
 #   3  Manifest error (missing or malformed)
 #   4  Verification failed (installation incomplete)
@@ -57,11 +58,20 @@ fi
 
 ARCH_DIR="$PROJECT_ROOT/.architecture"
 
-# The project is untrusted: a symlinked .architecture would send every write
-# below somewhere else, such as into the checkout this script runs from.
-if [ -L "$ARCH_DIR" ]; then
-  echo "ERROR: $ARCH_DIR is a symlink; refusing to install through it" >&2
-  exit 1
+# The project is untrusted: a symlink at or under .architecture would let it
+# choose where the install writes, e.g. into the checkout this script runs
+# from, a template linked to ~/.zshrc, or a dangling config.yml whose target
+# the config step would create. find doesn't follow a symlinked start point,
+# so it reports .architecture itself when that is the link.
+if [ -e "$ARCH_DIR" ] || [ -L "$ARCH_DIR" ]; then
+  if ! first_symlink="$(find "$ARCH_DIR" -type l -print -quit)"; then
+    echo "ERROR: could not scan $ARCH_DIR for symlinks" >&2
+    exit 1
+  fi
+  if [ -n "$first_symlink" ]; then
+    echo "ERROR: $first_symlink is a symlink; refusing to install through it" >&2
+    exit 1
+  fi
 fi
 
 # The caller's environment must not choose which repository git discovers or

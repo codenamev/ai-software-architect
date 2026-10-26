@@ -19,18 +19,19 @@ This document provides troubleshooting, recovery, and reference information for 
 
 The `install-framework.sh` script at `scripts/install-framework.sh` performs all deterministic file operations:
 
-1. **Choose the source** — Uses the first of:
+1. **Validate** — Refuses (exit 1) a relative or missing project root, and a project whose `.architecture` is a symlink, since every write would go wherever it points.
+2. **Choose the source** — Uses the first of:
    - `CLONE_DIR_OVERRIDE`, when set;
-   - the checkout the script itself lives in, when it carries `.install-manifest` and no repo URL was given. A project then gets the same code the skill runs from, so a checkout pinned to a commit installs that commit rather than the repo's current head. The script resolves its checkout's physical path, so this works when the skills directory is a symlink into the checkout;
-   - otherwise a shallow clone of the repo URL to `/tmp/ai-software-architect-<pid>`.
+   - the checkout the script itself lives in, when no repo URL was given, that checkout carries `.install-manifest`, and the script is that checkout's own `.claude/skills/setup-architect/scripts/install-framework.sh`. A project then gets the same code the skill runs from, so a checkout pinned to a commit installs that commit rather than the repo's current head. The script resolves its checkout's physical path, so this works when the skills directory is a symlink into the checkout. A copy of the skills outside such a checkout (for example in a git-tracked `~/.claude`) never adopts the repository around it, and `GIT_DIR`/`GIT_WORK_TREE` in the environment are ignored;
+   - otherwise a shallow clone of the repo URL into a fresh `mktemp -d` directory, `${TMPDIR:-/tmp}/ai-software-architect-XXXXXX`. Without a repo URL this prints a warning that it is installing the default repository's current head, unpinned.
 
    Warns if no project markers found in the target directory.
-2. **Read manifest** — Reads `.install-manifest` from the source to determine what to install.
-3. **Copy** — Copies only files and directories listed in the manifest (templates, agent docs).
-4. **Create directories** — Creates empty directories listed in the manifest (decisions/adrs, reviews, recalibration, comparisons).
-5. **Initialize config** — Copies `templates/config.yml` to `config.yml` if no config exists yet.
-6. **Cleanup** — Removes the temporary clone directory on exit (via trap). Never removes `CLONE_DIR_OVERRIDE` or the script's own checkout.
-7. **Verify** — Checks all required directories exist.
+3. **Read manifest** — Reads `.install-manifest` from the source to determine what to install.
+4. **Copy** — Copies only files and directories listed in the manifest (templates, agent docs).
+5. **Create directories** — Creates empty directories listed in the manifest (decisions/adrs, reviews, recalibration, comparisons).
+6. **Initialize config** — Copies `templates/config.yml` to `config.yml` if no config exists yet.
+7. **Cleanup** — Removes the temporary clone directory on exit (via trap). Never removes `CLONE_DIR_OVERRIDE` or the script's own checkout, and creates no temporary directory when using either.
+8. **Verify** — Checks all required directories exist.
 
 **What the script does NOT handle** (left to the skill's interpretive steps):
 - `members.yml` — created by the skill based on project analysis
@@ -69,9 +70,9 @@ Usage: install-framework.sh <project-root> [repo-url]
 Arguments:
   project-root    Absolute path to the target project root directory
   repo-url        Git repo URL to clone. Without it, the script installs from
-                  its own checkout when that carries .install-manifest, and
-                  otherwise clones https://github.com/bettison-org/ai-software-architect.
-                  Giving one always clones.
+                  its own checkout (see Choose the source), and otherwise
+                  clones https://github.com/bettison-org/ai-software-architect
+                  with an "unpinned" warning. Giving one always clones.
 
 Environment variables:
   CLONE_DIR_OVERRIDE=<path>   Install from this directory instead of the own
@@ -79,7 +80,7 @@ Environment variables:
 
 Exit codes:
   0  Success
-  1  Clone failed or bad project path
+  1  Clone failed, bad project path, or symlinked .architecture
   2  Copy failed
   3  Manifest not found or malformed
   4  Verification failed (installation incomplete)
@@ -105,6 +106,14 @@ Stdout tokens:
 **"Failed to clone" (exit 1)**
 - **Cause**: Network error or invalid repo URL
 - **Solution**: Check network connectivity. Verify the repo URL is accessible.
+
+**".architecture is a symlink; refusing to install through it" (exit 1)**
+- **Cause**: The project's `.architecture` is a symlink, so the install would write wherever it points
+- **Solution**: Replace the symlink with a real directory, after checking where it pointed and why
+
+**"installing the current head of … unpinned" (warning)**
+- **Cause**: The script isn't running from a framework checkout that carries `.install-manifest` (for example, the skills were copied rather than symlinked from a checkout), so it clones the default repository's current head
+- **Solution**: Run the skill from a framework checkout, pinned to the commit you want, or pass the repo URL explicitly if the current head is what you want
 
 **"project-root must be an absolute path" (exit 1)**
 - **Cause**: Relative path passed to script

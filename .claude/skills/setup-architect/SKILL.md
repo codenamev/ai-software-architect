@@ -36,7 +36,7 @@ Use `Glob` and `Grep` to detect technologies, `Read` to examine configs.
 
 ### 2. Install Framework
 
-Run the installation script. The script installs from the framework checkout it lives in (so the project gets the same code as this skill), or clones the framework repo to `/tmp` when that checkout has no `.install-manifest`. It reads `.install-manifest` to determine what to copy, installs only template files and agent docs, creates empty directories for project content, and initializes config. No manual cloning needed.
+Run the installation script. The script installs from the framework checkout it lives in (so the project gets the same code as this skill), or, when it isn't running from a checkout that carries `.install-manifest`, clones the framework repo's current head into a temporary directory and warns that the install is unpinned. It reads `.install-manifest` to determine what to copy, installs only template files and agent docs, creates empty directories for project content, and initializes config. No manual cloning needed.
 
 ```bash
 bash "<skill-base-dir>/scripts/install-framework.sh" "$(pwd)"

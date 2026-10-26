@@ -8,10 +8,14 @@
 #
 # The source checkout is the first of:
 #   1. CLONE_DIR_OVERRIDE, when set
-#   2. the checkout this script lives in, when it carries .install-manifest and
-#      no repo-url is given, so a project gets the same (possibly pinned) code
-#      the skill runs from rather than the repo's current head
-#   3. a shallow clone of repo-url to /tmp, removed on exit
+#   2. the checkout this script lives in, when no repo-url is given, that
+#      checkout carries .install-manifest, and this script is its
+#      .claude/skills/setup-architect/scripts/install-framework.sh; a project
+#      then gets the same (possibly pinned) code the skill runs from rather
+#      than the repo's current head
+#   3. a shallow clone of repo-url into a fresh mktemp directory under
+#      ${TMPDIR:-/tmp}, removed on exit; without a repo-url this warns on
+#      stderr that it installs the default repo's current head, unpinned
 #
 # Usage: install-framework.sh <project-root> [repo-url]
 #
@@ -26,7 +30,7 @@
 #
 # Exit codes:
 #   0  Success - all steps completed
-#   1  Prerequisites failed (bad arguments, clone failed)
+#   1  Prerequisites failed (bad arguments, symlinked .architecture, clone failed)
 #   2  Copy failed
 #   3  Manifest error (missing or malformed)
 #   4  Verification failed (installation incomplete)
@@ -52,27 +56,46 @@ if [ ! -d "$PROJECT_ROOT" ]; then
 fi
 
 ARCH_DIR="$PROJECT_ROOT/.architecture"
+
+# The project is untrusted: a symlinked .architecture would send every write
+# below somewhere else, such as into the checkout this script runs from.
+if [ -L "$ARCH_DIR" ]; then
+  echo "ERROR: $ARCH_DIR is a symlink; refusing to install through it" >&2
+  exit 1
+fi
+
+# The caller's environment must not choose which repository git discovers or
+# clones into.
+unset GIT_DIR GIT_WORK_TREE
+
 MANIFEST_NAME=".install-manifest"
+SCRIPT_PATH_IN_CHECKOUT=".claude/skills/setup-architect/scripts/install-framework.sh"
 
 own_checkout_with_manifest() {
   local root
   # The skills directory is usually a symlink into the checkout; git -C resolves
   # the physical path, where a logical `cd ..` would walk the symlink's tree.
   root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null)" || return 0
-  if [ -f "$root/$MANIFEST_NAME" ]; then
-    echo "$root"
-  fi
+  # A copy of the skill outside a checkout of its own resolves to whatever
+  # repository encloses it (e.g. a git-tracked ~/.claude); only accept a root
+  # that holds this very script.
+  [ "$root/$SCRIPT_PATH_IN_CHECKOUT" -ef "${BASH_SOURCE[0]}" ] || return 0
+  [ -f "$root/$MANIFEST_NAME" ] || return 0
+  echo "$root"
 }
 
 if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -z "${2:-}" ]; then
   CLONE_DIR_OVERRIDE="$(own_checkout_with_manifest)"
+  if [ -z "$CLONE_DIR_OVERRIDE" ]; then
+    echo "WARNING: not running from a framework checkout with $MANIFEST_NAME; installing the current head of $REPO_URL, unpinned" >&2
+  fi
 fi
 
-CLONE_DIR="${CLONE_DIR_OVERRIDE:-/tmp/ai-software-architect-$$}"
+CLONE_DIR="${CLONE_DIR_OVERRIDE:-}"
 
 # Clean up temp directory on exit (never the override or own checkout)
 cleanup() {
-  if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -d "$CLONE_DIR" ]; then
+  if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -n "$CLONE_DIR" ] && [ -d "$CLONE_DIR" ]; then
     rm -rf "$CLONE_DIR"
   fi
 }
@@ -99,7 +122,12 @@ clone_repo() {
     return 0
   fi
 
-  if ! git clone --depth 1 --quiet "$REPO_URL" "$CLONE_DIR" 2>&2; then
+  if ! CLONE_DIR="$(mktemp -d "${TMPDIR:-/tmp}/ai-software-architect-XXXXXX")"; then
+    echo "ERROR: Failed to create a temporary directory for the clone" >&2
+    exit 1
+  fi
+
+  if ! git clone --depth 1 --quiet -- "$REPO_URL" "$CLONE_DIR" 2>&2; then
     echo "ERROR: Failed to clone $REPO_URL" >&2
     exit 1
   fi

@@ -122,10 +122,41 @@ describe('ADR Validator', () => {
     });
   });
 
-  describe('frontmatter rejection', () => {
-    it('rejects YAML frontmatter', () => {
-      const withFrontmatter = `---\nname: foo\n---\n\n${VALID_ADR}`;
-      const result = validateAdr('ADR-001-foo.md', withFrontmatter);
+  describe('MADR frontmatter', () => {
+    const MADR_ADR = `---\nstatus: accepted\ndate: 2026-10-26\ndecision-makers: [Val]\n---\n\n${VALID_ADR.replace('## Status\n\nAccepted\n\n', '')}`;
+
+    it('accepts frontmatter status without a Status section', () => {
+      const result = validateAdr('ADR-001-foo.md', MADR_ADR);
+      assert.deepStrictEqual(result, { valid: true, errors: [] });
+    });
+
+    it('accepts frontmatter and a Status section that agree', () => {
+      const both = `---\nstatus: "Accepted"\n---\n\n${VALID_ADR}`;
+      const result = validateAdr('ADR-001-foo.md', both);
+      assert.strictEqual(result.valid, true, JSON.stringify(result.errors));
+    });
+
+    it('rejects frontmatter and a Status section that disagree', () => {
+      const both = `---\nstatus: proposed\n---\n\n${VALID_ADR}`;
+      const result = validateAdr('ADR-001-foo.md', both);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some(e => e.includes('disagrees')));
+    });
+
+    it('rejects an invalid frontmatter status', () => {
+      const result = validateAdr('ADR-001-foo.md', MADR_ADR.replace('status: accepted', 'status: pending'));
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some(e => e.includes('Frontmatter status')));
+    });
+
+    it('requires a status when frontmatter has none and no Status section exists', () => {
+      const result = validateAdr('ADR-001-foo.md', MADR_ADR.replace('status: accepted\n', ''));
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some(e => e.includes('Missing status')));
+    });
+
+    it('rejects unclosed frontmatter', () => {
+      const result = validateAdr('ADR-001-foo.md', `---\nstatus: accepted\n\n${VALID_ADR}`);
       assert.strictEqual(result.valid, false);
       assert.ok(result.errors.some(e => e.toLowerCase().includes('frontmatter')));
     });

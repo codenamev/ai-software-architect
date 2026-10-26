@@ -1,17 +1,28 @@
 #!/usr/bin/env bash
 # install-framework.sh - Deterministic installation of AI Software Architect framework
 #
-# Manifest-based installation: clones repo to /tmp, copies only files listed
-# in .install-manifest, creates empty directories, initialises config.
+# Manifest-based installation: copies only files listed in .install-manifest
+# from a source checkout, creates empty directories, initialises config.
 # Content generation (members.yml, principles.md, initial analysis) is handled
 # by the skill's interpretive steps, not this script.
+#
+# The source checkout is the first of:
+#   1. CLONE_DIR_OVERRIDE, when set
+#   2. the checkout this script lives in, when it carries .install-manifest and
+#      no repo-url is given, so a project gets the same (possibly pinned) code
+#      the skill runs from rather than the repo's current head
+#   3. a shallow clone of repo-url to /tmp, removed on exit
 #
 # Usage: install-framework.sh <project-root> [repo-url]
 #
 # Arguments:
 #   project-root  Absolute path to the target project root directory
-#   repo-url      Git repo URL (default: bettison-org fork, which carries the
-#                 .install-manifest that upstream codenamev/ai-software-architect lacks)
+#   repo-url      Git repo URL to clone; giving one always clones (default:
+#                 bettison-org fork, which carries the .install-manifest that
+#                 upstream codenamev/ai-software-architect lacks)
+#
+# Environment:
+#   CLONE_DIR_OVERRIDE  Install from this directory; never cloned or removed
 #
 # Exit codes:
 #   0  Success - all steps completed
@@ -41,10 +52,25 @@ if [ ! -d "$PROJECT_ROOT" ]; then
 fi
 
 ARCH_DIR="$PROJECT_ROOT/.architecture"
-CLONE_DIR="${CLONE_DIR_OVERRIDE:-/tmp/ai-software-architect-$$}"
 MANIFEST_NAME=".install-manifest"
 
-# Clean up temp directory on exit (skip if using override)
+own_checkout_with_manifest() {
+  local root
+  # The skills directory is usually a symlink into the checkout; git -C resolves
+  # the physical path, where a logical `cd ..` would walk the symlink's tree.
+  root="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null)" || return 0
+  if [ -f "$root/$MANIFEST_NAME" ]; then
+    echo "$root"
+  fi
+}
+
+if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -z "${2:-}" ]; then
+  CLONE_DIR_OVERRIDE="$(own_checkout_with_manifest)"
+fi
+
+CLONE_DIR="${CLONE_DIR_OVERRIDE:-/tmp/ai-software-architect-$$}"
+
+# Clean up temp directory on exit (never the override or own checkout)
 cleanup() {
   if [ -z "${CLONE_DIR_OVERRIDE:-}" ] && [ -d "$CLONE_DIR" ]; then
     rm -rf "$CLONE_DIR"
@@ -68,7 +94,6 @@ clone_repo() {
     echo "WARNING: No project markers found in $PROJECT_ROOT" >&2
   fi
 
-  # Skip clone if CLONE_DIR_OVERRIDE is set (for testing)
   if [ -n "${CLONE_DIR_OVERRIDE:-}" ]; then
     echo "CLONE_SKIPPED"
     return 0

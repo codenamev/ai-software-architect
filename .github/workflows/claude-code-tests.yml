@@ -465,6 +465,40 @@ jobs:
         test "$EXIT_CODE" -eq 1 && echo "✓ exit code 1" || { echo "✗ expected exit 1, got $EXIT_CODE"; exit 1; }
         echo "=== relative path test: PASSED ==="
 
+    - name: "install-framework.sh: own checkout via symlink (no clone)"
+      run: |
+        echo "=== Testing install-framework.sh own-checkout install ==="
+        PROJ="$(mktemp -d)"
+        LINKS="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+
+        # Mimic ~/.claude/skills/setup-architect symlinked into this checkout
+        ln -s "$(pwd)/.claude/skills/setup-architect" "$LINKS/setup-architect"
+        OUTPUT=$(bash "$LINKS/setup-architect/scripts/install-framework.sh" "$PROJ")
+
+        echo "$OUTPUT" | grep -q "CLONE_SKIPPED" && echo "✓ CLONE_SKIPPED" || { echo "✗ cloned instead of using own checkout"; exit 1; }
+        echo "$OUTPUT" | grep -q "VERIFY_OK" && echo "✓ VERIFY_OK" || { echo "✗ missing VERIFY_OK"; exit 1; }
+        test -f "$PROJ/.architecture/templates/adr-template.md" && echo "✓ adr template" || { echo "✗ adr template"; exit 1; }
+        test -f .install-manifest && echo "✓ own checkout not cleaned up" || { echo "✗ own checkout removed by cleanup"; exit 1; }
+
+        rm -rf "$PROJ" "$LINKS"
+        echo "=== own-checkout test: PASSED ==="
+
+    - name: "install-framework.sh: explicit repo-url clones"
+      run: |
+        echo "=== Testing install-framework.sh explicit repo-url ==="
+        SCRIPT=".claude/skills/setup-architect/scripts/install-framework.sh"
+        PROJ="$(mktemp -d)"
+        echo '{}' > "$PROJ/package.json"
+
+        OUTPUT=$(bash "$SCRIPT" "$PROJ" "file://$(pwd)")
+
+        echo "$OUTPUT" | grep -q "CLONE_OK" && echo "✓ CLONE_OK" || { echo "✗ repo-url did not clone"; exit 1; }
+        echo "$OUTPUT" | grep -q "VERIFY_OK" && echo "✓ VERIFY_OK" || { echo "✗ missing VERIFY_OK"; exit 1; }
+
+        rm -rf "$PROJ"
+        echo "=== explicit repo-url test: PASSED ==="
+
     # --- next-adr-number.sh tests ---
 
     - name: "next-adr-number.sh: sequential default"

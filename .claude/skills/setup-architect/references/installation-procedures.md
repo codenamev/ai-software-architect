@@ -19,12 +19,17 @@ This document provides troubleshooting, recovery, and reference information for 
 
 The `install-framework.sh` script at `scripts/install-framework.sh` performs all deterministic file operations:
 
-1. **Clone** — Shallow-clones the framework repo to `/tmp/ai-software-architect-<pid>`. Warns if no project markers found in the target directory.
-2. **Read manifest** — Reads `.install-manifest` from the cloned repo to determine what to install.
+1. **Choose the source** — Uses the first of:
+   - `CLONE_DIR_OVERRIDE`, when set;
+   - the checkout the script itself lives in, when it carries `.install-manifest` and no repo URL was given. A project then gets the same code the skill runs from, so a checkout pinned to a commit installs that commit rather than the repo's current head. The script resolves its checkout's physical path, so this works when the skills directory is a symlink into the checkout;
+   - otherwise a shallow clone of the repo URL to `/tmp/ai-software-architect-<pid>`.
+
+   Warns if no project markers found in the target directory.
+2. **Read manifest** — Reads `.install-manifest` from the source to determine what to install.
 3. **Copy** — Copies only files and directories listed in the manifest (templates, agent docs).
 4. **Create directories** — Creates empty directories listed in the manifest (decisions/adrs, reviews, recalibration, comparisons).
 5. **Initialize config** — Copies `templates/config.yml` to `config.yml` if no config exists yet.
-6. **Cleanup** — Removes the temporary clone directory on exit (via trap).
+6. **Cleanup** — Removes the temporary clone directory on exit (via trap). Never removes `CLONE_DIR_OVERRIDE` or the script's own checkout.
 7. **Verify** — Checks all required directories exist.
 
 **What the script does NOT handle** (left to the skill's interpretive steps):
@@ -48,7 +53,7 @@ config: templates/config.yml config.yml   # Copy src to dst if dst doesn't exist
 ```
 
 **Directives:**
-- `copy: <path>` — Copy file or directory from the cloned repo's `.architecture/` to the target `.architecture/`
+- `copy: <path>` — Copy file or directory from the source's `.architecture/` to the target `.architecture/`
 - `mkdir: <path>` — Create empty directory in target `.architecture/`
 - `config: <src> <dst>` — Copy src to dst only if dst doesn't already exist
 
@@ -63,10 +68,14 @@ Usage: install-framework.sh <project-root> [repo-url]
 
 Arguments:
   project-root    Absolute path to the target project root directory
-  repo-url        Git repo URL (default: https://github.com/codenamev/ai-software-architect)
+  repo-url        Git repo URL to clone. Without it, the script installs from
+                  its own checkout when that carries .install-manifest, and
+                  otherwise clones https://github.com/bettison-org/ai-software-architect.
+                  Giving one always clones.
 
 Environment variables:
-  CLONE_DIR_OVERRIDE=<path>   Use pre-cloned directory instead of cloning (for testing)
+  CLONE_DIR_OVERRIDE=<path>   Install from this directory instead of the own
+                              checkout or a clone (takes precedence over both)
 
 Exit codes:
   0  Success
@@ -77,7 +86,7 @@ Exit codes:
 
 Stdout tokens:
   CLONE_OK              Repository cloned successfully
-  CLONE_SKIPPED         Skipped (using CLONE_DIR_OVERRIDE)
+  CLONE_SKIPPED         Skipped (installing from CLONE_DIR_OVERRIDE or the own checkout)
   MANIFEST_OK           Manifest found and readable
   CONFIG_INIT           Config initialized from template
   CONFIG_EXISTS         Config already existed (not overwritten)
@@ -102,12 +111,12 @@ Stdout tokens:
 - **Solution**: Use `"$(pwd)"` when invoking the script
 
 **"Manifest not found" (exit 3)**
-- **Cause**: The cloned repo doesn't contain `.install-manifest`
-- **Solution**: The repository may not support manifest-based installation. Check that you're cloning the correct repo/branch.
+- **Cause**: The source (`CLONE_DIR_OVERRIDE` or the cloned repo) doesn't contain `.install-manifest`
+- **Solution**: The repository may not support manifest-based installation (upstream `codenamev/ai-software-architect` doesn't). Check that you're pointing at the correct repo/branch.
 
 **"Installation incomplete" (exit 4)**
 - **Cause**: Manifest-listed items weren't created successfully
-- **Solution**: Check what's missing (listed in error output). Verify the cloned repo's `.architecture/` contains the expected files.
+- **Solution**: Check what's missing (listed in error output). Verify the source's `.architecture/` contains the expected files.
 
 ### Verification Commands
 

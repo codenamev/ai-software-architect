@@ -12,7 +12,7 @@
 
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
-import { mkdtemp, rm, symlink, readFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, symlink, readFile, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -119,6 +119,25 @@ describe('MCP protocol smoke test', () => {
     assert.ok(Array.isArray(result.content) && result.content.length > 0, 'no content returned');
     assert.strictEqual(result.content[0].type, 'text');
     assert.ok(result.content[0].text.length > 0, 'empty text content');
+  });
+
+  it('reports guidance as not configured when config.yml is comment-only', async () => {
+    // A comment-only config.yml parses to null; reading .implementation off it
+    // used to throw a TypeError instead of the not-configured message.
+    const configDir = await mkdtemp(path.join(os.tmpdir(), 'asa-nullcfg-'));
+    try {
+      await mkdir(path.join(configDir, '.architecture'));
+      await writeFile(path.join(configDir, '.architecture', 'config.yml'), '# nothing yet\n');
+      const result = await client.request({
+        method: 'tools/call',
+        params: { name: 'get_implementation_guidance', arguments: { projectPath: configDir } },
+      }, CallToolResultSchema);
+
+      assert.notStrictEqual(result.isError, true, `tools/call failed: ${result.content?.[0]?.text}`);
+      assert.match(result.content[0].text, /not configured/);
+    } finally {
+      await rm(configDir, { recursive: true, force: true });
+    }
   });
 
   it('reports an unknown tool as an error rather than a success', async () => {

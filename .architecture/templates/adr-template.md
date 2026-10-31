@@ -1,3 +1,16 @@
+---
+status: proposed
+date: YYYY-MM-DD
+decision-makers: [list everyone involved in the decision]
+---
+
+<!--
+Base format: MADR 4.0 (https://adr.github.io/madr/). Frontmatter `status` is canonical
+(draft | proposed | accepted | implemented | deprecated | superseded). The "## Status"
+section below is optional; if you keep it, it must match the frontmatter.
+Sections beyond Context, Decision, and Consequences are optional extensions.
+-->
+
 # ADR-XXX: [Title]
 
 ## Status

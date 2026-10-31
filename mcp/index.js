@@ -1036,7 +1036,8 @@ The AI Software Architect framework has been configured with:
     }
 
     const configContent = fs.readFileSync(configPath, "utf8");
-    const config = yaml.parse(configContent);
+    // An empty or comment-only config.yml parses to null.
+    const config = yaml.parse(configContent) || {};
 
     // Check if implementation is configured
     if (!config.implementation) {

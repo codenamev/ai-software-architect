@@ -104,15 +104,14 @@ echo "✅ Directory structure created"
 
 ### Step 4: Initialize Configuration
 
-Copy the default configuration file:
+Step 1 already copied the framework's `config.yml` (the same file the plugin and MCP install paths seed). Keep it; don't overwrite it from `templates/config.yml`:
 
 ```bash
-# Copy config template if exists
-if [ -f ".architecture/templates/config.yml" ]; then
-  cp .architecture/templates/config.yml .architecture/config.yml
+# config.yml came over with the framework files in Step 1
+if [ -f ".architecture/config.yml" ]; then
   echo "✅ Configuration initialized"
 else
-  echo "⚠️  No config template found"
+  echo "⚠️  config.yml missing; re-run Step 1"
 fi
 ```
 

@@ -57,6 +57,15 @@ describe('Setup fidelity (ADR-016) — setup_architecture end-to-end', () => {
     assert.match(cfg, /pragmatic_mode/);
   });
 
+  it('seeds a config.yml carrying implementation guidance (#95)', async () => {
+    const cfg = parseYaml(await readFile(path.join(dir, '.architecture/config.yml'), 'utf8'));
+    assert.ok(cfg.implementation, 'seeded config.yml must carry an implementation: block');
+    const res = await new ArchitectureServer().getImplementationGuidance({ projectPath: dir });
+    const text = res.content[0].text;
+    assert.doesNotMatch(text, /not configured/);
+    assert.match(text, /## Development Methodology/);
+  });
+
   it('detects all frameworks (Rails not masked by Express)', async () => {
     const analysis = await readFile(path.join(dir, '.architecture/reviews/initial-system-analysis.md'), 'utf8');
     assert.match(analysis, /Rails/, 'Rails should be detected');

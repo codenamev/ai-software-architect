@@ -163,6 +163,174 @@ pragmatic_mode:
       # - "Is this over-engineering for our scale?"
 
 # ==============================================================================
+# IMPLEMENTATION GUIDANCE
+# ==============================================================================
+# Configure how AI assistants implement features when you use the command:
+# "Implement X as the architects"
+#
+# This allows you to specify your development methodology, coding influences,
+# and practices once, and have them applied consistently across all implementations.
+#
+# Benefits:
+# - 90% reduction in prompt length (no more repeating preferences)
+# - Consistent application of best practices
+# - Team standards documented in version control
+# - Better onboarding (new developers see documented practices)
+
+implementation:
+  # Enable or disable implementation guidance
+  # When enabled, "Implement X as the architects" will apply your configuration
+  # When disabled, implementations proceed without special guidance
+  # Default: true
+  enabled: true
+
+  # Primary development methodology
+  # Specifies the overall approach to writing code
+  # Options: TDD, BDD, DDD, Test-Last, Exploratory, or custom
+  #
+  # - TDD (Test-Driven Development): Write tests first, red-green-refactor
+  # - BDD (Behavior-Driven Development): Behavior-focused tests, outside-in
+  # - DDD (Domain-Driven Design): Domain modeling, bounded contexts
+  # - Test-Last: Implementation first, tests after
+  # - Exploratory: Experiment, then codify
+  #
+  # Default: TDD
+  methodology: "TDD"
+
+  # Coding influences - thought leaders whose practices to follow
+  # List specific books, talks, or articles that guide your approach
+  #
+  # Format: "Name - Source (focus area)" or just "Name - Source"
+  #
+  # Examples:
+  # - "Kent Beck - TDD by Example"
+  # - "Sandi Metz - POODR, 99 Bottles"
+  # - "Martin Fowler - Refactoring"
+  # - "Gary Bernhardt - Destroy All Software"
+  # - "Eric Evans - Domain-Driven Design"
+  #
+  # Can be organized as simple list or grouped by focus area
+  influences:
+    - "Kent Beck - TDD by Example (methodology fundamentals)"
+    - "Sandi Metz - POODR, 99 Bottles (OO design and refactoring)"
+    - "Martin Fowler - Refactoring (patterns and code smells)"
+    # Add more influences as needed
+    # - "Your favorite author - Their book/source"
+
+  # Language-specific practices (optional)
+  # Customize for your project's primary language(s)
+  # Add sections for each language you use
+  languages:
+    # Example: Ruby configuration
+    # ruby:
+    #   style_guide: "Rubocop"
+    #   idioms: "Prefer blocks over loops, use meaningful method names"
+    #   frameworks:
+    #     rails: "Follow conventions but question them"
+    #     sinatra: "Keep it simple"
+
+    # Example: JavaScript/TypeScript configuration
+    # javascript:
+    #   style_guide: "ESLint with Airbnb config"
+    #   idioms: "Prefer const, use arrow functions, destructure"
+    #   frameworks:
+    #     react: "Functional components, hooks"
+    #     vue: "Composition API"
+
+    # Example: Python configuration
+    # python:
+    #   style_guide: "PEP 8 via Black formatter"
+    #   idioms: "Pythonic patterns, list comprehensions"
+    #   frameworks:
+    #     django: "Fat models, thin views"
+    #     flask: "Keep it minimal"
+
+  # Testing approach (optional)
+  # Specify your testing framework, style, and goals
+  testing:
+    # Testing framework to use
+    # framework: "RSpec"  # or Minitest, Jest, pytest, JUnit, etc.
+
+    # Testing style
+    # style: "Outside-in TDD"  # or Inside-out, Detroit school, London school
+
+    # Testing approach
+    # approach: "Mock judiciously, prefer real objects when practical"
+
+    # Coverage goals
+    # coverage: "High for business logic, integration tests for critical paths"
+
+    # Test speed targets
+    # speed: "Unit tests <100ms, integration tests <1s"
+
+  # Refactoring guidelines (optional)
+  # When and how to refactor code
+  refactoring:
+    # When to refactor
+    # when:
+    #   - "After tests green (red-green-REFACTOR)"
+    #   - "When code smells emerge (long methods, duplication)"
+    #   - "Rule of Three: refactor on third occurrence"
+
+    # Refactoring principles
+    # principles:
+    #   - "Small methods (≤5 lines per Sandi Metz)"
+    #   - "Clear names over comments"
+    #   - "Simple design over clever code"
+
+  # Quality standards (optional)
+  # Define what "done" means for your team
+  quality:
+    # Definition of done checklist
+    # definition_of_done:
+    #   - "Tests passing (all green)"
+    #   - "Code refactored for clarity"
+    #   - "No obvious code smells"
+    #   - "Code reviewed by team"
+    #   - "Documentation updated (if public API)"
+
+    # Quality priorities (in order)
+    # priorities:
+    #   - "Clarity first (code is read more than written)"
+    #   - "Simplicity second (avoid premature abstraction)"
+    #   - "Performance third (optimize when measured need exists)"
+
+  # Security practices (optional but recommended)
+  # These are always applied, even with pragmatic_mode enabled
+  # Security practices are exempt from YAGNI challenges
+  security:
+    # Mandatory security practices
+    # Always applied regardless of other settings
+    # mandatory_practices:
+    #   - "Input validation (whitelist approach)"
+    #   - "Output encoding (context-aware)"
+    #   - "Parameterized queries (no string concatenation)"
+    #   - "Authentication checks (verify identity)"
+    #   - "Authorization checks (verify permissions)"
+
+    # Security influences
+    # influences:
+    #   - "OWASP Secure Coding Practices"
+    #   - "SEI CERT Coding Standards"
+
+  # Performance considerations (optional)
+  # Configure performance-aware implementation
+  performance:
+    # Is this a performance-critical system?
+    # If true, adds performance-focused practices and influences
+    # critical: false
+
+    # Performance practices
+    # practices:
+    #   - "Profile before optimizing"
+    #   - "Benchmark critical paths"
+    #   - "Set performance budgets"
+
+    # Performance influences (when critical: true)
+    # influences:
+    #   - "Brendan Gregg - Systems Performance"
+
+# ==============================================================================
 # GENERAL CONFIGURATION
 # ==============================================================================
 

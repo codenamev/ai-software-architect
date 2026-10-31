@@ -184,7 +184,7 @@ Implement authentication as the architects
 
 The AI will automatically follow your configured TDD methodology, reference Kent Beck and Sandi Metz's principles, apply Ruby idioms, use RSpec with outside-in TDD style, and ensure your definition of done is met.
 
-See [ADR-004](.architecture/decisions/adrs/ADR-004-implementation-command-configuration.md) and the implementation section in `.architecture/templates/config.yml` for full configuration options.
+See [ADR-004](.architecture/decisions/adrs/ADR-004-implementation-command-configuration.md) and the `implementation:` section of `.architecture/config.yml` (seeded at setup; `.architecture/templates/config.yml` carries the same block) for full configuration options.
 
 ## Best Practices
 

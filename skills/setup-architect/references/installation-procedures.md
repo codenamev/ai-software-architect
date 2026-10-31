@@ -102,17 +102,16 @@ mkdir -p .architecture/agent_docs
 echo "✅ Directory structure created"
 ```
 
-### Step 4: Initialize Configuration
+### Step 4: Verify Configuration
 
-Copy the default configuration file:
+Step 1 already copied the framework's `.architecture/config.yml`. Keep that copy; don't overwrite it with `.architecture/templates/config.yml`. Only if it is missing, seed it from the template, which carries the same `implementation:` block:
 
 ```bash
-# Copy config template if exists
-if [ -f ".architecture/templates/config.yml" ]; then
-  cp .architecture/templates/config.yml .architecture/config.yml
-  echo "✅ Configuration initialized"
+if [ -f ".architecture/config.yml" ]; then
+  echo "✅ Configuration present"
 else
-  echo "⚠️  No config template found"
+  cp .architecture/templates/config.yml .architecture/config.yml
+  echo "✅ Configuration seeded from template"
 fi
 ```
 

@@ -101,7 +101,7 @@ mkdir -p .architecture/agent_docs
 ```
 
 - Create directory structure (decisions/adrs, reviews, recalibration, etc.)
-- Initialize `.architecture/config.yml` from the source location's templates
+- Initialize `.architecture/config.yml` from the source location's `.architecture/config.yml` (not `templates/config.yml`)
 - Set up agent documentation (ADR-006 progressive disclosure)
 - **Legacy clone path only:** remove `.architecture/.architecture/` and (with safeguards) the cloned `.git/` directory. **Plugin path:** no clone removal needed — the plugin's install dir stays where it is under `~/.claude/plugins/`.
 

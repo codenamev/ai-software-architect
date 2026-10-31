@@ -102,16 +102,16 @@ mkdir -p .architecture/agent_docs
 echo "✅ Directory structure created"
 ```
 
-### Step 4: Initialize Configuration
+### Step 4: Verify Configuration
 
-Step 1 already copied the framework's `config.yml` (the same file the plugin and MCP install paths seed). Keep it; don't overwrite it from `templates/config.yml`:
+Step 1 already copied the framework's `.architecture/config.yml`. Keep that copy; don't overwrite it with `.architecture/templates/config.yml`. Only if it is missing, seed it from the template, which carries the same `implementation:` block:
 
 ```bash
-# config.yml came over with the framework files in Step 1
 if [ -f ".architecture/config.yml" ]; then
-  echo "✅ Configuration initialized"
+  echo "✅ Configuration present"
 else
-  echo "⚠️  config.yml missing; re-run Step 1"
+  cp .architecture/templates/config.yml .architecture/config.yml
+  echo "✅ Configuration seeded from template"
 fi
 ```
 

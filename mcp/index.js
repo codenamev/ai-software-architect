@@ -68,6 +68,16 @@ function listPluginCandidates(pluginsDir, maxDepth = PLUGIN_WALK_DEPTH) {
   return [...matches].sort();
 }
 
+// The member entries of a members.yml, read as tools/lib/subagent-generator.js
+// reads them: an empty or comment-only file (which parses to null), a bare
+// `members:`, or a non-list `members:` value all yield no members. Entries
+// that aren't maps (a bare `-`) are skipped. Malformed YAML still throws.
+function rosterEntries(membersYaml) {
+  const doc = yaml.parse(membersYaml);
+  const members = Array.isArray(doc?.members) ? doc.members : [];
+  return members.filter((member) => member && typeof member === "object" && !Array.isArray(member));
+}
+
 const SOURCE_NOT_FOUND_GUIDANCE =
   `Framework source for "${PLUGIN_NAME}" not found, so nothing was written. ` +
   "The MCP server looks in CLAUDE_PLUGIN_ROOT, then its own checkout, then ~/.claude/plugins. Either:\n" +
@@ -797,8 +807,7 @@ The AI Software Architect framework has been configured with:
     }
 
     const membersContent = await fs.readFile(membersPath, 'utf8');
-    const membersData = yaml.parse(membersContent);
-    const members = membersData.members || [];
+    const members = rosterEntries(membersContent);
 
     if (members.length === 0) {
       return {
@@ -811,12 +820,18 @@ The AI Software Architect framework has been configured with:
       };
     }
 
-    const membersList = members.map(member => 
-      `**${member.name}** (${member.title})\n` +
-      `  - Specialties: ${member.specialties.join(', ')}\n` +
-      `  - Domains: ${member.domains.join(', ')}\n` +
-      `  - Perspective: ${member.perspective}\n`
-    ).join('\n');
+    // Every field but id is optional, as in tools/lib/subagent-generator.js:
+    // a line whose field is absent is left out rather than throwing.
+    const listOf = (value) => (Array.isArray(value) ? value.join(', ') : value);
+    const membersList = members.map(member => {
+      const lines = [`**${member.name ?? member.id ?? '(unnamed member)'}**${member.title ? ` (${member.title})` : ''}\n`];
+      const specialties = listOf(member.specialties);
+      const domains = listOf(member.domains);
+      if (specialties) lines.push(`  - Specialties: ${specialties}\n`);
+      if (domains) lines.push(`  - Domains: ${domains}\n`);
+      if (member.perspective) lines.push(`  - Perspective: ${member.perspective}\n`);
+      return lines.join('');
+    }).join('\n');
 
     return {
       content: [
@@ -868,8 +883,7 @@ The AI Software Architect framework has been configured with:
     const membersPath = path.join(architecturePath, "members.yml");
     if (await fs.pathExists(membersPath)) {
       const membersContent = await fs.readFile(membersPath, 'utf8');
-      const membersData = yaml.parse(membersContent);
-      status.members = (membersData.members || []).length;
+      status.members = rosterEntries(membersContent).length;
     }
 
     // Framework drift: the plugin/MCP server auto-updates, the installed

@@ -283,7 +283,8 @@ Lists all architecture team members with their specialties and domains.
 
 **Returns:**
 - Formatted list of team members from `.architecture/members.yml`
-- Each member's name, title, specialties, domains, and perspective
+- Each member's name, title, specialties, domains, and perspective. Only `id` is required: a line whose field is absent is left out, and a member with no `name` is listed by its `id`
+- "No team members configured" when `members.yml` is empty, has no `members:` key, or its `members:` value isn't a list
 
 ### `get_architecture_status`
 **Standard Command Equivalent**: "What's our architecture status?"

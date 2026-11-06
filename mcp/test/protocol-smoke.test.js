@@ -140,6 +140,43 @@ describe('MCP protocol smoke test', () => {
     }
   });
 
+  // A members.yml with nothing in it (comment-only or empty) parses to null,
+  // and the generator treats every member field but id as optional. Both
+  // members.yml readers must tolerate both instead of throwing a TypeError.
+  const NONE = /No team members configured/;
+  for (const [label, membersYml, expected, count] of [
+    ['empty', '', NONE, 0],
+    ['comment-only', '# team not chosen yet\n', NONE, 0],
+    ['a bare members: key', 'members:\n', NONE, 0],
+    ['a non-list members: value', 'members:\n  lead: someone\n', NONE, 0],
+    ['a member with only id and name', 'members:\n  - id: solo\n    name: Solo Reviewer\n', /^\*\*Solo Reviewer\*\*\n$/m, 1],
+    ['a member with only id, beside a bare entry', 'members:\n  -\n  - id: solo\n', /^\*\*solo\*\*\n$/m, 1],
+  ]) {
+    it(`lists members and reports status when members.yml is ${label}`, async () => {
+      const dir = await mkdtemp(path.join(os.tmpdir(), 'asa-members-'));
+      try {
+        await mkdir(path.join(dir, '.architecture'));
+        await writeFile(path.join(dir, '.architecture', 'members.yml'), membersYml);
+        for (const name of ['list_architecture_members', 'get_architecture_status']) {
+          const result = await client.request({
+            method: 'tools/call',
+            params: { name, arguments: { projectPath: dir } },
+          }, CallToolResultSchema);
+          assert.notStrictEqual(result.isError, true, `${name} failed: ${result.content?.[0]?.text}`);
+          const text = result.content[0].text;
+          if (name === 'list_architecture_members') {
+            assert.match(text, expected);
+            assert.doesNotMatch(text, /undefined|Specialties|Domains|Perspective/);
+          } else {
+            assert.match(text, new RegExp(`Team Members\\*\\*: ${count}\\b`));
+          }
+        }
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    });
+  }
+
   it('reports an unknown tool as an error rather than a success', async () => {
     // Proves the isError assertion above has teeth in both directions: if the
     // handler stopped signalling failure, this test goes red instead of the

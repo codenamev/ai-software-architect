@@ -56,6 +56,9 @@ Observable wire changes, for anyone driving the server by hand: schema violation
 
 ### Fixed
 
+#### `list_architecture_members` and `get_architecture_status` threw on a sparse `members.yml`
+An empty or comment-only `members.yml` parses to null, and both tools read `.members` off it. `list_architecture_members` also called `.join` on `specialties` and `domains` without checking for them, though `tools/lib/subagent-generator.js` treats every member field but `id` as optional. Each of these returned `Error: Cannot read properties of …` in place of the roster, as did a non-list `members:` value or a bare `-` entry. Both tools now read the roster the way the generator does: anything but a list counts as no members, and entries that aren't maps are skipped. A member's title, Specialties, Domains or Perspective is left out when that field is absent, and its name falls back to its `id`. A fully specified roster renders the same as before. Malformed YAML still reports a parse error.
+
 #### "Implement X as the architects" was never configured on a fresh install (#95)
 `get_implementation_guidance` reads the `implementation:` block of `.architecture/config.yml`, but only `.architecture/templates/config.yml` ever carried one, and every install path seeds the canonical `config.yml`. So the tool always answered "Implementation guidance not configured". The canonical file now carries the template's block verbatim (TDD, three influences, optional sections commented out). **Existing installs are untouched: to opt in, paste the `implementation:` block from `.architecture/templates/config.yml` into your `.architecture/config.yml`.** The clone-based procedure in `setup-architect/references/installation-procedures.md` no longer overwrites the copied `config.yml` with the template (Step 4 now only seeds from the template when the file is missing). `setup-fidelity` tests run setup and then the tool, and assert the two copies of the block stay identical.
 

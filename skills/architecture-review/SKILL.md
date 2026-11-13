@@ -86,6 +86,14 @@ Return a markdown review with:
   recommendation that would change or retire a recorded principle,
   labeled PRINCIPLE CHANGE with the principle named. Write "none"
   when there are none. Do not omit the section.
+- Unresolved assumptions: anything your concerns or recommendations
+  depend on that neither the code, the configs, nor the ADRs settle
+  (expected load, who calls an endpoint, whether a constraint is
+  still real). One line each: the assumption, the title of the
+  concern above that depends on it (as you wrote it under Concerns),
+  and the evidence that would settle it. Do not also list the
+  assumption under Concerns, and give it no severity. Write "none"
+  when there are none. Do not omit the section.
 
 Read code, configs, and ADRs as needed via your scoped tools. Cite
 exact file paths and line numbers. Do not range outside your
@@ -152,6 +160,7 @@ Then build the consolidated review from the filtered set and the post-challenge 
 3. **Prioritization** — bucket every concern into Critical (0-2 weeks) / Important (2-8 weeks) / Nice-to-Have (2-6 months) based on the post-challenge severity ratings and the cross-cut analysis. Refuted findings are excluded here; they appear only under Challenges.
 4. **Verbatim per-perspective sections** — preserve each subagent's full review under a per-member section. This is the source data; aggregation summarizes but does not replace it.
 5. **Principle gate** — collect every member's Principle conflicts section into the review's Principle Conflicts table, one row per conflict, principle named. Two rules follow. A concern tied to a recorded principle is never bucketed below Important, whatever its severity rating: the principle already settled that it matters. A PRINCIPLE CHANGE recommendation never enters the prioritized lists at all; it goes under Proposed Principle Changes with a pointer to `create-adr`, because changing the constitution is a decision to record, not a finding to schedule. Findings refuted in step 5 drop out of the gate with everything else.
+6. **Unresolved assumptions** — collect every member's Unresolved assumptions section into the "Unresolved assumptions" appendix of the review. Merge the same assumption made by several members into one row listing all of them; an assumption three members leaned on is the one most worth checking. Assumptions are not findings: they get no severity, skip the challenge round, and never enter the prioritized lists. In the "Concerns that rest on it" cell, name each concern by the title it carries in the consolidated review (after dedup), and mark where that concern ended up: `(refuted)` if the challenge round refuted it, `(low-confidence)` if it went to the low-confidence appendix, nothing if it is in the prioritized lists. Keep the assumption even when every concern resting on it was refuted; the marker shows that. The orchestrator does not settle assumptions; the row's last column says what evidence would.
 
 ### 7. Write the consolidated review
 
@@ -166,6 +175,7 @@ Use [the review template](assets/review-template.md). Key sections:
 - Prioritized recommendations (from step 6.3)
 - Risks if unaddressed (highest-severity items)
 - Success metrics and follow-up plan
+- Unresolved assumptions (from step 6.6)
 - Dispositions: every Area for Improvement and every low-confidence row is written with `Disposition: pending`. The orchestrator never writes `accepted`, `rejected`, or `deferred`; those are the maintainer's calls, made directly or at the point where the review's findings are turned into a plan (recalibration), and a review that ships with them pre-filled has had its judgment made for it.
 
 Save to `.architecture/reviews/<filename>` (filename from step 1).

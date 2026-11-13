@@ -334,6 +334,14 @@ Each member reviewed independently. Every critical/high finding was then sent to
 |---------|--------|----------|------------|----------|-------------|
 | [Finding title] | [Member] | Medium | 0.5 | `path/to/file.rb:42` | pending |
 
+### Unresolved assumptions
+
+[What the members' concerns depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way. These are not findings and carry no severity. In "Concerns that rest on it", name each concern by its title in this review and mark where it ended up: `(refuted)` if the challenge round refuted it, `(low-confidence)` if it is in the appendix above, nothing if it is in the prioritized lists. If the maintainer later finds an assumption false, those are the findings to revisit. One row per assumption; when several members made the same one, list them all. Write "none" if no member recorded any.]
+
+| Assumption | Made by | Concerns that rest on it | What would settle it |
+|------------|---------|--------------------------|----------------------|
+| [The assumption, stated so it can be checked] | [Member], [Member] | [Finding title], [Finding title] (refuted) | [The evidence that would confirm or refute it] |
+
 ### Glossary
 
 [If needed, define domain-specific terms or acronyms used in the review]

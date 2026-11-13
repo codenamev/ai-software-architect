@@ -382,3 +382,11 @@ This section reflects the consensus reached after cross-functional discussion of
 | Finding | Reviewer | Severity | Confidence | Location | Disposition |
 |---------|----------|----------|------------|----------|-------------|
 | [Finding title] | [Reviewer] | Medium | 0.5 | `path/to/file:line` | pending |
+
+### F. Unresolved Assumptions
+
+[What the reviewers' weaknesses and recommendations depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way (expected load, who calls an endpoint, whether a constraint still holds). Every reviewer, with or without an AI assistant, lists theirs while writing their section; whoever assembles the review collects them here. These are not weaknesses and carry no severity, so do not also list them under Weaknesses. In "Concerns that rest on it", name each weakness or improvement by its title in this review, and mark where it ended up: `(refuted)` if the review's discussion dropped it, `(low-confidence)` if it is in appendix E, nothing if it is in Prioritized Improvements. If the maintainer finds an assumption false, those are the items to revisit. One row per assumption; when several reviewers made the same one, list them all. Write "none" if no reviewer recorded any.]
+
+| Assumption | Made by | Concerns that rest on it | What would settle it |
+|------------|---------|--------------------------|----------------------|
+| [The assumption, stated so it can be checked] | [Reviewer], [Reviewer] | [Weakness or improvement title] | [The evidence that would confirm or refute it] |

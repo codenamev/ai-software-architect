@@ -382,3 +382,11 @@ This section reflects the consensus reached after cross-functional discussion of
 | Finding | Reviewer | Severity | Confidence | Location | Disposition |
 |---------|----------|----------|------------|----------|-------------|
 | [Finding title] | [Reviewer] | Medium | 0.5 | `path/to/file:line` | pending |
+
+### F. Unresolved Assumptions
+
+[What the reviewers' concerns depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way. These are not findings and carry no severity. Each row names the concerns resting on the assumption, so if the maintainer later finds it false, those are the findings to revisit. One row per assumption; when several reviewers made the same one, list them all. Write "none" if no reviewer recorded any.]
+
+| Assumption | Made by | Concerns that rest on it | What would settle it |
+|------------|---------|--------------------------|----------------------|
+| [Peak load stays under 100 req/s] | [Reviewer], [Reviewer] | [Finding title] | [Production traffic numbers for the last 90 days] |

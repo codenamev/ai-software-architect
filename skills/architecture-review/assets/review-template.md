@@ -334,6 +334,14 @@ Each member reviewed independently. Every critical/high finding was then sent to
 |---------|--------|----------|------------|----------|-------------|
 | [Finding title] | [Member] | Medium | 0.5 | `path/to/file.rb:42` | pending |
 
+### Unresolved assumptions
+
+[What the members' concerns depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way. These are not findings and carry no severity. Each row names the concerns resting on the assumption, so if the maintainer later finds it false, those are the findings to revisit. One row per assumption; when several members made the same one, list them all. Write "none" if no member recorded any.]
+
+| Assumption | Made by | Concerns that rest on it | What would settle it |
+|------------|---------|--------------------------|----------------------|
+| [Peak load stays under 100 req/s] | [Member], [Member] | [Finding title] | [Production traffic numbers for the last 90 days] |
+
 ### Glossary
 
 [If needed, define domain-specific terms or acronyms used in the review]

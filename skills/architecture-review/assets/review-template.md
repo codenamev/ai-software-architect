@@ -336,11 +336,11 @@ Each member reviewed independently. Every critical/high finding was then sent to
 
 ### Unresolved assumptions
 
-[What the members' concerns depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way. These are not findings and carry no severity. Each row names the concerns resting on the assumption, so if the maintainer later finds it false, those are the findings to revisit. One row per assumption; when several members made the same one, list them all. Write "none" if no member recorded any.]
+[What the members' concerns depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way. These are not findings and carry no severity. In "Concerns that rest on it", name each concern by its title in this review and mark where it ended up: `(refuted)` if the challenge round refuted it, `(low-confidence)` if it is in the appendix above, nothing if it is in the prioritized lists. If the maintainer later finds an assumption false, those are the findings to revisit. One row per assumption; when several members made the same one, list them all. Write "none" if no member recorded any.]
 
 | Assumption | Made by | Concerns that rest on it | What would settle it |
 |------------|---------|--------------------------|----------------------|
-| [Peak load stays under 100 req/s] | [Member], [Member] | [Finding title] | [Production traffic numbers for the last 90 days] |
+| [The assumption, stated so it can be checked] | [Member], [Member] | [Finding title], [Finding title] (refuted) | [The evidence that would confirm or refute it] |
 
 ### Glossary
 

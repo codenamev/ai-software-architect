@@ -385,8 +385,8 @@ This section reflects the consensus reached after cross-functional discussion of
 
 ### F. Unresolved Assumptions
 
-[What the reviewers' concerns depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way. These are not findings and carry no severity. Each row names the concerns resting on the assumption, so if the maintainer later finds it false, those are the findings to revisit. One row per assumption; when several reviewers made the same one, list them all. Write "none" if no reviewer recorded any.]
+[What the reviewers' weaknesses and recommendations depend on that the review could not check: nothing in the code, configs, or ADRs settles it either way (expected load, who calls an endpoint, whether a constraint still holds). Every reviewer, with or without an AI assistant, lists theirs while writing their section; whoever assembles the review collects them here. These are not weaknesses and carry no severity, so do not also list them under Weaknesses. In "Concerns that rest on it", name each weakness or improvement by its title in this review, and add `(dismissed)` if the review later dropped it, so if the maintainer finds an assumption false, those are the items to revisit. One row per assumption; when several reviewers made the same one, list them all. Write "none" if no reviewer recorded any.]
 
 | Assumption | Made by | Concerns that rest on it | What would settle it |
 |------------|---------|--------------------------|----------------------|
-| [Peak load stays under 100 req/s] | [Reviewer], [Reviewer] | [Finding title] | [Production traffic numbers for the last 90 days] |
+| [The assumption, stated so it can be checked] | [Reviewer], [Reviewer] | [Weakness or improvement title] | [The evidence that would confirm or refute it] |

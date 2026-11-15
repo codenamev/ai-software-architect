@@ -33,7 +33,7 @@ The skill creates a `.architecture/` directory in your **target project** (not i
 - `.architecture/config.yml` — operational config (pragmatic mode, etc.)
 - `.architecture/templates/` — ADR + review templates ready to use
 
-The skill writes **only into your target project's `.architecture/`**. It does not modify code outside that directory.
+The skill writes into your target project's `.architecture/`, plus two integration points outside it: it appends a framework section to an existing `CLAUDE.md` (step 6), and the installation procedure creates `.coding-assistants/` for assistant-specific config. It does not modify application code.
 
 ## High-Level Workflow
 
@@ -88,16 +88,27 @@ Execute installation steps (see [references/installation-procedures.md](referenc
 
 ```bash
 # $FRAMEWORK_ROOT is from step 1.
-cp -r "$FRAMEWORK_ROOT/.architecture/templates" .architecture/templates
-cp "$FRAMEWORK_ROOT/.architecture/principles.md" .architecture/principles.md
-cp "$FRAMEWORK_ROOT/.architecture/members.yml" .architecture/members.yml
-cp "$FRAMEWORK_ROOT/.architecture/config.yml" .architecture/config.yml
-
+# Directories first: on a fresh project .architecture/ doesn't exist yet,
+# and cp into a missing parent fails.
 mkdir -p .architecture/decisions/adrs
 mkdir -p .architecture/reviews
 mkdir -p .architecture/recalibration
 mkdir -p .architecture/comparisons
 mkdir -p .architecture/agent_docs
+
+cp -r "$FRAMEWORK_ROOT/.architecture/templates" .architecture/templates
+cp "$FRAMEWORK_ROOT/.architecture/principles.md" .architecture/principles.md
+cp "$FRAMEWORK_ROOT/.architecture/members.yml" .architecture/members.yml
+cp "$FRAMEWORK_ROOT/.architecture/config.yml" .architecture/config.yml
+
+# config.yml's pragmatic_mode.deferral_log points here; create it so the
+# first deferral has somewhere to land.
+[ -f .architecture/deferrals.md ] || cp .architecture/templates/deferrals.md .architecture/deferrals.md
+
+# Git drops empty directories; keep the structure in the first commit.
+for d in decisions/adrs reviews recalibration comparisons agent_docs; do
+  [ -n "$(ls -A .architecture/$d)" ] || touch .architecture/$d/.gitkeep
+done
 ```
 
 - Create directory structure (decisions/adrs, reviews, recalibration, etc.)

@@ -59,6 +59,9 @@ Observable wire changes, for anyone driving the server by hand: schema violation
 
 ### Fixed
 
+#### `protect-files` hook blocked `setup-architect` in the target repo
+Setup steps 4 and 5 customize `.architecture/members.yml` and `principles.md`, and the PreToolUse hook rejects writes to exactly those files unless `CLAUDE_ALLOW_PROTECTED` is set. A Claude Code session can't set that variable for itself, so a native plugin install refused its own setup. Setup now opens a window by touching `.architecture/.setup-in-progress` before step 4 and removes it in step 7. The hook lets a protected write through only while that sentinel sits in the same `.architecture/` directory as the target and is under an hour old, so a setup that dies midway can't leave protection off. `CLAUDE_ALLOW_PROTECTED=1` still works for one-off edits after setup.
+
 #### `list_architecture_members` and `get_architecture_status` threw on a sparse `members.yml`
 An empty or comment-only `members.yml` parses to null, and both tools read `.members` off it. `list_architecture_members` also called `.join` on `specialties` and `domains` without checking for them, though `tools/lib/subagent-generator.js` treats every member field but `id` as optional. Each of these returned `Error: Cannot read properties of …` in place of the roster, as did a non-list `members:` value or a bare `-` entry. Both tools now read the roster the way the generator does: anything but a list counts as no members, and entries that aren't maps are skipped. A member's title, Specialties, Domains or Perspective is left out when that field is absent, and its name falls back to its `id`. A fully specified roster renders the same as before. Malformed YAML still reports a parse error.
 

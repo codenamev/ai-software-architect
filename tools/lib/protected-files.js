@@ -1,4 +1,5 @@
-import { normalize } from 'node:path';
+import { statSync } from 'node:fs';
+import { dirname, isAbsolute, normalize, resolve } from 'node:path';
 
 const PROTECTED_DIR = '.architecture';
 
@@ -45,6 +46,35 @@ function protectedEntry(filePath) {
   const { dir, name } = tailSegments(filePath);
   if (dir !== PROTECTED_DIR) return null;
   return Object.hasOwn(PROTECTED_FILES, name) ? PROTECTED_FILES[name] : null;
+}
+
+/**
+ * setup-architect writes `.architecture/.setup-in-progress` before it
+ * customizes members.yml / principles.md / config.yml and deletes it when it
+ * finishes. While that file sits next to the target and is fresh, the hook
+ * lets the write through. Without this, a native plugin install blocks its
+ * own setup: a Claude Code session can't set CLAUDE_ALLOW_PROTECTED for
+ * itself.
+ *
+ * Freshness is capped so an aborted setup can't leave protection switched
+ * off for good; a stale sentinel is ignored.
+ */
+export const SETUP_SENTINEL = '.setup-in-progress';
+export const SETUP_SENTINEL_TTL_MS = 60 * 60 * 1000;
+
+export function setupSentinelActive(filePath, { cwd = process.cwd(), now = Date.now(), stat = statSync } = {}) {
+  if (!isProtected(filePath)) return false;
+  const absolute = isAbsolute(filePath) ? filePath : resolve(cwd, filePath);
+  const sentinel = resolve(dirname(normalize(absolute)), SETUP_SENTINEL);
+  let info;
+  try {
+    info = stat(sentinel);
+  } catch {
+    return false;
+  }
+  if (!info.isFile()) return false;
+  const age = now - info.mtimeMs;
+  return age >= 0 && age <= SETUP_SENTINEL_TTL_MS;
 }
 
 export function isProtected(filePath) {

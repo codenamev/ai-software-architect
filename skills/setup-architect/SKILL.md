@@ -1,7 +1,7 @@
 ---
 name: setup-architect
 description: Sets up and installs the AI Software Architect framework in a NEW project for the FIRST time. Use when the user requests "Setup .architecture", "Setup ai-software-architect", "Initialize architecture framework", "Install software architect", or similar setup/installation phrases. Do NOT use for checking status (use architecture-status), creating documents (use create-adr or reviews), or when framework is already set up.
-allowed-tools: Read,Write,Edit,Glob,Grep,Bash(git:*,npm:*,node:*,mkdir:*,cp:*,ls:*,test:*)
+allowed-tools: Read,Write,Edit,Glob,Grep,Bash(git:*,npm:*,node:*,mkdir:*,cp:*,ls:*,test:*,touch:*,rm:*)
 disable-model-invocation: true
 ---
 
@@ -109,6 +109,14 @@ mkdir -p .architecture/agent_docs
 
 ### 4. Customize Architecture Team
 
+Steps 4 and 5 edit `members.yml` and `principles.md`, which the plugin's PreToolUse hook protects. Open a setup window first, so the hook lets those edits through:
+
+```bash
+touch .architecture/.setup-in-progress
+```
+
+The hook honors the sentinel for an hour from its mtime, so an aborted setup can't leave protection off. Step 7 removes it.
+
 Add technology-specific members to `.architecture/members.yml`:
 - **JavaScript/TypeScript**: JavaScript Expert, framework specialists (React/Vue/Angular)
 - **Python**: Python Expert, framework specialists (Django/Flask/FastAPI)
@@ -142,6 +150,12 @@ If `CLAUDE.md` exists in project root, append framework usage section:
 **Template**: [references/customization-guide.md § Update CLAUDE.md](references/customization-guide.md#update-claudemd-integration)
 
 ### 7. Cleanup
+
+Close the setup window so the hook protects the customized files again:
+
+```bash
+rm -f .architecture/.setup-in-progress
+```
 
 Remove framework development files:
 - Framework documentation (README.md, USAGE*.md, INSTALL.md)

@@ -130,6 +130,8 @@ Add framework-specific principles to `.architecture/principles.md`:
 - **Rails**: Convention over configuration, DRY, RESTful design
 - **Django**: Explicit over implicit, reusable apps, use built-ins
 
+These are defaults. Where the repo already shows a convention (service objects, a stated layering rule in its contributor docs), record the repo's convention and skip any default that contradicts it.
+
 **Principle examples**: [references/customization-guide.md § Customize Principles](references/customization-guide.md#customize-architectural-principles)
 
 ### 6. Update CLAUDE.md Integration

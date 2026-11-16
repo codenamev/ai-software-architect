@@ -1,6 +1,6 @@
 ---
 name: create-adr
-description: Creates a NEW Architectural Decision Record (ADR) documenting a specific architectural decision. Use when the user requests "Create ADR for [topic]", "Document decision about [topic]", "Write ADR for [choice]", or when documenting technology choices, patterns, or architectural approaches. Do NOT use for reviews (use architecture-review or specialist-review), checking existing ADRs (use architecture-status), or general documentation.
+description: Creates a NEW Architectural Decision Record (ADR) documenting a specific architectural decision. Use when the user requests "Create ADR for [topic]", "Document decision about [topic]", "Write ADR for [choice]", or when documenting technology choices, patterns, or architectural approaches. Do NOT use for reviews (use architecture-review or specialist-review), finding existing ADRs on a topic (use find-adrs), ADR counts (use architecture-status), or general documentation.
 allowed-tools: Read,Write,Glob,Grep,Bash(ls:*)
 disable-model-invocation: true
 ---
@@ -109,6 +109,7 @@ Next Steps:
 ## Related Skills
 
 **Before Creating ADR**:
+- "Which ADRs cover [topic]?" - Find a decision that already covers this, or one the new ADR supersedes
 - "What's our architecture status?" - Check existing ADRs to avoid duplication
 - "List architecture members" - See who should review the decision
 

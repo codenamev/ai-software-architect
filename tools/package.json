@@ -10,6 +10,7 @@
     "validate-adr": "node cli.js validate-adr",
     "generate-subagents": "node cli.js generate-subagents",
     "find-source": "node cli.js find-source",
+    "find-adrs": "node cli.js find-adrs",
     "count": "node cli.js count",
     "version-check": "node cli.js version-check"
   },

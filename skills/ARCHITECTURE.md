@@ -88,6 +88,7 @@ All skills now restrict tool access via `allowed-tools` frontmatter following pr
 |-------|--------------|-----------|
 | `list-members` | `Read` | Only reads members.yml |
 | `architecture-status` | `Read,Glob,Grep` | Reads files and searches for patterns |
+| `find-adrs` | `Read,Bash(node:*),Bash(find:*)` | Locates and runs `tools/cli.js find-adrs`, then reads the matched ADRs |
 | `create-adr` | `Read,Write,Bash(ls:*,grep:*)` | Reads templates, writes ADRs, scans for numbering |
 | `specialist-review` | `Read,Write,Glob,Grep` | Reads code, writes reviews, searches |
 | `architecture-review` | `Read,Write,Glob,Grep,Bash(git:*)` | Full review capabilities + git status |
@@ -117,6 +118,7 @@ All skills now restrict tool access via `allowed-tools` frontmatter following pr
 | `pragmatic-guard` | 1,200 | - | - | ✅ Optimal | Flat file |
 | `architecture-status` | 800 | - | - | ✅ Optimal | Flat file |
 | `list-members` | 200 | - | - | ✅ Optimal | Flat file |
+| `find-adrs` | 450 | - | - | ✅ Optimal | Flat file |
 
 ### Progressive Disclosure Benefits (Proven)
 

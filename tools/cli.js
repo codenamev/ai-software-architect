@@ -15,6 +15,7 @@ import { validateAdr } from './lib/adr-validator.js';
 import { generateAll } from './lib/subagent-generator.js';
 import { discoverSource, PLUGIN_NAME } from './lib/setup-source-discovery.js';
 import { checkConsistency, FRAMEWORK_VERSION_SOURCES } from './lib/version-consistency.js';
+import { loadAdrIndex, findRelevantAdrs } from './lib/adr-index.js';
 
 const [,, command, ...args] = process.argv;
 
@@ -23,6 +24,7 @@ const COMMANDS = {
   'validate-adr': validateAdrCommand,
   'generate-subagents': generateSubagentsCommand,
   'find-source': findSourceCommand,
+  'find-adrs': findAdrsCommand,
   count: countCommand,
   'version-check': versionCheckCommand,
   help: helpCommand
@@ -324,6 +326,57 @@ function versionCheckCommand() {
 }
 
 /**
+ * Find the ADRs that govern a question or a file (skills parity for the
+ * MCP find_relevant_adrs tool, ADR-015 Tier 1). Same library, same ranking.
+ *
+ *   node cli.js find-adrs [--project <dir>] [--query <text>] [--file <path>] [--limit <n>] [--json]
+ */
+function findAdrsCommand(args) {
+  const opts = { project: process.cwd(), query: '', file: '', limit: 5, json: false };
+  const rest = [];
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
+    if (a === '--json') opts.json = true;
+    else if (a === '--project') opts.project = args[++i];
+    else if (a === '--query') opts.query = args[++i];
+    else if (a === '--file') opts.file = args[++i];
+    else if (a === '--limit') opts.limit = Number(args[++i]);
+    else rest.push(a);
+  }
+  if (!opts.query && rest.length) opts.query = rest.join(' ');
+  if (!opts.query.trim() && !opts.file.trim()) {
+    throw new Error('Pass a query, a filePath, or both. (find-adrs --query <text> and/or --file <path>)');
+  }
+  if (!Number.isInteger(opts.limit) || opts.limit < 1 || opts.limit > 20) {
+    throw new Error('--limit must be an integer from 1 to 20');
+  }
+
+  const adrDir = join(resolve(opts.project), '.architecture', 'decisions', 'adrs');
+  if (!existsSync(adrDir)) {
+    throw new Error('No ADR directory at .architecture/decisions/adrs. Run setup_architecture first.');
+  }
+  const index = loadAdrIndex(adrDir);
+  const adrs = findRelevantAdrs(index, { query: opts.query, filePath: opts.file, limit: opts.limit });
+  const result = { searched: index.length, adrs };
+  // Wording matches the MCP tool so both tiers say the same thing.
+  if (adrs.length === 0) {
+    result.note = 'No ADR matched. Absence here means no recorded decision covers this, so a new choice may warrant an ADR.';
+  }
+
+  if (opts.json) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+  console.log(`Searched ${result.searched} ADRs.`);
+  if (result.note) console.log(result.note);
+  for (const adr of adrs) {
+    const state = adr.current ? adr.status : `${adr.status}, superseded by ${(adr.supersededBy || []).join(', ') || 'unknown'}`;
+    console.log(`\n${adr.id}: ${adr.title} [${state}]`);
+    console.log(`  ${adr.file}  score ${adr.score}  (${adr.matched.join('; ')})`);
+  }
+}
+
+/**
  * Show help
  */
 function helpCommand() {
@@ -335,6 +388,8 @@ Usage:
   node cli.js validate-adr [files...]      Validate ADRs against template rules
   node cli.js generate-subagents [--check] Generate agents/*.md from members.yml
   node cli.js find-source [--json]         Discover the framework source for setup-architect
+  node cli.js find-adrs --query <q> [--file <path>] [--project <dir>] [--json]
+                                           Find the ADRs that govern a question or file
   npm run count [files...]                 Count instructions (default: ../AGENTS.md ../CLAUDE.md)
   node cli.js version-check                Verify one framework version across all channels (ADR-011)
 

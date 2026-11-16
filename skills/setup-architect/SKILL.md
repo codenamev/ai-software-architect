@@ -217,7 +217,7 @@ If any of these fail, see [the recovery section](#recovery) below.
 3. If most files are in place but `members.yml` or `principles.md` weren't customized, you can re-run setup; the skill will detect the partial install and offer to complete the customization step rather than restart.
 4. If the initial analysis didn't run, ask: `Generate initial system analysis at .architecture/reviews/initial-system-analysis.md` — the orchestrator will dispatch the team without redoing the file install.
 
-**If setup ran but the team isn't right for your project**, you don't need to re-run setup. Edit `.architecture/members.yml` directly (set `CLAUDE_ALLOW_PROTECTED=1` to satisfy the PreToolUse hook) and run `node tools/cli.js generate-subagents` to refresh the corresponding `agents/<id>.md` files.
+**If setup ran but the team isn't right for your project**, you don't need to re-run setup. Edit `.architecture/members.yml` directly (set `CLAUDE_ALLOW_PROTECTED=1` to satisfy the PreToolUse hook) and run `node "$TOOLS_CLI" generate-subagents` from anywhere inside the project to refresh the matching `.claude/agents/<id>.md` files.
 
 ## Error Handling
 

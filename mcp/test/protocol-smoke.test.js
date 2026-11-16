@@ -24,7 +24,7 @@ const MCP_DIR = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const SERVER = path.join(MCP_DIR, 'index.js');
 
 // Every tool index.js advertises, matching mcp/README.md "Available Tools
-// (6 Tier-1 Tools)". A tool disappearing is a break for anyone whose prompts
+// (7 Tier-1 Tools)". A tool disappearing is a break for anyone whose prompts
 // reference it, so the set is asserted exactly rather than as a subset.
 const EXPECTED_TOOLS = [
   'setup_architecture',
@@ -33,6 +33,7 @@ const EXPECTED_TOOLS = [
   'get_architecture_status',
   'configure_pragmatic_mode',
   'get_implementation_guidance',
+  'find_relevant_adrs',
 ].sort();
 
 // Spawn the server at `entry` and return a connected client. Callers close it.
@@ -176,6 +177,49 @@ describe('MCP protocol smoke test', () => {
       }
     });
   }
+
+  it('finds ADRs by query and by affects glob, labelling superseded ones', async () => {
+    const adrDir = path.join(projectDir, '.architecture', 'decisions', 'adrs');
+    await mkdir(adrDir, { recursive: true });
+    await writeFile(path.join(adrDir, 'ADR-001-cache-with-redis.md'),
+      '---\nstatus: Superseded\nsuperseded-by: ADR-002\n---\n# ADR-001: Cache sessions with Redis\n\nRedis holds session state.\n');
+    await writeFile(path.join(adrDir, 'ADR-002-cache-in-postgres.md'),
+      '---\nstatus: Accepted\nsupersedes: ADR-001\naffects: app/cache/**\n---\n# ADR-002: Cache sessions in Postgres\n\nDrop Redis; Postgres unlogged tables hold session state.\n');
+
+    const call = async (args) => {
+      const result = await client.request({
+        method: 'tools/call',
+        params: { name: 'find_relevant_adrs', arguments: { projectPath: projectDir, ...args } },
+      }, CallToolResultSchema);
+      assert.notStrictEqual(result.isError, true, `tools/call failed: ${result.content?.[0]?.text}`);
+      return JSON.parse(result.content[0].text);
+    };
+
+    const byQuery = await call({ query: 'where does session cache state live?' });
+    assert.strictEqual(byQuery.searched, 2);
+    const old = byQuery.adrs.find(a => a.id === 'ADR-001');
+    assert.ok(old, 'superseded ADR missing from results');
+    assert.strictEqual(old.current, false);
+    assert.deepStrictEqual(old.supersededBy, ['ADR-002']);
+    assert.strictEqual(byQuery.adrs.find(a => a.id === 'ADR-002').current, true);
+
+    const byPath = await call({ filePath: 'app/cache/session_store.rb' });
+    assert.deepStrictEqual(byPath.adrs.map(a => a.id), ['ADR-002']);
+    assert.ok(byPath.adrs[0].matched.includes('affects app/cache/**'));
+
+    const none = await call({ query: 'kubernetes helm charts' });
+    assert.deepStrictEqual(none.adrs, []);
+    assert.match(none.note, /No ADR matched/);
+  });
+
+  it('refuses find_relevant_adrs with neither query nor filePath', async () => {
+    const result = await client.request({
+      method: 'tools/call',
+      params: { name: 'find_relevant_adrs', arguments: { projectPath: projectDir } },
+    }, CallToolResultSchema);
+    assert.strictEqual(result.isError, true, 'empty lookup was accepted');
+    assert.match(result.content[0].text, /query, a filePath/);
+  });
 
   it('reports an unknown tool as an error rather than a success', async () => {
     // Proves the isError assertion above has teeth in both directions: if the

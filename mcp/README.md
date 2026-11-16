@@ -208,9 +208,9 @@ The framework splits capabilities into two tiers (see [ADR-015](../.architecture
   `architecture-review` and `specialist-review` skills and the
   `pragmatic-enforcer` subagent.
 
-## Available Tools (6 Tier-1 Tools)
+## Available Tools (7 Tier-1 Tools)
 
-The MCP server provides 6 deterministic Tier-1 tools corresponding to the framework's core operations:
+The MCP server provides 7 deterministic Tier-1 tools corresponding to the framework's core operations:
 
 ### `setup_architecture`
 **Standard Command Equivalent**: "Setup ai-software-architect"
@@ -300,6 +300,21 @@ Gets current state of architecture documentation with counts and metrics.
 - Team member count (from `.architecture/members.yml`)
 - Framework setup status
 - Available actions summary
+
+### `find_relevant_adrs`
+**Standard Command Equivalent**: "Which ADRs cover this?"
+
+Finds the ADRs that govern a question or a file, so an agent reads recorded decisions before changing code. Plain matching, no embeddings: keywords against ADR titles and bodies (rarer terms weigh more), plus optional `affects:` globs in ADR frontmatter against a file path.
+
+**Parameters:**
+- `projectPath` (string, required): Path to your project root directory
+- `query` (string, optional): Question or topic
+- `filePath` (string, optional): Project-relative path of a file you are about to change
+- `limit` (integer 1-20, optional): Maximum ADRs to return (default 5)
+
+At least one of `query` or `filePath` is required.
+
+**Returns:** JSON with `searched` (ADR count) and `adrs`, each with `id`, `title`, `status`, `file`, `current`, `matched` reasons, and `score`. A superseded ADR comes back with `current: false` and `supersededBy`, never as the decision in force. Relation fields are omitted when absent rather than returned as null. An empty result carries a `note`.
 
 ### `configure_pragmatic_mode`
 **Standard Command Equivalent**: "Enable pragmatic mode"
@@ -432,7 +447,7 @@ Ask the Pragmatic Enforcer to review these code changes for over-engineering
 
 ## Feature Parity
 
-The MCP server provides the 6 deterministic Tier-1 tools. Orchestrated reviews
+The MCP server provides the 7 deterministic Tier-1 tools. Orchestrated reviews
 and pragmatic enforcement (Tier 2) are delivered by the plugin/Skills, not MCP
 (see [Two-Tier Capability Model](#two-tier-capability-model)).
 

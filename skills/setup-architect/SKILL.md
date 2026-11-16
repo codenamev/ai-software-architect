@@ -90,7 +90,8 @@ Execute installation steps (see [references/installation-procedures.md](referenc
 # $FRAMEWORK_ROOT is from step 1.
 cp -r "$FRAMEWORK_ROOT/.architecture/templates" .architecture/templates
 cp "$FRAMEWORK_ROOT/.architecture/principles.md" .architecture/principles.md
-cp "$FRAMEWORK_ROOT/.architecture/members.yml" .architecture/members.yml
+# members.yml is seeded, not copied: drops motivated_by refs to this framework's ADRs/issues.
+node "$TOOLS_CLI" seed-members "$FRAMEWORK_ROOT/.architecture/members.yml" .architecture/members.yml
 cp "$FRAMEWORK_ROOT/.architecture/config.yml" .architecture/config.yml
 
 mkdir -p .architecture/decisions/adrs

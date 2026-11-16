@@ -15,6 +15,7 @@ import { validateAdr } from './lib/adr-validator.js';
 import { generateAll } from './lib/subagent-generator.js';
 import { discoverSource, PLUGIN_NAME } from './lib/setup-source-discovery.js';
 import { checkConsistency, FRAMEWORK_VERSION_SOURCES } from './lib/version-consistency.js';
+import { stripInternalProvenance } from './lib/roster-seeding.js';
 
 const [,, command, ...args] = process.argv;
 
@@ -23,6 +24,7 @@ const COMMANDS = {
   'validate-adr': validateAdrCommand,
   'generate-subagents': generateSubagentsCommand,
   'find-source': findSourceCommand,
+  'seed-members': seedMembersCommand,
   count: countCommand,
   'version-check': versionCheckCommand,
   help: helpCommand
@@ -243,6 +245,21 @@ function generateSubagentsCommand(args) {
 }
 
 /**
+ * Seed a project's members.yml from the framework roster, stripping
+ * framework-internal provenance (motivated_by ADR/issue refs) on the way.
+ * Usage: seed-members <source members.yml> <dest members.yml>
+ */
+function seedMembersCommand(args) {
+  const [src, dest] = args;
+  if (!src || !dest) {
+    console.error('Usage: node cli.js seed-members <source members.yml> <dest members.yml>');
+    process.exit(1);
+  }
+  writeFileSync(resolve(dest), stripInternalProvenance(readFileSync(resolve(src), 'utf8')));
+  console.log(`+ ${dest} (seeded from ${src}, framework provenance stripped)`);
+}
+
+/**
  * Count instructions in key documentation files
  */
 function countCommand(args) {
@@ -335,6 +352,7 @@ Usage:
   node cli.js validate-adr [files...]      Validate ADRs against template rules
   node cli.js generate-subagents [--check] Generate agents/*.md from members.yml
   node cli.js find-source [--json]         Discover the framework source for setup-architect
+  node cli.js seed-members <src> <dest>    Copy members.yml minus framework-internal motivated_by refs
   npm run count [files...]                 Count instructions (default: ../AGENTS.md ../CLAUDE.md)
   node cli.js version-check                Verify one framework version across all channels (ADR-011)
 

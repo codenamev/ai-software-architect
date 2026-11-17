@@ -7,11 +7,11 @@
  */
 
 import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { join, resolve, basename } from 'node:path';
+import { join, resolve, basename, dirname } from 'node:path';
 import { homedir } from 'node:os';
 import { validateLinks, checkLinks } from './lib/link-validator.js';
 import { countInstructions } from './lib/instruction-counter.js';
-import { validateAdr } from './lib/adr-validator.js';
+import { validateAdr, validateSupersession } from './lib/adr-validator.js';
 import { generateAll } from './lib/subagent-generator.js';
 import { discoverSource, PLUGIN_NAME } from './lib/setup-source-discovery.js';
 import { checkConsistency, FRAMEWORK_VERSION_SOURCES } from './lib/version-consistency.js';
@@ -98,10 +98,25 @@ function validateAdrCommand(args) {
 
   let totalFailed = 0;
 
+  // Supersession links are checked against every ADR in the target's
+  // directory, so validating one file still sees the file it points at.
+  const linkErrors = new Map();
+  for (const dir of new Set(targets.map(dirname))) {
+    const siblings = findAdrFiles(dir).map(f => ({ filename: basename(f), content: readFileSync(f, 'utf8') }));
+    for (const [filename, errs] of validateSupersession(siblings)) {
+      linkErrors.set(join(dir, filename), errs);
+    }
+  }
+
   for (const file of targets) {
     const filename = basename(file);
     const content = readFileSync(file, 'utf8');
     const result = validateAdr(filename, content);
+    const extra = linkErrors.get(file) || [];
+    if (extra.length > 0) {
+      result.errors.push(...extra);
+      result.valid = false;
+    }
 
     if (result.valid) {
       console.log(`✅ ${filename}`);

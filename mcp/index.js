@@ -1388,7 +1388,6 @@ export function markAdrSuperseded(content, newId, oldId = 'This ADR') {
   return out;
 }
 
-const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
 function frontmatterField(content, key) {
   const fm = FRONTMATTER.exec(content);

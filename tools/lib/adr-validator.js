@@ -48,6 +48,83 @@ export function validateAdr(filename, content) {
   return { valid: errors.length === 0, errors };
 }
 
+const ADR_REF_PATTERN = /^ADR-\d{3}$/;
+
+// Cross-file check for MADR supersession links. A newer ADR declares
+// "supersedes: ADR-NNN" in its frontmatter; the older one must carry
+// "superseded-by:" pointing back and "status: superseded". Either side
+// alone is an error, so a half-recorded supersession can't pass review.
+// Takes [{ filename, content }]; returns Map<filename, string[]> of errors.
+export function validateSupersession(adrs) {
+  const byId = new Map();
+  for (const adr of adrs) {
+    const id = adrId(adr.filename);
+    if (id) byId.set(id, { ...adr, id, frontmatter: frontmatterOf(adr.content) });
+  }
+
+  const errors = new Map();
+  const report = (filename, message) => {
+    if (!errors.has(filename)) errors.set(filename, []);
+    errors.get(filename).push(message);
+  };
+
+  for (const adr of byId.values()) {
+    const fm = adr.frontmatter;
+    for (const target of refList(fm.supersedes, 'supersedes', adr, report)) {
+      const old = byId.get(target);
+      if (!old) {
+        report(adr.filename, `supersedes: ${target} does not match any ADR file.`);
+        continue;
+      }
+      const backLinks = refList(old.frontmatter['superseded-by'], null);
+      if (!backLinks.includes(adr.id)) {
+        report(adr.filename, `supersedes: ${target}, but ${target} has no "superseded-by: ${adr.id}".`);
+      }
+      if ((old.frontmatter.status || '').split(/\s+/)[0].toLowerCase() !== 'superseded') {
+        report(adr.filename, `supersedes: ${target}, but ${target} status is not "superseded".`);
+      }
+    }
+
+    const successors = refList(fm['superseded-by'], 'superseded-by', adr, report);
+    for (const target of successors) {
+      const successor = byId.get(target);
+      if (!successor) {
+        report(adr.filename, `superseded-by: ${target} does not match any ADR file.`);
+      } else if (!refList(successor.frontmatter.supersedes, null).includes(adr.id)) {
+        report(adr.filename, `superseded-by: ${target}, but ${target} has no "supersedes: ${adr.id}".`);
+      }
+    }
+    if (successors.length > 0 && (fm.status || '').split(/\s+/)[0].toLowerCase() !== 'superseded') {
+      report(adr.filename, `superseded-by is set but status is "${fm.status || ''}"; expected "superseded".`);
+    }
+  }
+
+  return errors;
+}
+
+function adrId(filename) {
+  const match = filename.match(/^(ADR-\d{3})-/);
+  return match ? match[1] : null;
+}
+
+function frontmatterOf(content) {
+  if (!(content.startsWith('---\n') || content.startsWith('---\r\n'))) return {};
+  return parseFrontmatter(content) || {};
+}
+
+// Parses "ADR-001" or "ADR-001, ADR-002" (optionally bracketed). With a
+// field name, malformed entries are reported; without one they're dropped.
+function refList(raw, field, adr, report) {
+  if (raw === undefined || raw === '' || /^(none|null|~)$/i.test(raw)) return [];
+  const refs = [];
+  for (const part of raw.replace(/^\[|\]$/g, '').split(',')) {
+    const ref = part.trim().replace(/^(['"])(.*)\1$/, '$2');
+    if (ADR_REF_PATTERN.test(ref)) refs.push(ref);
+    else if (field) report(adr.filename, `${field}: "${ref}" is not an ADR reference (expected ADR-NNN).`);
+  }
+  return refs;
+}
+
 function parseFrontmatter(content) {
   const match = content.match(FRONTMATTER_PATTERN);
   if (!match) return null;

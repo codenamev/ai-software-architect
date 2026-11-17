@@ -1,6 +1,11 @@
-import { describe, it } from 'node:test';
+import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert';
-import { isProtected, protectedFileMessage } from '../lib/protected-files.js';
+import { isProtected, protectedFileMessage, setupSentinelActive, SETUP_SENTINEL_TTL_MS } from '../lib/protected-files.js';
+import { mkdtempSync, mkdirSync, writeFileSync, utimesSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 describe('Protected files', () => {
   describe('isProtected', () => {
@@ -118,6 +123,81 @@ describe('Protected files', () => {
       const msg = protectedFileMessage('.architecture/decisions/../members.yml');
       assert.match(msg, /members\.yml/);
       assert.match(msg, /generate-subagents/);
+    });
+  });
+
+  describe('setup sentinel', () => {
+    const HOOK = fileURLToPath(new URL('../hooks/protect-files-hook.js', import.meta.url));
+    let root;
+    let arch;
+
+    function runHook(filePath, cwd = root) {
+      const env = { ...process.env };
+      delete env.CLAUDE_ALLOW_PROTECTED;
+      return spawnSync(process.execPath, [HOOK], {
+        input: JSON.stringify({ cwd, tool_name: 'Edit', tool_input: { file_path: filePath } }),
+        env,
+        encoding: 'utf8',
+      });
+    }
+
+    function touchSentinel(ageMs = 0) {
+      const p = join(arch, '.setup-in-progress');
+      writeFileSync(p, 'setup-architect\n');
+      const t = (Date.now() - ageMs) / 1000;
+      utimesSync(p, t, t);
+    }
+
+    beforeEach(() => {
+      root = mkdtempSync(join(tmpdir(), 'asa-sentinel-'));
+      arch = join(root, '.architecture');
+      mkdirSync(arch);
+    });
+
+    afterEach(() => rmSync(root, { recursive: true, force: true }));
+
+    it('blocks protected files when no sentinel exists', () => {
+      assert.strictEqual(setupSentinelActive(join(arch, 'members.yml')), false);
+      assert.strictEqual(runHook(join(arch, 'members.yml')).status, 2);
+    });
+
+    it('allows protected files while a fresh sentinel exists', () => {
+      touchSentinel();
+      for (const name of ['members.yml', 'principles.md', 'config.yml']) {
+        assert.strictEqual(setupSentinelActive(join(arch, name)), true, name);
+        assert.strictEqual(runHook(join(arch, name)).status, 0, name);
+      }
+    });
+
+    it('resolves relative paths against the payload cwd', () => {
+      touchSentinel();
+      assert.strictEqual(setupSentinelActive('.architecture/config.yml', { cwd: root }), true);
+      assert.strictEqual(runHook('.architecture/config.yml').status, 0);
+      assert.strictEqual(runHook('.architecture/config.yml', tmpdir()).status, 2);
+    });
+
+    it('ignores a stale sentinel left by an aborted setup', () => {
+      touchSentinel(SETUP_SENTINEL_TTL_MS + 60_000);
+      assert.strictEqual(setupSentinelActive(join(arch, 'members.yml')), false);
+      assert.strictEqual(runHook(join(arch, 'members.yml')).status, 2);
+    });
+
+    it('ignores a sentinel that is a directory', () => {
+      mkdirSync(join(arch, '.setup-in-progress'));
+      assert.strictEqual(setupSentinelActive(join(arch, 'members.yml')), false);
+    });
+
+    it('only honors a sentinel in the same .architecture directory', () => {
+      touchSentinel();
+      const other = join(root, 'nested', '.architecture');
+      mkdirSync(other, { recursive: true });
+      assert.strictEqual(setupSentinelActive(join(other, 'members.yml')), false);
+      assert.strictEqual(runHook(join(other, 'members.yml')).status, 2);
+    });
+
+    it('never reports active for unprotected paths', () => {
+      touchSentinel();
+      assert.strictEqual(setupSentinelActive(join(arch, 'notes.md')), false);
     });
   });
 });

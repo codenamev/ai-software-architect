@@ -287,6 +287,8 @@ Add principles specific to your project's frameworks:
 
 #### Rails Projects
 
+Read the repo before seeding these. If it already has `app/services/`, `app/operations/`, form or query objects, or a `CLAUDE.md`/`CONTRIBUTING.md` that states where business logic lives, write *that* convention into `principles.md` and drop any default below that contradicts it. The defaults are for projects that haven't picked a side yet.
+
 **Convention Over Configuration**:
 - Follow Rails conventions
 - Don't fight the framework

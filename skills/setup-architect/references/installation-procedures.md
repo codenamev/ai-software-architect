@@ -99,6 +99,14 @@ mkdir -p .architecture/recalibration
 mkdir -p .architecture/comparisons
 mkdir -p .architecture/agent_docs
 
+# pragmatic_mode.deferral_log in config.yml points at this file
+[ -f .architecture/deferrals.md ] || cp .architecture/templates/deferrals.md .architecture/deferrals.md
+
+# Git drops empty directories; keep them in the first commit
+for d in decisions/adrs reviews recalibration comparisons agent_docs; do
+  [ -n "$(ls -A .architecture/$d)" ] || touch .architecture/$d/.gitkeep
+done
+
 echo "✅ Directory structure created"
 ```
 

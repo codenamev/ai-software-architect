@@ -12,6 +12,7 @@ own question with a number: how much does the plugin change what Claude does?
 | `create-adr` | `/create-adr` on a scaffolded `.architecture/` | an `ADR-NNN-*.md` written with `## Status` … `## Consequences` |
 | `specialist-dispatch` | natural request for a security review | `specialist-review` fires, `security-specialist` subagent dispatched, `architecture-review` does **not** fire |
 | `status-drift` | natural request for architecture status on a stale install | `architecture-status` fires; judge checks the report names the installed version and the ADR count |
+| `adr-context` | a plain edit to a file an ADR governs (prompt never mentions ADRs) | new code keeps integer cents per ADR-001; `read-governing-adr` shows the hook routed the agent to the ADR |
 
 `setup-architect` and `create-adr` carry `disable-model-invocation: true`, so their
 prompts use the slash form a user types. They are graded on the files produced, not on a
@@ -37,3 +38,11 @@ across two releases.
 Results land in `evals/results/` (gitignored). The first run is the baseline; the number
 to watch is the `Δ` on `specialist-dispatch`. If it is near zero, the persona layer is not
 changing Claude's answer and that is a finding, not a flake.
+
+`adr-context` measures the PreToolUse hook, not a skill. Its ADR sets a rule a model
+wouldn't apply by default (round once to whole cents), so the delta is about the code
+written, not whether the agent can quote an ADR. The hook's `additionalContext` is not in
+the trace graders see, so the indicator is the `Read` of the ADR file instead. First run
+(2026-11-17, 3 runs per arm): with 1.00, without 0.00. In at least one with-arm run the
+agent wrote a float version first, got the hook context on that edit, then read the ADR
+and fixed it, so the hook works as a correction, not a pre-read.

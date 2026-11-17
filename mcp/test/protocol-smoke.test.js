@@ -234,16 +234,24 @@ describe('MCP protocol smoke test', () => {
   });
 
   describe('create_adr supersedes', () => {
+    // Own project dir: the find_relevant_adrs test above writes ADR-001/002
+    // into the shared projectDir, and these tests number from an empty dir.
+    let supersedeDir;
     let adrDir;
     const call = (args) => client.request({
       method: 'tools/call',
-      params: { name: 'create_adr', arguments: { context: 'c', decision: 'd', consequences: 'q', projectPath: projectDir, ...args } },
+      params: { name: 'create_adr', arguments: { context: 'c', decision: 'd', consequences: 'q', projectPath: supersedeDir, ...args } },
     }, CallToolResultSchema);
     const listAdrs = async () => (await readdir(adrDir)).sort();
 
     before(async () => {
-      adrDir = path.join(projectDir, '.architecture', 'decisions', 'adrs');
+      supersedeDir = await mkdtemp(path.join(os.tmpdir(), 'asa-supersede-'));
+      adrDir = path.join(supersedeDir, '.architecture', 'decisions', 'adrs');
       await mkdir(adrDir, { recursive: true });
+    });
+
+    after(async () => {
+      if (supersedeDir) await rm(supersedeDir, { recursive: true, force: true });
     });
 
     it('flips the old ADR to superseded and links both ways in one call', async () => {

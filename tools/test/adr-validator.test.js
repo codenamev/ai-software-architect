@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { validateAdr } from '../lib/adr-validator.js';
+import { validateAdr, validateSupersession } from '../lib/adr-validator.js';
 
 const VALID_ADR = `# ADR-001: Use PostgreSQL
 
@@ -174,5 +174,84 @@ describe('ADR Validator', () => {
       assert.strictEqual(result.valid, false);
       assert.ok(result.errors.length >= 4, `expected >= 4 errors, got ${result.errors.length}`);
     });
+  });
+});
+
+const adr = (status, extra = '') => `---
+status: ${status}
+date: 2026-11-16
+${extra}---
+
+# Title
+
+## Context
+
+c
+
+## Decision
+
+d
+
+## Consequences
+
+e
+`;
+
+describe('validateSupersession', () => {
+  const OLD = 'ADR-001-old-choice.md';
+  const NEW = 'ADR-002-new-choice.md';
+  const run = (oldContent, newContent) =>
+    validateSupersession([
+      { filename: OLD, content: oldContent },
+      { filename: NEW, content: newContent },
+    ]);
+
+  it('accepts a two-way link with the old ADR superseded', () => {
+    const errors = run(adr('superseded', 'superseded-by: ADR-002\n'), adr('accepted', 'supersedes: ADR-001\n'));
+    assert.strictEqual(errors.size, 0, JSON.stringify([...errors]));
+  });
+
+  it('accepts ADRs with no supersession fields', () => {
+    assert.strictEqual(run(adr('accepted'), adr('accepted')).size, 0);
+  });
+
+  it('treats "supersedes: none" as no link', () => {
+    assert.strictEqual(run(adr('accepted'), adr('accepted', 'supersedes: none\n')).size, 0);
+  });
+
+  it('flags supersedes without a back-link or status change on the old ADR', () => {
+    const errors = run(adr('accepted'), adr('accepted', 'supersedes: ADR-001\n'));
+    const msgs = errors.get(NEW) || [];
+    assert.ok(msgs.some(m => m.includes('no "superseded-by: ADR-002"')), JSON.stringify(msgs));
+    assert.ok(msgs.some(m => m.includes('status is not "superseded"')), JSON.stringify(msgs));
+  });
+
+  it('flags superseded-by without a matching supersedes', () => {
+    const errors = run(adr('superseded', 'superseded-by: ADR-002\n'), adr('accepted'));
+    assert.ok((errors.get(OLD) || []).some(m => m.includes('no "supersedes: ADR-001"')));
+  });
+
+  it('flags superseded-by on an ADR whose status is not superseded', () => {
+    const errors = run(adr('accepted', 'superseded-by: ADR-002\n'), adr('accepted', 'supersedes: ADR-001\n'));
+    assert.ok((errors.get(OLD) || []).some(m => m.includes('expected "superseded"')));
+  });
+
+  it('flags a reference to a missing ADR', () => {
+    const errors = run(adr('accepted'), adr('accepted', 'supersedes: ADR-099\n'));
+    assert.ok((errors.get(NEW) || []).some(m => m.includes('ADR-099 does not match')));
+  });
+
+  it('flags malformed references', () => {
+    const errors = run(adr('accepted'), adr('accepted', 'supersedes: 001\n'));
+    assert.ok((errors.get(NEW) || []).some(m => m.includes('not an ADR reference')));
+  });
+
+  it('accepts a list when one ADR supersedes two', () => {
+    const errors = validateSupersession([
+      { filename: OLD, content: adr('superseded', 'superseded-by: ADR-003\n') },
+      { filename: NEW, content: adr('superseded', 'superseded-by: ADR-003\n') },
+      { filename: 'ADR-003-merged.md', content: adr('accepted', 'supersedes: [ADR-001, ADR-002]\n') },
+    ]);
+    assert.strictEqual(errors.size, 0, JSON.stringify([...errors]));
   });
 });

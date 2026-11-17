@@ -1,7 +1,7 @@
 ---
 name: setup-architect
 description: Sets up and installs the AI Software Architect framework in a NEW project for the FIRST time. Use when the user requests "Setup .architecture", "Setup ai-software-architect", "Initialize architecture framework", "Install software architect", or similar setup/installation phrases. Do NOT use for checking status (use architecture-status), creating documents (use create-adr or reviews), or when framework is already set up.
-allowed-tools: Read,Write,Edit,Glob,Grep,Bash(git:*,npm:*,node:*,mkdir:*,cp:*,ls:*,test:*)
+allowed-tools: Read,Write,Edit,Glob,Grep,Bash(git:*,npm:*,node:*,mkdir:*,cp:*,ls:*,test:*,touch:*,rm:*)
 disable-model-invocation: true
 ---
 
@@ -33,7 +33,7 @@ The skill creates a `.architecture/` directory in your **target project** (not i
 - `.architecture/config.yml` — operational config (pragmatic mode, etc.)
 - `.architecture/templates/` — ADR + review templates ready to use
 
-The skill writes **only into your target project's `.architecture/`**. It does not modify code outside that directory.
+The skill writes into your target project's `.architecture/`, plus two integration points outside it: it appends a framework section to an existing `CLAUDE.md` (step 6), and the installation procedure creates `.coding-assistants/` for assistant-specific config. It does not modify application code.
 
 ## High-Level Workflow
 
@@ -88,16 +88,27 @@ Execute installation steps (see [references/installation-procedures.md](referenc
 
 ```bash
 # $FRAMEWORK_ROOT is from step 1.
-cp -r "$FRAMEWORK_ROOT/.architecture/templates" .architecture/templates
-cp "$FRAMEWORK_ROOT/.architecture/principles.md" .architecture/principles.md
-cp "$FRAMEWORK_ROOT/.architecture/members.yml" .architecture/members.yml
-cp "$FRAMEWORK_ROOT/.architecture/config.yml" .architecture/config.yml
-
+# Directories first: on a fresh project .architecture/ doesn't exist yet,
+# and cp into a missing parent fails.
 mkdir -p .architecture/decisions/adrs
 mkdir -p .architecture/reviews
 mkdir -p .architecture/recalibration
 mkdir -p .architecture/comparisons
 mkdir -p .architecture/agent_docs
+
+cp -r "$FRAMEWORK_ROOT/.architecture/templates" .architecture/templates
+cp "$FRAMEWORK_ROOT/.architecture/principles.md" .architecture/principles.md
+cp "$FRAMEWORK_ROOT/.architecture/members.yml" .architecture/members.yml
+cp "$FRAMEWORK_ROOT/.architecture/config.yml" .architecture/config.yml
+
+# config.yml's pragmatic_mode.deferral_log points here; create it so the
+# first deferral has somewhere to land.
+[ -f .architecture/deferrals.md ] || cp .architecture/templates/deferrals.md .architecture/deferrals.md
+
+# Git drops empty directories; keep the structure in the first commit.
+for d in decisions/adrs reviews recalibration comparisons agent_docs; do
+  [ -n "$(ls -A .architecture/$d)" ] || touch .architecture/$d/.gitkeep
+done
 ```
 
 - Create directory structure (decisions/adrs, reviews, recalibration, etc.)
@@ -108,6 +119,14 @@ mkdir -p .architecture/agent_docs
 **Critical (legacy clone path only):** Follow safety procedures when removing `.git/` directory. See [references/installation-procedures.md § Cleanup Procedures](references/installation-procedures.md#cleanup-procedures).
 
 ### 4. Customize Architecture Team
+
+Steps 4 and 5 edit `members.yml` and `principles.md`, which the plugin's PreToolUse hook protects. Open a setup window first, so the hook lets those edits through:
+
+```bash
+touch .architecture/.setup-in-progress
+```
+
+The hook honors the sentinel for an hour from its mtime, so an aborted setup can't leave protection off. Step 7 removes it.
 
 Add technology-specific members to `.architecture/members.yml`:
 - **JavaScript/TypeScript**: JavaScript Expert, framework specialists (React/Vue/Angular)
@@ -130,6 +149,8 @@ Add framework-specific principles to `.architecture/principles.md`:
 - **Rails**: Convention over configuration, DRY, RESTful design
 - **Django**: Explicit over implicit, reusable apps, use built-ins
 
+These are defaults. Where the repo already shows a convention (service objects, a stated layering rule in its contributor docs), record the repo's convention and skip any default that contradicts it.
+
 **Principle examples**: [references/customization-guide.md § Customize Principles](references/customization-guide.md#customize-architectural-principles)
 
 ### 6. Update CLAUDE.md Integration
@@ -142,6 +163,12 @@ If `CLAUDE.md` exists in project root, append framework usage section:
 **Template**: [references/customization-guide.md § Update CLAUDE.md](references/customization-guide.md#update-claudemd-integration)
 
 ### 7. Cleanup
+
+Close the setup window so the hook protects the customized files again:
+
+```bash
+rm -f .architecture/.setup-in-progress
+```
 
 Remove framework development files:
 - Framework documentation (README.md, USAGE*.md, INSTALL.md)

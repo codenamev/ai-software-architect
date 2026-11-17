@@ -4,14 +4,15 @@
  *
  * Reads JSON from stdin, extracts the target file path, and blocks Write/Edit
  * on .architecture/{members.yml, principles.md, config.yml} unless the
- * CLAUDE_ALLOW_PROTECTED env var is set.
+ * CLAUDE_ALLOW_PROTECTED env var is set, or setup-architect's fresh
+ * `.architecture/.setup-in-progress` sentinel sits next to the target.
  *
  * Exit 0 = allow.
  * Exit 2 = block; stderr is shown to the model so it can redirect to the
  *          recommended workflow (regenerator, ADR, pragmatic-guard skill).
  */
 
-import { isProtected, protectedFileMessage } from '../lib/protected-files.js';
+import { isProtected, protectedFileMessage, setupSentinelActive } from '../lib/protected-files.js';
 
 async function readStdin() {
   const chunks = [];
@@ -38,6 +39,7 @@ async function readStdin() {
     payload?.params?.file_path;
 
   if (!filePath || !isProtected(filePath)) process.exit(0);
+  if (setupSentinelActive(filePath, { cwd: payload?.cwd || process.cwd() })) process.exit(0);
 
   console.error(protectedFileMessage(filePath));
   process.exit(2);

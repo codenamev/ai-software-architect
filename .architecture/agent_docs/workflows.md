@@ -242,7 +242,7 @@ Document architectural decision for [topic]
 2. **Be Specific**: Clear, precise language about what's changing
 3. **Include Context**: Future readers need to understand why
 4. **Document Alternatives**: Show you considered other approaches
-5. **Update Status**: Mark as Accepted when implemented, Superseded if replaced
+5. **Update Status**: Mark as Accepted when implemented. When a new ADR replaces an old one, link both ways in frontmatter: the new ADR gets `supersedes: ADR-NNN`, the old one gets `status: superseded` and `superseded-by: ADR-new`. Do both in the same change; `validate-adr` fails a one-sided link. The MCP `create_adr` tool does this for you when you pass `supersedes`.
 
 ---
 

@@ -7,6 +7,10 @@
           {
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT:-.}/tools/hooks/protect-files-hook.js"
+          },
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PLUGIN_ROOT:-.}/tools/hooks/adr-context-hook.js"
           }
         ]
       }

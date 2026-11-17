@@ -12,7 +12,7 @@
 
 import { describe, it, before, after } from 'node:test';
 import assert from 'node:assert';
-import { mkdtemp, mkdir, rm, symlink, readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, rm, symlink, readFile, readdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +24,7 @@ const MCP_DIR = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const SERVER = path.join(MCP_DIR, 'index.js');
 
 // Every tool index.js advertises, matching mcp/README.md "Available Tools
-// (6 Tier-1 Tools)". A tool disappearing is a break for anyone whose prompts
+// (7 Tier-1 Tools)". A tool disappearing is a break for anyone whose prompts
 // reference it, so the set is asserted exactly rather than as a subset.
 const EXPECTED_TOOLS = [
   'setup_architecture',
@@ -33,6 +33,7 @@ const EXPECTED_TOOLS = [
   'get_architecture_status',
   'configure_pragmatic_mode',
   'get_implementation_guidance',
+  'find_relevant_adrs',
 ].sort();
 
 // Spawn the server at `entry` and return a connected client. Callers close it.
@@ -177,6 +178,49 @@ describe('MCP protocol smoke test', () => {
     });
   }
 
+  it('finds ADRs by query and by affects glob, labelling superseded ones', async () => {
+    const adrDir = path.join(projectDir, '.architecture', 'decisions', 'adrs');
+    await mkdir(adrDir, { recursive: true });
+    await writeFile(path.join(adrDir, 'ADR-001-cache-with-redis.md'),
+      '---\nstatus: Superseded\nsuperseded-by: ADR-002\n---\n# ADR-001: Cache sessions with Redis\n\nRedis holds session state.\n');
+    await writeFile(path.join(adrDir, 'ADR-002-cache-in-postgres.md'),
+      '---\nstatus: Accepted\nsupersedes: ADR-001\naffects: app/cache/**\n---\n# ADR-002: Cache sessions in Postgres\n\nDrop Redis; Postgres unlogged tables hold session state.\n');
+
+    const call = async (args) => {
+      const result = await client.request({
+        method: 'tools/call',
+        params: { name: 'find_relevant_adrs', arguments: { projectPath: projectDir, ...args } },
+      }, CallToolResultSchema);
+      assert.notStrictEqual(result.isError, true, `tools/call failed: ${result.content?.[0]?.text}`);
+      return JSON.parse(result.content[0].text);
+    };
+
+    const byQuery = await call({ query: 'where does session cache state live?' });
+    assert.strictEqual(byQuery.searched, 2);
+    const old = byQuery.adrs.find(a => a.id === 'ADR-001');
+    assert.ok(old, 'superseded ADR missing from results');
+    assert.strictEqual(old.current, false);
+    assert.deepStrictEqual(old.supersededBy, ['ADR-002']);
+    assert.strictEqual(byQuery.adrs.find(a => a.id === 'ADR-002').current, true);
+
+    const byPath = await call({ filePath: 'app/cache/session_store.rb' });
+    assert.deepStrictEqual(byPath.adrs.map(a => a.id), ['ADR-002']);
+    assert.ok(byPath.adrs[0].matched.includes('affects app/cache/**'));
+
+    const none = await call({ query: 'kubernetes helm charts' });
+    assert.deepStrictEqual(none.adrs, []);
+    assert.match(none.note, /No ADR matched/);
+  });
+
+  it('refuses find_relevant_adrs with neither query nor filePath', async () => {
+    const result = await client.request({
+      method: 'tools/call',
+      params: { name: 'find_relevant_adrs', arguments: { projectPath: projectDir } },
+    }, CallToolResultSchema);
+    assert.strictEqual(result.isError, true, 'empty lookup was accepted');
+    assert.match(result.content[0].text, /query, a filePath/);
+  });
+
   it('reports an unknown tool as an error rather than a success', async () => {
     // Proves the isError assertion above has teeth in both directions: if the
     // handler stopped signalling failure, this test goes red instead of the
@@ -187,6 +231,59 @@ describe('MCP protocol smoke test', () => {
     }, CallToolResultSchema);
 
     assert.strictEqual(result.isError, true, 'unknown tool was not reported as an error');
+  });
+
+  describe('create_adr supersedes', () => {
+    let adrDir;
+    const call = (args) => client.request({
+      method: 'tools/call',
+      params: { name: 'create_adr', arguments: { context: 'c', decision: 'd', consequences: 'q', projectPath: projectDir, ...args } },
+    }, CallToolResultSchema);
+    const listAdrs = async () => (await readdir(adrDir)).sort();
+
+    before(async () => {
+      adrDir = path.join(projectDir, '.architecture', 'decisions', 'adrs');
+      await mkdir(adrDir, { recursive: true });
+    });
+
+    it('flips the old ADR to superseded and links both ways in one call', async () => {
+      const first = await call({ title: 'Use Postgres' });
+      assert.notStrictEqual(first.isError, true, first.content?.[0]?.text);
+      const second = await call({ title: 'Use SQLite', supersedes: 'ADR-001' });
+      assert.notStrictEqual(second.isError, true, second.content?.[0]?.text);
+      assert.match(second.content[0].text, /Supersedes: ADR-001/);
+
+      const oldAdr = await readFile(path.join(adrDir, 'ADR-001-use-postgres.md'), 'utf8');
+      const newAdr = await readFile(path.join(adrDir, 'ADR-002-use-sqlite.md'), 'utf8');
+      const fm = (text) => text.match(/^---\n([\s\S]*?)\n---/)[1];
+      assert.match(fm(oldAdr), /^status: superseded$/m);
+      assert.match(fm(oldAdr), /^superseded-by: ADR-002$/m);
+      assert.match(oldAdr, /## Status\n\nSuperseded by ADR-002\n/);
+      assert.match(fm(newAdr), /^supersedes: ADR-001$/m);
+      assert.match(fm(newAdr), /^status: proposed$/m);
+    });
+
+    it('refuses to supersede an ADR twice and writes nothing', async () => {
+      const before = await listAdrs();
+      const result = await call({ title: 'Use MySQL', supersedes: 'ADR-001' });
+      assert.strictEqual(result.isError, true, 'second supersede of ADR-001 was accepted');
+      assert.match(result.content[0].text, /already superseded by ADR-002/);
+      assert.deepStrictEqual(await listAdrs(), before);
+    });
+
+    it('errors on a missing target before writing anything', async () => {
+      const before = await listAdrs();
+      const result = await call({ title: 'Orphan', supersedes: 'ADR-099' });
+      assert.strictEqual(result.isError, true, 'unknown supersedes target was accepted');
+      assert.match(result.content[0].text, /ADR-099 does not match any ADR/);
+      assert.deepStrictEqual(await listAdrs(), before);
+    });
+
+    it('rejects a malformed supersedes id at the schema', async () => {
+      const result = await call({ title: 'Bad ref', supersedes: '001' });
+      assert.strictEqual(result.isError, true, 'malformed supersedes was accepted');
+      assert.match(result.content[0].text, /supersedes/);
+    });
   });
 
   it('rejects a call missing a required argument and names the field', async () => {

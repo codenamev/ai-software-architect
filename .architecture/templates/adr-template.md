@@ -2,6 +2,8 @@
 status: proposed
 date: YYYY-MM-DD
 decision-makers: [list everyone involved in the decision]
+# supersedes: ADR-NNN      # this ADR replaces ADR-NNN; also set that ADR's status + superseded-by
+# superseded-by: ADR-NNN   # set on an old ADR when a newer one replaces it (with status: superseded)
 ---
 
 <!--
@@ -17,7 +19,7 @@ Sections beyond Context, Decision, and Consequences are optional extensions.
 
 [Draft | Proposed | Accepted | Implemented | Deprecated | Superseded]
 
-If superseded, link to the new ADR: [New ADR Link]
+If superseded, link to the new ADR: [New ADR Link]. The frontmatter `superseded-by:` field is what tools read.
 
 ## Context
 

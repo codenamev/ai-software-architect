@@ -1,7 +1,7 @@
 ---
 name: create-adr
 description: Creates a NEW Architectural Decision Record (ADR) documenting a specific architectural decision. Use when the user requests "Create ADR for [topic]", "Document decision about [topic]", "Write ADR for [choice]", or when documenting technology choices, patterns, or architectural approaches. Do NOT use for reviews (use architecture-review or specialist-review), checking existing ADRs (use architecture-status), or general documentation.
-allowed-tools: Read,Write,Glob,Grep,Bash(ls:*)
+allowed-tools: Read,Write,Edit,Glob,Grep,Bash(ls:*)
 disable-model-invocation: true
 ---
 
@@ -17,6 +17,7 @@ Ask if needed:
 - What problem does it solve?
 - What alternatives were considered?
 - What are the trade-offs?
+- Does this replace an existing ADR? If so, which one (`ADR-NNN`)?
 
 Then read `.architecture/principles.md` if it exists. The decision is written against it in step 6.
 
@@ -68,8 +69,17 @@ Use the template from `.architecture/templates/adr-template.md`:
 
 **If deferrals enabled**: Track deferred decisions in `.architecture/deferrals.md`
 
+**If this ADR supersedes another**: confirm the old file exists in `.architecture/decisions/adrs/` before writing anything. If it doesn't, stop and ask; don't create a dangling link. Add `supersedes: ADR-NNN` to the new ADR's frontmatter.
+
 ### 7. Save ADR
 Write to: `.architecture/decisions/adrs/ADR-XXX-title.md`
+
+**If this ADR supersedes another**, edit the old ADR in the same change:
+- frontmatter `status: superseded`
+- frontmatter `superseded-by: ADR-XXX` (the new number)
+- if the old ADR keeps a `## Status` section, change it to `Superseded` and link the new ADR so it matches the frontmatter
+
+Leave the rest of the old ADR alone. It's the record of what was decided then. `validate-adr` checks that both sides of the link agree, so a half-written pair fails validation.
 
 ### 8. Report to User
 ```
@@ -77,6 +87,7 @@ Created ADR-XXX: [Title]
 
 Location: .architecture/decisions/adrs/ADR-XXX-title.md
 Status: [Status]
+Supersedes: [ADR-NNN, now marked superseded | none]
 
 Key Points:
 - Decision: [Summary]
@@ -104,7 +115,7 @@ Next Steps:
 - **Proposed**: Documented but not approved
 - **Accepted**: Approved and should be implemented
 - **Deprecated**: No longer best practice
-- **Superseded**: Replaced by newer ADR (reference it)
+- **Superseded**: Replaced by a newer ADR. Set by the new ADR's `supersedes:` field (step 7), never by hand alone
 
 ## Related Skills
 

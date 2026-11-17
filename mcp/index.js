@@ -138,6 +138,8 @@ export class ArchitectureServer {
           context: z.string().describe("Context and background for the decision"),
           decision: z.string().describe("The architectural decision being made"),
           consequences: z.string().describe("Consequences of this decision"),
+          supersedes: z.string().regex(/^ADR-\d{3}$/, 'supersedes must look like "ADR-007"').optional()
+            .describe('ID of an existing ADR this one replaces (e.g. "ADR-007"). The old ADR is marked "status: superseded" with "superseded-by" pointing here, in the same call.'),
           projectPath,
         },
         handler: (args) => this.createADR(args),
@@ -727,7 +729,7 @@ The AI Software Architect framework has been configured with:
   }
 
   async createADR(args) {
-    const { title, context, decision, consequences, projectPath } = args;
+    const { title, context, decision, consequences, supersedes, projectPath } = args;
     const architecturePath = path.join(projectPath, ".architecture");
     
     if (!(await fs.pathExists(architecturePath))) {
@@ -754,10 +756,28 @@ The AI Software Architect framework has been configured with:
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       || 'untitled';
-    const adrFilename = `ADR-${nextNumber.toString().padStart(3, '0')}-${titleSlug}.md`;
-    
+    const newId = `ADR-${nextNumber.toString().padStart(3, '0')}`;
+    const adrFilename = `${newId}-${titleSlug}.md`;
+
+    // Resolve and rewrite the superseded ADR before writing anything, so a bad
+    // target leaves the decisions directory untouched.
+    let superseded = null;
+    if (supersedes) {
+      const targetNumber = parseInt(supersedes.slice(4), 10);
+      const oldFilename = existingADRs.find(file => {
+        const match = file.match(/^(?:ADR-)?(\d+)/i);
+        return match && parseInt(match[1], 10) === targetNumber && file.endsWith('.md');
+      });
+      if (!oldFilename) {
+        throw new Error(`supersedes: ${supersedes} does not match any ADR in .architecture/decisions/adrs/. Nothing was written.`);
+      }
+      const oldPath = path.join(adrsPath, oldFilename);
+      const oldContent = await fs.readFile(oldPath, 'utf8');
+      superseded = { filename: oldFilename, path: oldPath, content: markAdrSuperseded(oldContent, newId, supersedes) };
+    }
+
     const template = await this.loadAdrTemplate(architecturePath);
-    const adrContent = renderAdrFromTemplate(template, {
+    let adrContent = renderAdrFromTemplate(template, {
       number: nextNumber,
       title,
       context,
@@ -765,14 +785,20 @@ The AI Software Architect framework has been configured with:
       consequences,
       date: new Date().toISOString().split('T')[0],
     });
+    if (superseded) adrContent = setFrontmatterField(adrContent, 'supersedes', supersedes);
 
     await fs.writeFile(path.join(adrsPath, adrFilename), adrContent);
+    if (superseded) await fs.writeFile(superseded.path, superseded.content);
+
+    const supersededLine = superseded
+      ? `\nSupersedes: ${supersedes} (${superseded.filename} now has status: superseded, superseded-by: ${newId})`
+      : '';
 
     return {
       content: [
         {
           type: "text",
-          text: `✅ ADR created successfully!\n\nFile: .architecture/decisions/adrs/${adrFilename}\nNumber: ${nextNumber}\nTitle: ${title}\n\nRendered from .architecture/templates/adr-template.md: Status, Context, Decision and Consequences carry your input; the remaining [bracketed] prompts (Decision Drivers, the Consequences sub-lists, Alternatives Considered, …) are left for you to complete or delete.`,
+          text: `✅ ADR created successfully!\n\nFile: .architecture/decisions/adrs/${adrFilename}\nNumber: ${nextNumber}\nTitle: ${title}${supersededLine}\n\nRendered from .architecture/templates/adr-template.md: Status, Context, Decision and Consequences carry your input; the remaining [bracketed] prompts (Decision Drivers, the Consequences sub-lists, Alternatives Considered, …) are left for you to complete or delete.`,
         },
       ],
     };
@@ -1299,6 +1325,53 @@ export function renderAdrFromTemplate(template, { number, title, context, decisi
   out = fillSectionPlaceholder(out, 'Decision', decision);
   out = fillSectionPlaceholder(out, 'Consequences', consequences);
   return out;
+}
+
+// Mark an existing ADR as replaced by `newId`, in the shape validate-adr's
+// supersede check expects: frontmatter "status: superseded" plus
+// "superseded-by: <newId>", and a "## Status" section (when present) that
+// agrees with the frontmatter. Line-based so the rest of the file is untouched.
+// Throws rather than overwrite an existing successor link. Exported for tests.
+export function markAdrSuperseded(content, newId, oldId = 'This ADR') {
+  const existing = frontmatterField(content, 'superseded-by');
+  if (existing && existing !== 'none') {
+    throw new Error(`${oldId} is already superseded by ${existing}. Nothing was written.`);
+  }
+  let out = setFrontmatterField(content, 'status', 'superseded');
+  out = setFrontmatterField(out, 'superseded-by', newId);
+  const bounds = sectionBounds(out, 'Status');
+  if (bounds) {
+    const [bodyStart, bodyEnd] = bounds;
+    const lines = out.slice(bodyStart, bodyEnd).split('\n');
+    const i = lines.findIndex(l => l.trim() && !/^\[.*\]$/.test(l.trim()));
+    const replacement = `Superseded by ${newId}`;
+    if (i === -1) lines.splice(1, 0, '', replacement);
+    else lines[i] = replacement;
+    out = out.slice(0, bodyStart) + lines.join('\n') + out.slice(bodyEnd);
+  }
+  return out;
+}
+
+const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
+
+function frontmatterField(content, key) {
+  const fm = FRONTMATTER.exec(content);
+  if (!fm) return null;
+  const line = fm[1].split(/\r?\n/).find(l => l.toLowerCase().startsWith(`${key}:`));
+  return line ? line.slice(key.length + 1).trim() : null;
+}
+
+// Set `key: value` in the leading YAML frontmatter: replace the line when the
+// key exists, otherwise append it before the closing "---". A file with no
+// frontmatter gets one. Exported for tests.
+export function setFrontmatterField(content, key, value) {
+  const fm = FRONTMATTER.exec(content);
+  if (!fm) return `---\n${key}: ${value}\n---\n\n${content}`;
+  const lines = fm[1].split(/\r?\n/);
+  const i = lines.findIndex(l => l.toLowerCase().startsWith(`${key}:`));
+  if (i === -1) lines.push(`${key}: ${value}`);
+  else lines[i] = `${key}: ${value}`;
+  return `---\n${lines.join('\n')}\n---\n${content.slice(fm[0].length)}`;
 }
 
 function appendSection(text, name, body) {

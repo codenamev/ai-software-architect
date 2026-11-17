@@ -251,6 +251,7 @@ Creates a new Architectural Decision Record with automatic numbering.
 - `context` (string, required): Context and background for the decision
 - `decision` (string, required): The architectural decision being made
 - `consequences` (string, required): Consequences of this decision
+- `supersedes` (string, optional): ID of an existing ADR this one replaces, e.g. `ADR-007`. The new ADR gets `supersedes: ADR-007` in its frontmatter, and in the same call the old ADR gets `status: superseded`, `superseded-by: ADR-XXX`, and a matching Status section. If the target doesn't exist or is already superseded, the call fails and nothing is written.
 - `projectPath` (string, required): Path to your project root directory
 
 **Creates:**

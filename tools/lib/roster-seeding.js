@@ -42,3 +42,57 @@ export function assertContainsIds(members, requiredIds = CANONICAL_MEMBER_IDS) {
   }
   return true;
 }
+
+/**
+ * Strip framework-internal provenance from a members.yml before seeding it
+ * into a user project.
+ *
+ * The framework's own roster records why each checklist item exists
+ * (`motivated_by: "ADR-016; ..."`, `#30`, ...). Those refs point at this
+ * repo's ADRs and issues, which don't exist in the target project, so a seeded
+ * copy would cite decisions the user can't read. This collapses every
+ * `- text: "..."` + `motivated_by: "..."` item to a plain `- "..."` string and
+ * drops the explanatory comment that documents the field. Everything else
+ * (other keys, comments, ordering, formatting) passes through byte-for-byte.
+ *
+ * Line-based on purpose: a YAML round-trip would reflow the file and lose its
+ * comments. Items with keys other than text/motivated_by are left alone.
+ *
+ * @param {string} yamlText
+ * @returns {string}
+ */
+export function stripInternalProvenance(yamlText) {
+  const lines = yamlText.split('\n');
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Drop the comment block that documents motivated_by (references ADR-010).
+    if (/^\s*#.*\bADR-\d+\b.*Silent Checklist/.test(line)) {
+      if (i + 1 < lines.length && /^\s*#.*motivated_by/.test(lines[i + 1])) i++;
+      continue;
+    }
+
+    const item = line.match(/^(\s*)- text: (.*)$/);
+    if (item) {
+      const [, indent, value] = item;
+      const childIndent = indent + '  ';
+      const children = [];
+      let j = i + 1;
+      while (j < lines.length && lines[j].startsWith(childIndent + ' ') === false &&
+             lines[j].startsWith(childIndent) && /^\s*[a-z_]+:/.test(lines[j])) {
+        children.push(lines[j]);
+        j++;
+      }
+      const onlyMotivation = children.every(c => c.trimStart().startsWith('motivated_by:'));
+      if (onlyMotivation) {
+        out.push(`${indent}- ${value}`);
+        i = j - 1;
+        continue;
+      }
+    }
+
+    out.push(line);
+  }
+  return out.join('\n');
+}

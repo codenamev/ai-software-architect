@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: adr-context
+context:
+  scaffold_script: fixture.sh

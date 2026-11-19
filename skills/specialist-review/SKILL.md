@@ -24,7 +24,7 @@ If either is unclear, ask one focused clarifying question and stop.
 
 Read `.architecture/members.yml` and find the member whose `name` or `title` matches the requested role (case-insensitive, allow common abbreviations like "security" → "Security Specialist").
 
-The member's `id` (e.g., `security_specialist`) maps to a subagent at `agents/<kebab-id>.md` (e.g., `agents/security-specialist.md`). The drift check in CI (`generate-subagents --check`) guarantees that file exists if the member exists.
+The member's `id` (e.g., `security_specialist`) maps to a subagent at `<kebab-id>.md` (e.g., `security-specialist.md`): in `.claude/agents/` of a project using the plugin, or the plugin's own `agents/`. The drift check in CI (`generate-subagents --check`) guarantees that file exists if the member exists.
 
 **If the requested specialist is not in `members.yml`:**
 

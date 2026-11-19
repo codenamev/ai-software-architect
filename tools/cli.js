@@ -16,6 +16,7 @@ import { generateAll } from './lib/subagent-generator.js';
 import { discoverSource, PLUGIN_NAME } from './lib/setup-source-discovery.js';
 import { checkConsistency, FRAMEWORK_VERSION_SOURCES } from './lib/version-consistency.js';
 import { stripInternalProvenance } from './lib/roster-seeding.js';
+import { resolveSubagentPaths } from './lib/project-root.js';
 
 const [,, command, ...args] = process.argv;
 
@@ -227,8 +228,14 @@ function findPluginCandidates(pluginsDir, maxDepth = 5) {
  */
 function generateSubagentsCommand(args) {
   const check = args.includes('--check');
-  const membersPath = resolve('../.architecture/members.yml');
-  const outDir = resolve('../agents');
+  const rootFlag = args.indexOf('--root');
+  if (rootFlag !== -1 && !args[rootFlag + 1]) throw new Error('--root needs a directory');
+  const { membersPath, outDir } = resolveSubagentPaths({
+    cwd: process.cwd(),
+    explicitRoot: rootFlag === -1 ? undefined : args[rootFlag + 1],
+    exists: existsSync,
+  });
+  console.log(`Reading ${membersPath}\nWriting ${outDir}\n`);
 
   const yaml = readFileSync(membersPath, 'utf8');
   const generated = generateAll(yaml);
@@ -365,7 +372,9 @@ Documentation Governance Tools
 Usage:
   npm run validate [dir]                   Validate markdown links (default: ../.architecture)
   node cli.js validate-adr [files...]      Validate ADRs against template rules
-  node cli.js generate-subagents [--check] Generate agents/*.md from members.yml
+  node cli.js generate-subagents [--check] [--root <dir>]
+                                           Generate subagents from the nearest .architecture/members.yml
+                                           (plugin repo: agents/; any other project: .claude/agents/)
   node cli.js find-source [--json]         Discover the framework source for setup-architect
   node cli.js seed-members <src> <dest>    Copy members.yml minus framework-internal motivated_by refs
   npm run count [files...]                 Count instructions (default: ../AGENTS.md ../CLAUDE.md)

@@ -15,6 +15,7 @@
       "Skill(setup-architect)",
       "Skill(specialist-review)",
       "Skill(list-members)",
+      "Skill(find-adrs)",
       "Skill(pragmatic-guard)",
       "mcp__ai-software-architect__create_adr",
       "mcp__ai-software-architect__get_architecture_status",

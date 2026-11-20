@@ -20,6 +20,7 @@ That installs:
 | `specialist-review`    | "Ask Security Specialist to review authentication"  |
 | `list-members`         | "List architecture members"                         |
 | `architecture-status`  | "What's our architecture status?"                   |
+| `find-adrs`            | "Which ADRs cover mcp/index.js?"                    |
 | `pragmatic-guard`      | "Enable pragmatic mode"                             |
 
 For full installation, troubleshooting, and feature comparison, see [USAGE-WITH-CLAUDE-PLUGIN.md](USAGE-WITH-CLAUDE-PLUGIN.md).
@@ -34,7 +35,7 @@ The skill files still live in this repo at [`skills/`](skills/) for transparency
 
 If you previously installed via the cp recipe:
 
-1. Optionally remove the manually-copied directories: `rm -rf ~/.claude/skills/{setup-architect,create-adr,architecture-review,specialist-review,list-members,architecture-status,pragmatic-guard}`.
+1. Optionally remove the manually-copied directories: `rm -rf ~/.claude/skills/{setup-architect,create-adr,architecture-review,specialist-review,list-members,architecture-status,find-adrs,pragmatic-guard}`.
 2. Install the plugin per the commands above.
 
 No project-side changes are required — your existing `.architecture/` content is unaffected.

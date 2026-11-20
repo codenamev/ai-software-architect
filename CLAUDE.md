@@ -35,6 +35,7 @@ Claude Code users can access framework operations as reusable skills:
 - `create-adr`: Create Architectural Decision Records
 - `list-members`: Show architecture team members
 - `architecture-status`: Framework health and documentation status
+- `find-adrs`: Find the ADRs that govern a question or file
 - `pragmatic-guard`: Enable YAGNI enforcement mode
 
 **See [AGENTS.md](AGENTS.md#installation-options) for installation instructions.**

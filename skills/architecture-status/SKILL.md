@@ -1,6 +1,6 @@
 ---
 name: architecture-status
-description: Reports on the health and state of architecture documentation (counts of ADRs, reviews, activity levels, documentation gaps). Use when the user asks "What's our architecture status?", "Show architecture documentation", "How many ADRs do we have?", "What decisions are documented?", "Architecture health check", or wants an overview/summary of documentation state. Do NOT use for listing team members (use list-members), creating new documents (use create-adr), or conducting reviews (use architecture-review or specialist-review).
+description: Reports on the health and state of architecture documentation (counts of ADRs, reviews, activity levels, documentation gaps). Use when the user asks "What's our architecture status?", "Show architecture documentation", "How many ADRs do we have?", "What decisions are documented?", "Architecture health check", or wants an overview/summary of documentation state. Do NOT use for listing team members (use list-members), finding which ADRs cover a topic or file (use find-adrs), creating new documents (use create-adr), or conducting reviews (use architecture-review or specialist-review).
 allowed-tools: Read,Glob,Grep
 ---
 

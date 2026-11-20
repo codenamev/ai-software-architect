@@ -41,7 +41,7 @@ Install via the Claude Code plugin system with automatic updates:
 /plugin install ai-software-architect@ai-software-architect
 ```
 
-That's it! The framework is now available in all your projects — including the seven skills, MCP server, and generated subagents as a single unit.
+That's it! The framework is now available in all your projects — including the eight skills, MCP server, and generated subagents as a single unit.
 
 See [USAGE-WITH-CLAUDE-PLUGIN.md](USAGE-WITH-CLAUDE-PLUGIN.md) for detailed installation guide, troubleshooting, and comparison with other methods.
 
@@ -197,7 +197,7 @@ Choose the right installation method for your workflow:
 
 **Legend**: ✅ Fully supported, ⚠️ Partially supported, ❌ Not supported, N/A Not applicable
 
-**Note**: The Plugin bundles the same npm package as the MCP Server option, plus the seven skills, generated subagents, and ADR-validation hook as a single install unit.
+**Note**: The Plugin bundles the same npm package as the MCP Server option, plus the eight skills, generated subagents, and ADR-validation hook as a single install unit.
 
 **Two-tier capability model** (see [ADR-015](.architecture/decisions/adrs/ADR-015-mcp-skills-parity-reconciliation.md)): Tier-1 operations are deterministic file/config tasks available on every channel, including the MCP server. Tier-2 capabilities — orchestrated architecture reviews, specialist reviews, and pragmatic enforcement — require LLM reasoning and are delivered only through the plugin/Skills (`architecture-review`, `specialist-review`, and the `pragmatic-enforcer` subagent), not as MCP tools. The Plugin gets Tier 2 via its bundled Skills; an MCP-only install does not.
 
@@ -363,6 +363,7 @@ For Claude Code users, see [USAGE-WITH-CLAUDE-PLUGIN.md](USAGE-WITH-CLAUDE-PLUGI
 - **specialist-review**: Gets focused reviews from specific experts
 - **list-members**: Shows your architecture team
 - **architecture-status**: Displays current documentation state
+- **find-adrs**: Finds the ADRs that govern a question or a file
 - **pragmatic-guard**: Enables Pragmatic Guard Mode (YAGNI enforcement)
 
 **Standard Commands**:
